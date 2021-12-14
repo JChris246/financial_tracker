@@ -42,9 +42,9 @@ const TransactionHistory = () => {
     // }, []);
 
     return (
-        <section className="flex flex-col p-4 bg-gray-100 mx-4 border">
-           <div className="uppercase text-lg text-center">Transaction History</div>
-           <div className="relative grid grid-flow-row auto-rows-max items-center h-full py-10 bg-white rounded-sm sm:items-stretch sm:flex-row mx-auto ">
+        <section className="flex flex-col p-4 mx-4 bg-gray-200 border">
+           <div className="text-3xl text-center uppercase">Transaction History</div>
+           <div className="relative grid items-center h-full grid-flow-row py-10 mx-auto rounded-sm auto-rows-max sm:items-stretch sm:flex-row ">
                 {
                     transactions.map((item, i) => <TransactionHistoryTile key={i} amount={item.amount} />)
                 }
