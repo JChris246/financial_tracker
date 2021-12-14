@@ -1,0 +1,25 @@
+{
+  "name": "finance_app",
+  "version": "0.1.0",
+  "description": "App to track and manage your finances",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "money",
+    "finance",
+    "react",
+    "nodejs",
+    "mongo"
+  ],
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "mongoose": "^6.1.0"
+  },
+  "author": "JChris",
+  "contributors": ["kac246", "c0d3rJ"],
+  "license": "MIT"
+}
