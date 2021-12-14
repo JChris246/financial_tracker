@@ -9,10 +9,10 @@ function App() {
     return (
         <div className="place-items-center">
             <header>
-                <h1 className="text-3xl text-gray-800">Finance Tracker</h1>
+                <h1 className="text-3xl text-gray-200 py-12 underline-decoration">Finance Tracker</h1>
             </header>
             <Balance balance="$200"/>
-            <IncomeExpense/>
+            <IncomeExpense income="4864" expense="354"/>
             <TransactionHistory transactionhistory="List of transactions"/>
             {/* <SpendingGraph spendinggraph="Graph"/> */}
             

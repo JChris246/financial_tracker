@@ -1,10 +1,11 @@
 {
-  "name": "finance_app",
+  "name": "finance_app_server",
   "version": "0.1.0",
   "description": "App to track and manage your finances",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "keywords": [
     "money",
@@ -17,9 +18,13 @@
     "dotenv": "^10.0.0",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "mongoose": "^6.1.0"
+    "mongoose": "^6.1.1",
+    "nodemon": "^2.0.15"
   },
   "author": "JChris",
-  "contributors": ["kac246", "c0d3rJ"],
+  "contributors": [
+    "kac246",
+    "c0d3rJ"
+  ],
   "license": "MIT"
 }

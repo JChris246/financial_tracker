@@ -3,5 +3,16 @@
 @tailwind utilities;
 
 body {
-    background-color: azure;
+    background-color: rgba(17, 24, 39);
+}
+
+h1.underline-decoration::after {
+    content: " ";
+	border-radius: 6px;
+	display: block;
+	height: 3px;
+	width: 70px;
+    margin-top: 8px;
+    margin-left: 4px;
+    background-color: red;
 }
