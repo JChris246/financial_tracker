@@ -1,29 +1,26 @@
 import React from "react";
+import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/solid'
 
 const TransactionHistoryTile = ({ item }) => {
     const isPositive = () => item.amount > 0;
 
     return (
-        <div class="flex items-center p-4 bg-white border rounded max-w-md min-w-max my-1">
+        <div class="flex items-center p-2 bg-white border max:w-96 md:w-96 rounded my-1">
                 {isPositive() ?
-                    <div class="flex flex-shrink-0 items-center justify-center bg-green-200 h-16 w-16 rounded">
-                        <svg class="w-6 h-6 fill-current text-green-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                        </svg>
+                    <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-green-200 rounded">
+                        <ArrowUpIcon className="w-5 h-5 text-green-700 fill-current"/>
                     </div>
                     :
-                    <div class="flex flex-shrink-0 items-center justify-center bg-red-200 h-16 w-16 rounded">
-                        <svg class="w-6 h-6 fill-current text-red-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                        </svg>
+                    <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-red-200 rounded">
+                        <ArrowDownIcon className="w-5 h-5 text-red-700 fill-current"/>
                     </div>  
                 }
                 
-                <div class="flex-grow flex flex-col ml-4">
-                    {/*<span class="text-xl font-bold">${item.amount}</span>*/}
-                    <div class="flex items-center justify-between">
-                        <span class="text-xl font-bold">${item.amount}</span>
-                        <span class="text-gray-500">{item.name}</span>
+                <div className="flex flex-col flex-grow ml-4">
+                    {/*<span className="text-xl font-bold">${item.amount}</span>*/}
+                    <div className="flex items-center justify-between">
+                        <span className="">${item.amount}</span>
+                        <span className="pl-1 text-gray-500">{item.name}</span>
                     </div>
                 </div>
             </div>
