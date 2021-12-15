@@ -1,10 +1,10 @@
 import React from "react";
 
-const TransactionHistoryTile = ({ amount }) => {
-    const isPositive = () => amount > 0;
+const TransactionHistoryTile = ({ item }) => {
+    const isPositive = () => item.amount > 0;
 
     return (
-        <div class="flex items-center p-4 bg-white border rounded w-96 my-1">
+        <div class="flex items-center p-4 bg-white border rounded max-w-md min-w-max my-1">
                 {isPositive() ?
                     <div class="flex flex-shrink-0 items-center justify-center bg-green-200 h-16 w-16 rounded">
                         <svg class="w-6 h-6 fill-current text-green-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -20,11 +20,11 @@ const TransactionHistoryTile = ({ amount }) => {
                 }
                 
                 <div class="flex-grow flex flex-col ml-4">
-                    <span class="text-xl font-bold">${amount}</span>
-                    {/*<div class="flex items-center justify-between">
-                        <span class="text-gray-500">Revenue last 30 days</span>
-                        <span class="text-green-500 text-sm font-semibold ml-2">+12.6%</span>
-                    </div>*/}
+                    {/*<span class="text-xl font-bold">${item.amount}</span>*/}
+                    <div class="flex items-center justify-between">
+                        <span class="text-xl font-bold">${item.amount}</span>
+                        <span class="text-gray-500">{item.name}</span>
+                    </div>
                 </div>
             </div>
     );

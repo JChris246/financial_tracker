@@ -4,17 +4,23 @@ import TransactionHistoryTile from "./TransactionHistoryTile";
 
 const transactions = [
     {
-        amount: 45
+        amount: 45,
+        name: "cash"
     }, {
-        amount: -45
+        amount: -45,
+        name: "book"
     }, {
-        amount: -5
+        amount: -5,
+        name: "chewing Gum"
     }, {
-        amount: 5
+        amount: 5,
+        name: "cash"
     }, {
-        amount: 9
+        amount: 9,
+        name: "cash"
     }, {
-        amount: 0
+        amount: 0,
+        name: "test"
     }
 ];
 
@@ -42,11 +48,11 @@ const TransactionHistory = () => {
     // }, []);
 
     return (
-        <section className="flex flex-col p-4 mx-4 bg-gray-200 border">
+        <section id="history" className="flex flex-col p-4 mx-4 bg-gray-200 border">
            <div className="text-3xl text-center uppercase">Transaction History</div>
            <div className="relative grid items-center h-full grid-flow-row py-10 mx-auto rounded-sm auto-rows-max sm:items-stretch sm:flex-row ">
                 {
-                    transactions.map((item, i) => <TransactionHistoryTile key={i} amount={item.amount} />)
+                    transactions.map((item, i) => <TransactionHistoryTile key={i} item={item} />)
                 }
 
             </div>

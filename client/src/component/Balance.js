@@ -26,10 +26,10 @@ const Balance = () => {
 
     return (
 
-        <section className="flex flex-col p-2 bg-gray-700 text-gray-100 mx-4 border rounded-md border-b-0">
-            <div className="relative flex flex-col h-full py-3 rounded-sm sm:items-stretch sm:flex-row md:w-100 mx-auto">
+        <section id="balance" className="flex flex-col p-2 mx-4 text-gray-100 bg-gray-700 ">
+            <div className="relative flex flex-col h-full py-3 mx-auto sm:items-stretch sm:flex-row md:w-100">
                 <div className="px-12 py-8 ">
-                    <div className="uppercase text-lg text-center">Your Balance</div>
+                    <div className="mb-2 text-lg text-center uppercase">Your Balance</div>
                     <span className="text-3xl">$ { balance } </span>
                 </div>
             </div>
