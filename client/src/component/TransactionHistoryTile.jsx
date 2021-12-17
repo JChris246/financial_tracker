@@ -2,11 +2,9 @@ import React from "react";
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/react/solid'
 
 const TransactionHistoryTile = ({ item }) => {
-    const isPositive = () => item.amount > 0;
-
     return (
         <div class="flex items-center p-2 bg-white border max:w-96 md:w-96 rounded my-1">
-                {isPositive() ?
+                {item.amount > 0 ?
                     <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-green-200 rounded">
                         <ArrowUpIcon className="w-5 h-5 text-green-700 fill-current"/>
                     </div>

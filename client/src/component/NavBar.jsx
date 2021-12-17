@@ -33,9 +33,9 @@ export const NavBar = () => {
                     <h1 className="py-12 text-3xl text-gray-200 underline-decoration">Finance Tracker</h1>
                 </header>
             </span>
-            <ul className="flex items-center hidden space-x-8 lg:flex">
+            <ul className="items-center hidden space-x-8 lg:flex">
                 {navlinks.map(({name, route, id}) => (
-                        <li>
+                        <li key={id}>
                             <a
                                 href={route}
                                 aria-label={name}
@@ -73,7 +73,7 @@ export const NavBar = () => {
             
             {isMenuOpen && (
               <div className="absolute top-0 left-0 z-10 w-full">
-                <div className="p-5 bg-white bg-gray-700 border rounded shadow-sm">
+                <div className="p-5 bg-white dark:bg-gray-700 border rounded shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     
                         <span className="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">

@@ -1,51 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import TransactionHistoryTile from "./TransactionHistoryTile";
 
-const transactions = [
-    {
-        amount: 45,
-        name: "cash"
-    }, {
-        amount: -45,
-        name: "book"
-    }, {
-        amount: -5,
-        name: "chewing Gum"
-    }, {
-        amount: 5,
-        name: "cash"
-    }, {
-        amount: 9,
-        name: "cash"
-    }, {
-        amount: 0,
-        name: "test"
-    }
-];
+const TransactionHistory = ({ sync }) => {
+    const [transactions, setTransactions] = useState([]);
 
-const TransactionHistory = () => {
-    // const [transactions, setTransactions] = useState([]);
+    useEffect(() => {
+        (async () => {
+            const res = await fetch("/api/transactions", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
 
-    // useEffect(() => {
-    //     (async () => {
-    //         const res = await fetch("/api/transactions", {
-    //             method: "GET",
-    //             headers: {
-    //                 "Content-Type": "application/json"
-    //             }
-    //         });
-
-    //         // if status comes back as an error
-    //         // set transactions as an empty array for now
-    //         if (res.status !== 200)
-    //             setTransactions([]);
-    //         else {
-    //             // else get the transactions from the response json
-    //             setTransactions(await res.json());
-    //         }
-    //     })();
-    // }, []);
+            // if status comes back as an error
+            // set transactions as an empty array for now
+            if (res.status !== 200)
+                setTransactions([]);
+            else {
+                // else get the transactions from the response json
+                setTransactions(await res.json());
+            }
+        })();
+    }, [sync]);
 
     return (
         <section id="history" className="flex flex-col p-4 mx-4 bg-gray-200 border">

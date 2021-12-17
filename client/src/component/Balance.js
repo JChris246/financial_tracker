@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const Balance = () => {
+const Balance = ({ sync }) => {
     const [balance, setBalance] = useState(0);
 
     useEffect(() => {
@@ -22,7 +22,7 @@ const Balance = () => {
                 setBalance(b);
             }
         })();
-    }, []);
+    }, [sync]);
 
     return (
 

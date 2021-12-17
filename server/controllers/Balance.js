@@ -1,7 +1,7 @@
 const Transaction = require("../models/Transactions")
 
 module.exports.getBalance = (_, res) => {
-    Transaction.find({}, (err, transactions) => {
+    Transaction.find({}, { "amount": 1 }, (err, transactions) => {
         if (err) {
             console.log(err);
             res.status(500).send({
@@ -13,7 +13,7 @@ module.exports.getBalance = (_, res) => {
                 balance: 0
             });
         else res.status(200).send({
-            balance: transactions.reduce((accumulator, current) => accumulator + current, 0)
+            balance: transactions.reduce((accumulator, current) => accumulator + current.amount, 0)
         });
     });
 };

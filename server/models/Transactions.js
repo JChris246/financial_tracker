@@ -9,6 +9,10 @@ const transactionSchema = new Schema({
     amount: {
         type: Number,
         require: true
+    },
+    type: { // whether income or spend (true - income, false - spend)
+        type: Boolean,
+        require: true
     }
 });
 

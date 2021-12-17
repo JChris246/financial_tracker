@@ -1,9 +1,42 @@
 import React, {useState} from "react";
 import {PlusIcon, XIcon} from "@heroicons/react/solid";
 
-export const AddTrans = () => {
+export const AddTrans = ({ refresh }) => {
 	const [isTransModelOpen, setIsTransModelOpen] = useState(false);
 	const [isTestModelOpen, setIsTestModelOpen] = useState(false);
+	const [transaction, setTransaction] = useState({
+		name: "",
+		amount: ""
+	});
+
+	const enterTransaction = (e) => {
+		setTransaction({
+			...transaction,
+			[e.target.name]: e.target.value
+		});
+	};
+
+	const addTransaction = async (e) => {
+		e.preventDefault();
+
+		const res = await fetch("/api/transaction", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(transaction)
+		});
+
+		if (res.status !== 201)
+			alert((await res.json()).msg);
+		else {
+			// clear input and close input
+			setTransaction({ name: "", amount: "" });
+			setIsTestModelOpen(false);
+			refresh();
+		}
+
+	}
 
 	return (
 		<section id="addtransaction" className="flex flex-col p-4 mx-4 bg-gray-100 border">
@@ -54,18 +87,27 @@ export const AddTrans = () => {
 								</button>
 							</div>
 
-							<div className="relative flex-auto p-6">
-								<div className="flex flex-col mt-8 space-y-3 sm:space-y-0 sm:flex-row sm:justify-center sm:-mx-2">
-									<input id="email" type="text"
-												 className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
-												 placeholder="Transaction Amount"/>
+							<form className="relative flex-auto p-6" onSubmit={addTransaction}>
+								<div className="flex flex-col mt-0 space-y-2 sm:justify-center sm:-mx-2">
+									<input
+										type="text" value={transaction.name} onChange={enterTransaction} name="name" required
+										className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md
+											sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500
+											dark:focus:border-blue-500 focus:outline-none focus:ring"
+										placeholder="Transaction Name" />
+									<input type="number" value={transaction.amount} onChange={enterTransaction} name="amount" required
+										className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
+										placeholder="Transaction Amount" />
 
-										<button
-											className="px-4 py-2 text-sm font-bold tracking-wide text-white uppercase capitalize transition-colors duration-200 transform bg-blue-700 rounded-md sm:mx-2 hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
-											Add
-										</button>
+									<button
+										className="px-4 py-2 text-sm font-bold tracking-wide text-white capitalize
+											transition-colors duration-200 transform bg-blue-700 rounded-md sm:mx-2 hover:bg-blue-600
+											focus:outline-none focus:bg-blue-600"
+										onClick={addTransaction}>
+										Add
+									</button>
 								</div>
-							</div>
+							</form>
 
 							{/*<div className="flex items-center justify-end p-6 border-t border-solid rounded-b border-blueGray-200">
 								<button
@@ -87,7 +129,7 @@ export const AddTrans = () => {
 
 			{isTransModelOpen && (
 				<div className="fixed top-0 bottom-0 left-0 right-0 z-10">
-					<div className="p-5 bg-white bg-gray-700 border rounded shadow-sm">
+					<div className="p-5 bg-white dark:bg-gray-700 border rounded shadow-sm">
 						<div className="flex items-center justify-between mb-4">
 
 									<span className="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">
