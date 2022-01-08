@@ -2,11 +2,32 @@ import React, {useState} from "react";
 import {PlusIcon, XIcon} from "@heroicons/react/solid";
 
 export const AddTrans = ({ refresh }) => {
+	const formatDate = (d) => {
+		const pad = (v, n=2) => {
+			v = v + ""; // convert to string
+			if (v.length === n)
+				return v;
+			for (let i = 0; i < n; i++) {
+				v = "0" + v;
+				if (v.length >= n)
+					break;
+			}
+			return v;
+		};
+		
+		// YYYY-MM-DDThh:mm
+		// 2022-01-07T23:43:09
+		const date = d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+		const time = pad(d.getHours()) + ":" + pad(d.getMinutes());
+		return date + "T" + time;
+	};
+
 	const [isTransModelOpen, setIsTransModelOpen] = useState(false);
 	const [isTestModelOpen, setIsTestModelOpen] = useState(false);
 	const [transaction, setTransaction] = useState({
 		name: "",
-		amount: ""
+		amount: "",
+		date: formatDate(new Date())
 	});
 
 	const enterTransaction = (e) => {
@@ -31,11 +52,10 @@ export const AddTrans = ({ refresh }) => {
 			alert((await res.json()).msg);
 		else {
 			// clear input and close input
-			setTransaction({ name: "", amount: "" });
+			setTransaction({ name: "", amount: "", date : "" }); 
 			setIsTestModelOpen(false);
 			refresh();
 		}
-
 	}
 
 	return (
@@ -69,7 +89,7 @@ export const AddTrans = ({ refresh }) => {
 			{isTestModelOpen && (
 				<div
 					className="fixed inset-0 z-10 items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none backdrop-blur-md">
-					<div className="relative w-auto max-w-sm mx-auto my-6 backdrop-blur-md border">
+					<div className="relative w-auto max-w-sm mx-auto my-6 border backdrop-blur-md">
 
 						<div className="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
 
@@ -91,18 +111,19 @@ export const AddTrans = ({ refresh }) => {
 								<div className="flex flex-col mt-0 space-y-2 sm:justify-center sm:-mx-2">
 									<input
 										type="text" value={transaction.name} onChange={enterTransaction} name="name" required
-										className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md
-											sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500
-											dark:focus:border-blue-500 focus:outline-none focus:ring"
+										className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
 										placeholder="Transaction Name" />
 									<input type="number" value={transaction.amount} onChange={enterTransaction} name="amount" required
 										className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
 										placeholder="Transaction Amount" />
 
+									<input type="datetime-local" value={transaction.date} onChange={enterTransaction} name="date" required
+										className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring"
+										placeholder="Transaction Date" />
+
+
 									<button
-										className="px-4 py-2 text-sm font-bold tracking-wide text-white capitalize
-											transition-colors duration-200 transform bg-blue-700 rounded-md sm:mx-2 hover:bg-blue-600
-											focus:outline-none focus:bg-blue-600"
+										className="px-4 py-2 text-sm font-bold tracking-wide text-white capitalize transition-colors duration-200 transform bg-blue-700 rounded-md sm:mx-2 hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
 										onClick={addTransaction}>
 										Add
 									</button>
@@ -129,7 +150,7 @@ export const AddTrans = ({ refresh }) => {
 
 			{isTransModelOpen && (
 				<div className="fixed top-0 bottom-0 left-0 right-0 z-10">
-					<div className="p-5 bg-white dark:bg-gray-700 border rounded shadow-sm">
+					<div className="p-5 bg-white border rounded shadow-sm dark:bg-gray-700">
 						<div className="flex items-center justify-between mb-4">
 
 									<span className="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">

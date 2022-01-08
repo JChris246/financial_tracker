@@ -7,6 +7,7 @@ import IncomeExpense from "./component/IncomeExpense";
 import TransactionHistory from "./component/TransactionHistory";
 import {NavBar} from "./component/NavBar";
 import {AddTrans} from "./component/AddTrans";
+import SpendingGraph from './component/SpendingGraph';
 // import SpendingGraph from "./component/SpendingGraph";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <TransactionHistory transactionhistory="List of transactions" sync={sync}/>
             {/* <SpendingGraph spendinggraph="Graph"/> */}
             <AddTrans refresh={updateValues}/>
+            <SpendingGraph/> 
         </div>
     );
 }

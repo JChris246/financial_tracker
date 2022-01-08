@@ -8,11 +8,15 @@ const transactionSchema = new Schema({
     },
     amount: {
         type: Number,
-        require: true
+        required: true
     },
     type: { // whether income or spend (true - income, false - spend)
         type: Boolean,
-        require: true
+        required: true
+    },
+    date: { // transaction date in seconds
+        type: Number,
+        required: true
     }
 });
 
