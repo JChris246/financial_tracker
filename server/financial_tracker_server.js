@@ -4,11 +4,14 @@ const mongoose = require("mongoose");
 // environment variables configuration
 require("dotenv").config();
 
+global.LOG_DIR = __dirname + "/logs";
+const logger = require("./logger/index.js").setup();
+
 global.env = process.env.NODE_ENV || "development";
 
 // Server routes
-const balanceRouter = require("./routes/balance");
-const transactionRouter = require("./routes/transaction");
+const balanceRouter = require("./routes/balance.js");
+const transactionRouter = require("./routes/transaction.js");
 
 const app = express();
 
@@ -61,22 +64,22 @@ const onError = error => {
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case "EACCES":
-            console.error(bind + " requires elevated privileges");
+            logger.error(bind + " requires elevated privileges");
             process.exit(1);
             break;
         case "EADDRINUSE":
-            console.error(bind + " is already in use");
+            logger.error(bind + " is already in use");
             process.exit(1);
             break;
         default:
-            console.error("Unknown error occurred: " + error);
+            logger.error("Unknown error occurred: " + error);
             setTimeout(() => {
                 try {
-                    console.log("Attempting to listen again");
+                    logger.info("Attempting to listen again");
                     server.close();
                     server.listen(global.PORT);
                 } catch (e) {
-                    console.error("Failed to listen again");
+                    logger.error("Failed to listen again");
                 }
             }, 1000);
             // throw error;
@@ -84,7 +87,7 @@ const onError = error => {
 };
 
 // catch all exception handler
-process.on("uncaughtException", (err) => { console.error("Caught in catch-all: " + err); console.log(err); });
+process.on("uncaughtException", (err) => { logger.error("Caught in catch-all: " + err); console.error(err); });
 
 /**
  * Event listener for HTTP server "listening" event.
@@ -92,7 +95,7 @@ process.on("uncaughtException", (err) => { console.error("Caught in catch-all: "
 const onListening = () => {
     let addr = server.address();
     let bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-    console.log("Listening on " + bind);
+    logger.info("Listening on " + bind);
 };
 
 // Get port from environment (or 5000) and store in Express.
@@ -116,5 +119,5 @@ mongoose.connect(DB_URL, {
     user: process.env.DB_USER,
     pass: process.env.DB_PASSWORD,
 }).then(() => server.listen(global.PORT)).catch(e => {
-    console.log(e);
+    logger.error("Failed to connect to mongo: " + e);
 });

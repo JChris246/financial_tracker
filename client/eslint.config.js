@@ -37,7 +37,7 @@ export default [
                 "error",
                 "unix"
             ],
-             "quotes": [
+            "quotes": [
                 "error",
                 "double"
             ],
@@ -45,7 +45,7 @@ export default [
                 "warn",
                 "always"
             ],
-             "no-dupe-keys": [
+            "no-dupe-keys": [
                 0
             ],
             "no-empty": "error",

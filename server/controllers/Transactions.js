@@ -1,15 +1,19 @@
 const Transaction = require("../models/Transactions");
 
+const logger = require("../logger").setup();
+
 module.exports.getTransactions = (req, res) => {
     let options = {}; // get all transactions
 
     // if req specifies type of transactions to retrieve, add it to options
-    if (req.params.type === "income" || req.params.type === "spend")
+    if (req.params.type === "income" || req.params.type === "spend") {
         options = { "type": req.params.type === "income" };
+        logger.warn("No type specified, using default 'income' type");
+    }
 
     Transaction.find(options, { name: 1, amount: 1, date: 1 }, (err, transactions) => {
         if (err) {
-            console.log(err);
+            logger.error("An error occurred while getting transactions: " + err);
             res.status(500).send({
                 msg: err
             });
@@ -23,36 +27,44 @@ const parseDate = d => (new Date(d).getTime());
 module.exports.addTransaction = (req, res) => {
     const amount = req.body.amount;
     const name = req.body.name;
-    // get the timestamp from user, if ut doesnt exist use the current timestamp
+    // get the timestamp from user, if ut doesn't exist use the current timestamp
     const date = parseDate(req.body.date) || Date.now();
 
-    if (!amount)
+    if (!amount) {
+        logger.warn("User tried to add a transaction without an amount");
         res.send(400).send({ msg: "You need to have the transaction amount" });
-    if (!name)
+    }
+    if (!name) {
+        logger.warn("User tried to add a transaction without a name");
         res.send(400).send({ msg: "You need to have the transaction name" });
+    }
 
     const type = req.body.type || amount > 0;
 
     const newTransaction = new Transaction({ name, amount, type, date });
     newTransaction.save().then(savedTransaction => {
         // if savedTransaction returned is the same as newTransaction then saved successfully
-        if (savedTransaction === newTransaction)
+        if (savedTransaction === newTransaction) {
+            logger.info("Transaction added successfully");
             res.status(201).send({
                 amount: savedTransaction.amount,
                 name: savedTransaction.name,
                 date: savedTransaction.date,
                 msg: "Transaction added successfully",
             });
-        else res.status(500).send({
-            msg: "Failed to add transaction"
-        });
+        } else {
+            logger.error("Failed to add transaction");
+            res.status(500).send({
+                msg: "Failed to add transaction"
+            });
+        }
     });
 };
 
 module.exports.getGraphData = (_, res) => {
     Transaction.find({}, (err, transactions) => {
         if (err) {
-            console.log(err);
+            logger.error("An error occurred while getting graph data: " + err);
             res.status(500).send({ msg: err });
         }
 
