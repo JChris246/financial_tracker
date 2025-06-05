@@ -1,28 +1,30 @@
-const createError = require("http-errors");
 const express = require("express");
 const mongoose = require("mongoose");
 
-//environment variables configuration
+// environment variables configuration
 require("dotenv").config();
 
 global.env = process.env.NODE_ENV || "development";
 
-//Server routes
+// Server routes
 const balanceRouter = require("./routes/balance");
 const transactionRouter = require("./routes/transaction");
 
 const app = express();
 
 app.use(express.json());
-app.use(express.static("client/build"));
+app.use(express.static("static"));
+app.use("/assets/", express.static("assets"));
 
 app.use("/api/balance", balanceRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
+// error handler
+app.use((err, req, res) => {
+    // render the error page
+    res.status(err.status || 500);
+    res.render("error");
 });
 
 // error handler
@@ -54,7 +56,7 @@ const onError = error => {
         throw error;
     }
 
-    let bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+    let bind = typeof port === "string" ? "Pipe " + global.PORT : "Port " + global.PORT;
 
     // handle specific listen errors with friendly messages
     switch (error.code) {
@@ -67,9 +69,22 @@ const onError = error => {
             process.exit(1);
             break;
         default:
-            throw error;
+            console.error("Unknown error occurred: " + error);
+            setTimeout(() => {
+                try {
+                    console.log("Attempting to listen again");
+                    server.close();
+                    server.listen(global.PORT);
+                } catch (e) {
+                    console.error("Failed to listen again");
+                }
+            }, 1000);
+            // throw error;
     }
 };
+
+// catch all exception handler
+process.on("uncaughtException", (err) => { console.error("Caught in catch-all: " + err); console.log(err); });
 
 /**
  * Event listener for HTTP server "listening" event.
@@ -77,11 +92,12 @@ const onError = error => {
 const onListening = () => {
     let addr = server.address();
     let bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+    console.log("Listening on " + bind);
 };
 
 // Get port from environment (or 5000) and store in Express.
-const port = normalizePort(process.env.PORT || "5000");
-app.set("port", port);
+global.PORT = normalizePort(process.env.PORT || "5000");
+app.set("port", global.PORT);
 
 // Create HTTP server.
 const http = require("http");
@@ -99,6 +115,6 @@ mongoose.connect(DB_URL, {
     authSource: "admin",
     user: process.env.DB_USER,
     pass: process.env.DB_PASSWORD,
-}).then(() => server.listen(port)).catch(e => {
+}).then(() => server.listen(global.PORT)).catch(e => {
     console.log(e);
 });

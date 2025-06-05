@@ -1,4 +1,4 @@
-const Transaction = require("../models/Transactions")
+const Transaction = require("../models/Transactions");
 
 module.exports.getBalance = (_, res) => {
     Transaction.find({}, { "amount": 1 }, (err, transactions) => {

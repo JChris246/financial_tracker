@@ -7,7 +7,7 @@ module.exports.getTransactions = (req, res) => {
     if (req.params.type === "income" || req.params.type === "spend")
         options = { "type": req.params.type === "income" };
 
-    Transaction.find(options, { name: 1, amount: 1, date:1 }, (err, transactions) => {
+    Transaction.find(options, { name: 1, amount: 1, date: 1 }, (err, transactions) => {
         if (err) {
             console.log(err);
             res.status(500).send({
@@ -16,7 +16,7 @@ module.exports.getTransactions = (req, res) => {
         }
         res.status(200).send(transactions);
     });
-}
+};
 
 const parseDate = d => (new Date(d).getTime());
 
@@ -32,7 +32,7 @@ module.exports.addTransaction = (req, res) => {
         res.send(400).send({ msg: "You need to have the transaction name" });
 
     const type = req.body.type || amount > 0;
-    
+
     const newTransaction = new Transaction({ name, amount, type, date });
     newTransaction.save().then(savedTransaction => {
         // if savedTransaction returned is the same as newTransaction then saved successfully
@@ -47,7 +47,7 @@ module.exports.addTransaction = (req, res) => {
             msg: "Failed to add transaction"
         });
     });
-}
+};
 
 module.exports.getGraphData = (_, res) => {
     Transaction.find({}, (err, transactions) => {
@@ -70,4 +70,4 @@ module.exports.getGraphData = (_, res) => {
 
         res.status(200).send(graphData);
     });
-}
+};
