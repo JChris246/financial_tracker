@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const getTransactions = async (type) => {
     const res = await fetch("/api/transactions/" + type, {
@@ -45,15 +45,16 @@ const IncomeExpense = ({ sync }) => {
                     $ {amount.income}
                     </h6>
                 </div>
-                <div className="w-56 h-1 transition duration-300 transform bg-gray-300 rounded-full group-hover:bg-deep-purple-accent-400 group-hover:scale-110 sm:h-auto sm:w-1" />
+                <div className="w-56 h-1 transition duration-300 transform bg-gray-300 rounded-full group-hover:bg-deep-purple-accent-400
+                    group-hover:scale-110 sm:h-auto sm:w-1" />
                 <div className="px-12 py-8 md:w-72">
                     <h1 className="text-2xl font-bold text-gray-700">Expense</h1>
                     <h6 className="text-4xl font-bold text-center text-red-400 sm:text-5xl">
                     $ {amount.expense}
-                    </h6>              
+                    </h6>
                 </div>
             </div>
-            
+
         </section>
     );
 }

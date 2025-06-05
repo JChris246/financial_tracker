@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const Balance = ({ sync }) => {
     const [balance, setBalance] = useState(0);
@@ -34,7 +34,7 @@ const Balance = ({ sync }) => {
                 </div>
             </div>
         </section>
-        
+
     );
 }
 
