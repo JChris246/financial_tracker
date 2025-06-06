@@ -1,6 +1,6 @@
-const Transaction = require("../models/Transactions");
-
 const logger = require("../logger").setup();
+
+const { getDatabase } = require("../db/index");
 
 module.exports.getTransactions = (req, res) => {
     let options = {}; // get all transactions
@@ -11,15 +11,10 @@ module.exports.getTransactions = (req, res) => {
         logger.warn("No type specified, using default 'income' type");
     }
 
-    Transaction.find(options, { name: 1, amount: 1, date: 1 }, (err, transactions) => {
-        if (err) {
-            logger.error("An error occurred while getting transactions: " + err);
-            res.status(500).send({
-                msg: err
-            });
-        }
-        res.status(200).send(transactions);
-    });
+    getDatabase().getTransactions(options,
+        transactions => res.status(200).send(transactions),
+        err => res.status(500).send({ msg: err })
+    );
 };
 
 const parseDate = d => (new Date(d).getTime());
@@ -27,7 +22,7 @@ const parseDate = d => (new Date(d).getTime());
 module.exports.addTransaction = (req, res) => {
     const amount = req.body.amount;
     const name = req.body.name;
-    // get the timestamp from user, if ut doesn't exist use the current timestamp
+    // get the timestamp from user, if it doesn't exist use the current timestamp
     const date = parseDate(req.body.date) || Date.now();
 
     if (!amount) {
@@ -39,47 +34,42 @@ module.exports.addTransaction = (req, res) => {
         res.send(400).send({ msg: "You need to have the transaction name" });
     }
 
-    const type = req.body.type || amount > 0;
-
-    const newTransaction = new Transaction({ name, amount, type, date });
-    newTransaction.save().then(savedTransaction => {
-        // if savedTransaction returned is the same as newTransaction then saved successfully
-        if (savedTransaction === newTransaction) {
-            logger.info("Transaction added successfully");
+    getDatabase().createTransaction(
+        { name, amount, type, date },
+        transaction => {
             res.status(201).send({
-                amount: savedTransaction.amount,
-                name: savedTransaction.name,
-                date: savedTransaction.date,
+                amount: transaction.amount,
+                name: transaction.name,
+                date: transaction.date,
                 msg: "Transaction added successfully",
             });
-        } else {
-            logger.error("Failed to add transaction");
-            res.status(500).send({
-                msg: "Failed to add transaction"
-            });
-        }
-    });
+        },
+        () => res.status(500).send({ msg: "Failed to add transaction" })
+    );
+
+    const type = req.body.type || amount > 0;
 };
 
 module.exports.getGraphData = (_, res) => {
-    Transaction.find({}, (err, transactions) => {
-        if (err) {
+    getDatabase().getAllTransactions(
+        transactions => {
+            const graphData = {
+                spend: [0, 0, 0, 0, 0, 0, 0],
+                income: [0, 0, 0, 0, 0, 0, 0]
+            };
+
+            // Sunday - Saturday : 0 - 6
+            for (let i = 0; i < transactions.length; i++) {
+                if (transactions[i].amount < 0)
+                    graphData.spend[new Date(transactions[i].date).getDay()] += (transactions[i].amount * -1);
+                else graphData.income[new Date(transactions[i].date).getDay()] += transactions[i].amount;
+            }
+
+            res.status(200).send(graphData);
+        },
+        err => {
             logger.error("An error occurred while getting graph data: " + err);
             res.status(500).send({ msg: err });
         }
-
-        const graphData = {
-            spend: [0, 0, 0, 0, 0, 0, 0],
-            income: [0, 0, 0, 0, 0, 0, 0]
-        };
-
-        // Sunday - Saturday : 0 - 6
-        for (let i = 0; i < transactions.length; i++) {
-            if (transactions[i].amount < 0)
-                graphData.spend[new Date(transactions[i].date).getDay()] += (transactions[i].amount * -1);
-            else graphData.income[new Date(transactions[i].date).getDay()] += transactions[i].amount;
-        }
-
-        res.status(200).send(graphData);
-    });
+    );
 };

@@ -4,8 +4,8 @@
   "description": "App to track and manage your finances",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node financial_tracker_server.js",
+    "dev": "nodemon financial_tracker_server.js"
   },
   "keywords": [
     "money",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "eslint": "^9.28.0"
   },
-  "author": "JChris",
+  "author": "JChris246",
   "contributors": [
     "kac246",
     "c0d3rJ"

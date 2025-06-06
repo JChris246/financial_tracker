@@ -1,10 +1,10 @@
 const express = require("express");
-const mongoose = require("mongoose");
 
 // environment variables configuration
 require("dotenv").config();
 
 global.LOG_DIR = __dirname + "/logs";
+const morganLogger = require("./logger/morganLogger");
 const logger = require("./logger/index.js").setup();
 
 global.env = process.env.NODE_ENV || "development";
@@ -15,6 +15,7 @@ const transactionRouter = require("./routes/transaction.js");
 
 const app = express();
 
+app.use(morganLogger);
 app.use(express.json());
 app.use(express.static("static"));
 app.use("/assets/", express.static("assets"));
@@ -108,16 +109,16 @@ const server = http.createServer(app);
 server.on("error", onError);
 server.on("listening", onListening);
 
-// try to connect to mongo
-// if successful allow the server to start accepting requests
-// else log the error and terminate
-const DB_URL = "mongodb://" + process.env.DB_HOST + "/" + process.env.DB_NAME;
-mongoose.connect(DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    authSource: "admin",
-    user: process.env.DB_USER,
-    pass: process.env.DB_PASSWORD,
-}).then(() => server.listen(global.PORT)).catch(e => {
-    logger.error("Failed to connect to mongo: " + e);
+const setupDatabase = require("./db/index.js").setupDatabase;
+setupDatabase(process.env.DB_TYPE).then(success => {
+    if (!success) {
+        logger.error("Failed to set up database");
+        process.exit(1);
+    }
+    global.ACTIVE_DB_TYPE = process.env.DB_TYPE;
+    logger.info("Database '" + global.ACTIVE_DB_TYPE + "' set up successfully");
+    server.listen(global.PORT);
+}).catch((err) => {
+    logger.error("An error occurred while setting up the database: " + err);
+    process.exit(1);
 });
