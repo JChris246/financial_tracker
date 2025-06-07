@@ -26,6 +26,7 @@ const IncomeExpense = ({ sync }) => {
 
     useEffect(() => {
         (async () => {
+            // this is probably inefficient
             const income = (await getTransactions("income")).reduce((acc, cur) => acc + cur.amount, 0);
             const spend = (await getTransactions("spend")).reduce((acc, cur) => acc + cur.amount, 0);
             setAmount({

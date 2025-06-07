@@ -11,6 +11,8 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
+import { NotificationType, useNotificationContext } from "./Notification";
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -41,6 +43,8 @@ const labels = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
 const SpendingGraph = () => {
     const [data, setData] = useState({});
 
+    const { display: displayNotification } = useNotificationContext();
+
     const getSpendingData = async () => {
         const res = await fetch("/api/transactions/all/graph", {
             method: "GET",
@@ -49,9 +53,9 @@ const SpendingGraph = () => {
             }
         });
 
-        if (res.status !== 200)
-            alert("Error");
-        else {
+        if (res.status !== 200) {
+            displayNotification({ message: "An error occurred while getting spending graph", type: NotificationType.Error });
+        } else {
             const graphData = await res.json();
             setData({
                 labels,

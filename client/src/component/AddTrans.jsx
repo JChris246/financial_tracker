@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PlusIcon, XIcon } from "@heroicons/react/solid";
+
+import { NotificationType, useNotificationContext } from "./Notification";
 
 export const AddTrans = ({ refresh }) => {
     const formatDate = (d) => {
@@ -30,6 +32,8 @@ export const AddTrans = ({ refresh }) => {
         date: formatDate(new Date())
     });
 
+    const { display: displayNotification } = useNotificationContext();
+
     const enterTransaction = (e) => {
         setTransaction({
             ...transaction,
@@ -40,12 +44,16 @@ export const AddTrans = ({ refresh }) => {
     const addTransaction = async (e) => {
         e.preventDefault();
 
-        if (!transaction.name || !transaction.amount)
-            return alert("You need to have the transaction name and amount"); // TODO: add notification component for this
+        if (!transaction.name || !transaction.amount) {
+            displayNotification({ message: "You need to have the transaction name and amount", type: NotificationType.Error });
+            return;
+        }
 
         const amount = Number(transaction.amount);
-        if (isNaN(amount))
-            return alert("You need to have a valid transaction amount"); // TODO: add notification component for this
+        if (isNaN(amount)) {
+            displayNotification({ message: "You need to have a valid transaction amount", type: NotificationType.Error });
+            return;
+        }
 
         transaction.amount = amount;
         const res = await fetch("/api/transaction", {
@@ -56,9 +64,9 @@ export const AddTrans = ({ refresh }) => {
             body: JSON.stringify(transaction)
         });
 
-        if (res.status !== 201)
-            alert((await res.json()).msg);
-        else {
+        if (res.status !== 201) {
+            displayNotification({ message: "Unable to add transaction: " + (await res.json()).msg, type: NotificationType.Error });
+        } else {
             // clear input and close input
             setTransaction({ name: "", amount: "", date: formatDate(new Date()) });
             setIsTestModelOpen(false);
