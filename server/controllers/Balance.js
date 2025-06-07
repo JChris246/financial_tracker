@@ -9,7 +9,7 @@ module.exports.getBalance = (_, res) => {
                 res.status(200).send({ balance: 0 });
             } else {
                 res.status(200).send({
-                    balance: transactions.reduce((accumulator, current) => accumulator + current.amount, 0)
+                    balance: transactions.reduce((accumulator, currentAmount) => accumulator + currentAmount, 0)
                 });
             }
         },

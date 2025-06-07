@@ -1,6 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
+const { isNumber } = require("../utils");
 
 module.exports.getTransactions = (req, res) => {
     let options = {}; // get all transactions
@@ -20,22 +21,29 @@ module.exports.getTransactions = (req, res) => {
 const parseDate = d => (new Date(d).getTime());
 
 module.exports.addTransaction = (req, res) => {
-    const amount = req.body.amount;
+    let amount = req.body.amount;
     const name = req.body.name;
     // get the timestamp from user, if it doesn't exist use the current timestamp
     const date = parseDate(req.body.date) || Date.now();
 
-    if (!amount) {
+    if (!isNumber(Number(amount))) {
         logger.warn("User tried to add a transaction without an amount");
         res.send(400).send({ msg: "You need to have the transaction amount" });
     }
+    amount = Number(amount);
+
+    if (amount === 0) {
+        logger.warn("User tried to add a transaction with an amount of 0");
+        res.send(400).send({ msg: "You need to have a valid transaction amount" });
+    }
+
     if (!name) {
         logger.warn("User tried to add a transaction without a name");
         res.send(400).send({ msg: "You need to have the transaction name" });
     }
 
     getDatabase().createTransaction(
-        { name, amount, type, date },
+        { name, amount, type: req.body.type || amount > 0, date },
         transaction => {
             res.status(201).send({
                 amount: transaction.amount,
@@ -46,8 +54,6 @@ module.exports.addTransaction = (req, res) => {
         },
         () => res.status(500).send({ msg: "Failed to add transaction" })
     );
-
-    const type = req.body.type || amount > 0;
 };
 
 module.exports.getGraphData = (_, res) => {

@@ -67,7 +67,7 @@ const getAllTransactionAmounts = (successCallback, errorCallback) => {
             errorCallback(err);
             return;
         }
-        successCallback(transactions);
+        successCallback(transactions.map(t => t.amount));
     });
 };
 

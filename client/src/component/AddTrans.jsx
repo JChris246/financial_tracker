@@ -40,6 +40,14 @@ export const AddTrans = ({ refresh }) => {
     const addTransaction = async (e) => {
         e.preventDefault();
 
+        if (!transaction.name || !transaction.amount)
+            return alert("You need to have the transaction name and amount"); // TODO: add notification component for this
+
+        const amount = Number(transaction.amount);
+        if (isNaN(amount))
+            return alert("You need to have a valid transaction amount"); // TODO: add notification component for this
+
+        transaction.amount = amount;
         const res = await fetch("/api/transaction", {
             method: "POST",
             headers: {
@@ -52,7 +60,7 @@ export const AddTrans = ({ refresh }) => {
             alert((await res.json()).msg);
         else {
             // clear input and close input
-            setTransaction({ name: "", amount: "", date: "" });
+            setTransaction({ name: "", amount: "", date: formatDate(new Date()) });
             setIsTestModelOpen(false);
             refresh();
         }

@@ -8,6 +8,7 @@ const morganLogger = require("./logger/morganLogger");
 const logger = require("./logger/index.js").setup();
 
 global.env = process.env.NODE_ENV || "development";
+global.DB_PATH = process.env.DB_PATH;
 
 // Server routes
 const balanceRouter = require("./routes/balance.js");
