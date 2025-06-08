@@ -17,7 +17,7 @@ function App() {
     useEffect(() =>  setSync(true), [sync]);
 
     return (
-        <div className="place-items-center z-1">
+        <div className="place-items-center">
             <NavBar/>
 
             <Balance sync={sync}/>

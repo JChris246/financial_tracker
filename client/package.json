@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "integration": "vite --config=vite-integration.config.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",

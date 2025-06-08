@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node financial_tracker_server.js",
     "dev": "nodemon financial_tracker_server.js",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "test:server": "NODE_ENV=test DB_PATH=test_db DB_TYPE=json node financial_tracker_server.js"
   },
   "keywords": [
     "money",

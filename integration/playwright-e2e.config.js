@@ -19,7 +19,6 @@ export default defineConfig({
         actionTimeout: 5 * 1000,
         baseURL: baseUrl,
         video: 'on', // TODO: maybe turn this off in CI
-        trace: 'on'
     },
 
     /* Configure projects for major browsers */
@@ -60,10 +59,21 @@ export default defineConfig({
         // },
     ],
 
-    webServer: {
-        command: 'npm run integration',
-        url: baseUrl,
-        reuseExistingServer: !process.env.CI,
-        cwd: "../client"
-    },
+    // TODO: should e2e tests be run like this, or with the "final product" of the server hosting the client?
+    webServer: [
+        {
+            name: 'server',
+            command: 'npm run test:server',
+            url: "http://localhost:5000",
+            reuseExistingServer: !process.env.CI,
+            cwd: "../server"
+        },
+        {
+            name: 'client',
+            command: 'npm run dev',
+            url: baseUrl,
+            reuseExistingServer: !process.env.CI,
+            cwd: "../client"
+        }
+    ]
 });

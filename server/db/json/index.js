@@ -3,7 +3,7 @@ const fs = require("fs");
 
 const logger = require("../../logger").setup();
 
-const fullDbPath = path.join(global.DB_PATH, "data");
+const fullDbPath = global.env === "test" ? path.join(__dirname, global.DB_PATH, "data") : path.join(global.DB_PATH, "data");
 const DB = ["db-transactions.json",]
     .map(file => path.join(fullDbPath, file));
 const DB_TYPE = { TRANSACTIONS: 0 };
@@ -13,9 +13,16 @@ global.dbLock = false;
 // TODO: should probably add error handling for this functions
 
 const init = () => {
+    if (global.env === "test") {
+        // wipe any previous test server data
+        if (fs.existsSync(fullDbPath)) {
+            fs.rmSync(fullDbPath, { recursive: true });
+        }
+    }
+
     if (!fs.existsSync(fullDbPath)) {
         logger.debug("Creating DB path: " + fullDbPath);
-        fs.mkdirSync(fullDbPath, true);
+        fs.mkdirSync(fullDbPath, { recursive: true });
     }
 
     for (const db of DB) {

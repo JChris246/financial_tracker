@@ -25,15 +25,12 @@ app.use("/api/balance", balanceRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
 
-// error handler
-app.use((err, req, res) => {
-    // render the error page
-    res.status(err.status || 500);
-    res.render("error");
-});
+if (global.env === "test") {
+    app.use("/", (_, res) => res.status(200).send({ msg: "Ok" })); // return 200 as health check for playwright
+}
 
 // error handler
-app.use(function (err, req, res) {
+app.use((err, req, res) => {
     // render the error page
     res.status(err.status || 500);
     res.render("error");

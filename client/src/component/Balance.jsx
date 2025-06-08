@@ -33,7 +33,7 @@ const Balance = ({ sync }) => {
             <div className="relative flex flex-col h-full py-3 mx-auto sm:items-stretch sm:flex-row md:w-100">
                 <div className="px-12 py-8 ">
                     <div className="mb-2 text-lg text-center uppercase">Your Balance</div>
-                    <span className="text-3xl">$ { balance } </span>
+                    <span id="balance-value" className="text-3xl">$ { balance } </span>
                 </div>
             </div>
         </section>
