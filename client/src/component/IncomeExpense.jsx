@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
 
-const getTransactions = async (type) => {
-    const res = await fetch("/api/transactions/" + type, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+import { NotificationType, useNotificationContext } from "./Notification";
+import { requestSync } from "../utils/Fetch";
 
-    // if status comes back as an error
-    // return as an empty array for now
-    if (res.status !== 200)
+const getTransactions = async (type, displayNotification) => {
+    const { msg, success, json } = await requestSync({ url: "/api/transactions/" + type, method: "GET" });
+
+    if (success) {
+        return json;
+    } else {
+        // if status comes back as an error
+        // return as an empty array for now
+        displayNotification({ message: "An error occurred while getting " + type + " transactions: " + msg, type: NotificationType.Error });
         return [];
-    else {
-        // else get the transactions from the response json
-        return await res.json();
     }
 };
 
@@ -24,11 +22,13 @@ const IncomeExpense = ({ sync }) => {
         expense: 0
     });
 
+    const { display: displayNotification } = useNotificationContext();
+
     useEffect(() => {
         (async () => {
             // this is probably inefficient
-            const income = (await getTransactions("income")).reduce((acc, cur) => acc + cur.amount, 0);
-            const spend = (await getTransactions("spend")).reduce((acc, cur) => acc + cur.amount, 0);
+            const income = (await getTransactions("income", displayNotification)).reduce((acc, cur) => acc + cur.amount, 0);
+            const spend = (await getTransactions("spend", displayNotification)).reduce((acc, cur) => acc + cur.amount, 0);
             setAmount({
                 income,
                 expense: spend

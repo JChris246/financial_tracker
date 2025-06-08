@@ -1,28 +1,30 @@
 import { useEffect, useState } from "react";
 
 import TransactionHistoryTile from "./TransactionHistoryTile";
+import { NotificationType, useNotificationContext } from "./Notification";
+import { request } from "../utils/Fetch";
 
 const TransactionHistory = ({ sync }) => {
     const [transactions, setTransactions] = useState([]);
 
-    useEffect(() => {
-        (async () => {
-            const res = await fetch("/api/transactions", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+    const { display: displayNotification } = useNotificationContext();
 
-            // if status comes back as an error
-            // set transactions as an empty array for now
-            if (res.status !== 200)
-                setTransactions([]);
-            else {
-                // else get the transactions from the response json
-                setTransactions(await res.json());
+    useEffect(() => {
+        request({
+            url: "/api/transactions",
+            method: "GET",
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    // get the transactions from the response json
+                    setTransactions(json);
+                } else {
+                    // if status comes back as an error
+                    // set transactions as an empty array for now
+                    setTransactions([]);
+                    displayNotification({ message: "Unable to get transactions to show history: " + msg, type: NotificationType.Error });
+                }
             }
-        })();
+        });
     }, [sync]);
 
     return (

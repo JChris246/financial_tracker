@@ -1,27 +1,30 @@
 import { useEffect, useState } from "react";
 
+import { NotificationType, useNotificationContext } from "./Notification";
+import { request } from "../utils/Fetch";
+
 const Balance = ({ sync }) => {
     const [balance, setBalance] = useState(0);
 
-    useEffect(() => {
-        (async () => {
-            const res = await fetch("/api/balance", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
+    const { display: displayNotification } = useNotificationContext();
 
-            // if status comes back as an error
-            // set balance as - for now
-            if (res.status !== 200)
-                setBalance("-");
-            else {
-                // else get the balance from the response json
-                const { balance : b } = await res.json();
-                setBalance(b);
+    useEffect(() => {
+        request({
+            url: "/api/balance",
+            method: "GET",
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    // get the balance from the response json
+                    const { balance : b } = json;
+                    setBalance(b);
+                } else {
+                    // if status comes back as an error
+                    // set balance as - for now
+                    setBalance("-");
+                    displayNotification({ message: "Unable to get balance: " + msg, type: NotificationType.Error });
+                }
             }
-        })();
+        });
     }, [sync]);
 
     return (

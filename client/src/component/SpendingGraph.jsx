@@ -12,6 +12,7 @@ import {
 import { Line } from "react-chartjs-2";
 
 import { NotificationType, useNotificationContext } from "./Notification";
+import { request } from "../utils/Fetch";
 
 ChartJS.register(
     CategoryScale,
@@ -46,34 +47,31 @@ const SpendingGraph = () => {
     const { display: displayNotification } = useNotificationContext();
 
     const getSpendingData = async () => {
-        const res = await fetch("/api/transactions/all/graph", {
+        request({
+            url: "/api/transactions/all/graph",
             method: "GET",
-            headers: {
-                "Content-Type": "application/json"
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    setData({
+                        labels,
+                        datasets: [{
+                            label: "Expenditure",
+                            data: json.spend,
+                            borderColor: "rgb(255, 99, 132)",
+                            backgroundColor: "rgba(255, 99, 132, 0.5)",
+                        },
+                        {
+                            label: "Income",
+                            data: json.income,
+                            borderColor: "rgb(53, 162, 235)",
+                            backgroundColor: "rgba(53, 162, 235, 0.5)",
+                        }],
+                    });
+                } else {
+                    displayNotification({ message: "An error occurred while getting spending graph: " + msg, type: NotificationType.Error });
+                }
             }
         });
-
-        if (res.status !== 200) {
-            displayNotification({ message: "An error occurred while getting spending graph", type: NotificationType.Error });
-        } else {
-            const graphData = await res.json();
-            setData({
-                labels,
-                datasets: [{
-                    label: "Expenditure",
-                    data: graphData.spend,
-                    borderColor: "rgb(255, 99, 132)",
-                    backgroundColor: "rgba(255, 99, 132, 0.5)",
-                },
-                {
-                    label: "Income",
-                    data: graphData.income,
-                    borderColor: "rgb(53, 162, 235)",
-                    backgroundColor: "rgba(53, 162, 235, 0.5)",
-                },
-                ],
-            });
-        }
     };
 
     useEffect(() => {

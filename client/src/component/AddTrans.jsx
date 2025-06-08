@@ -2,34 +2,16 @@ import { useState } from "react";
 import { PlusIcon, XIcon } from "@heroicons/react/solid";
 
 import { NotificationType, useNotificationContext } from "./Notification";
+import { formatDate, DATE_TYPE } from "../utils/utils";
+import { request } from "../utils/Fetch";
 
 export const AddTrans = ({ refresh }) => {
-    const formatDate = (d) => {
-        const pad = (v, n = 2) => {
-            v = v + ""; // convert to string
-            if (v.length === n)
-                return v;
-            for (let i = 0; i < n; i++) {
-                v = "0" + v;
-                if (v.length >= n)
-                    break;
-            }
-            return v;
-        };
-
-        // YYYY-MM-DDThh:mm
-        // 2022-01-07T23:43:09
-        const date = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
-        const time = pad(d.getHours()) + ":" + pad(d.getMinutes());
-        return date + "T" + time;
-    };
-
     const [isTransModelOpen, setIsTransModelOpen] = useState(false);
-    const [isTestModelOpen, setIsTestModelOpen] = useState(false);
+    const [isTestModelOpen, setIsTestModelOpen] = useState(false); // TODO: rename this?
     const [transaction, setTransaction] = useState({
         name: "",
         amount: "",
-        date: formatDate(new Date())
+        date: formatDate(new Date(), DATE_TYPE.INPUT)
     });
 
     const { display: displayNotification } = useNotificationContext();
@@ -56,22 +38,21 @@ export const AddTrans = ({ refresh }) => {
         }
 
         transaction.amount = amount;
-        const res = await fetch("/api/transaction", {
+        request({
+            url: "/api/transaction",
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(transaction)
+            body: JSON.stringify(transaction),
+            callback: ({ msg, success }) => {
+                if (success) {
+                    // clear input and close input
+                    setTransaction({ name: "", amount: "", date: formatDate(new Date(), DATE_TYPE.INPUT)});
+                    setIsTestModelOpen(false);
+                    refresh();
+                } else {
+                    displayNotification({ message: "Unable to add transaction: " + msg, type: NotificationType.Error });
+                }
+            }
         });
-
-        if (res.status !== 201) {
-            displayNotification({ message: "Unable to add transaction: " + (await res.json()).msg, type: NotificationType.Error });
-        } else {
-            // clear input and close input
-            setTransaction({ name: "", amount: "", date: formatDate(new Date()) });
-            setIsTestModelOpen(false);
-            refresh();
-        }
     }
 
     return (
