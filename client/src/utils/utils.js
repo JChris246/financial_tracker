@@ -1,6 +1,6 @@
 const pad = (v, n = 2) => {
     v = v + ""; // convert to string
-    if (v.length === n)
+    if (v.length >= n)
         return v;
     for (let i = 0; i < n; i++) {
         v = "0" + v;
