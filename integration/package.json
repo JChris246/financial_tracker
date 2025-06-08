@@ -1,0 +1,14 @@
+{
+  "name": "financial_app_client_integration_tests",
+  "version": "0.2.0",
+  "description": "Separate folder to host the integration (and e2e?) tests away from jest, until I find a better solution",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:integration": "npx playwright test",
+    "test:e2e": "npx playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

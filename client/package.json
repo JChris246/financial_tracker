@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config=jest.config.js"
   },
   "dependencies": {
     "@heroicons/react": "^1.0.5",

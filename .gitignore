@@ -26,3 +26,9 @@ yarn-error.log*
 package-lock.json
 
 logs/
+
+# Playwright
+**/test-results/**
+**/playwright-report/**
+**/blob-report/**
+**/playwright/.cache/**
