@@ -12,14 +12,18 @@ global.dbLock = false;
 
 // TODO: should probably add error handling for this functions
 
-const init = () => {
+
+const wipeDb = () => {
     if (global.env === "test") {
         // wipe any previous test server data
         if (fs.existsSync(fullDbPath)) {
             fs.rmSync(fullDbPath, { recursive: true });
         }
     }
+};
 
+// TODO: create this function for the other db types?
+const seedDb = () => {
     if (!fs.existsSync(fullDbPath)) {
         logger.debug("Creating DB path: " + fullDbPath);
         fs.mkdirSync(fullDbPath, { recursive: true });
@@ -30,6 +34,12 @@ const init = () => {
             fs.writeFileSync(db, "[]"); // create empty file...it may not always be a array needed
         }
     }
+};
+
+const init = () => {
+    wipeDb();
+    seedDb();
+
     logger.debug("JSON DB initialized");
     return true;
 };
@@ -110,4 +120,4 @@ const getAllTransactionAmounts = (successCallback) => {
     successCallback(results);
 };
 
-module.exports = { init, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };
+module.exports = { init, wipeDb, seedDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node financial_tracker_server.js",
     "dev": "nodemon financial_tracker_server.js",
-    "test:unit": "jest",
+    "test:unit": "NODE_ENV=test jest --runTestsByPath test/**",
+    "test:integration": "NODE_ENV=test DB_TYPE=json DB_PATH=test_db RUN_SERVER=false jest --runTestsByPath test_integration/**",
     "test:server": "NODE_ENV=test DB_PATH=test_db DB_TYPE=json node financial_tracker_server.js"
   },
   "keywords": [
@@ -26,7 +27,8 @@
   },
   "devDependencies": {
     "eslint": "^9.28.0",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "supertest": "^7.1.1"
   },
   "author": "JChris246",
   "contributors": [

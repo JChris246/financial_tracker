@@ -3,6 +3,7 @@ const express = require("express");
 // environment variables configuration
 require("dotenv").config();
 
+global.VERSION = "0.2.0";
 global.LOG_DIR = __dirname + "/logs";
 const morganLogger = require("./logger/morganLogger");
 const logger = require("./logger/index.js").setup();
@@ -20,6 +21,7 @@ app.use(morganLogger);
 app.use(express.json());
 app.use(express.static("static"));
 app.use("/assets/", express.static("assets"));
+app.use("/api/ping", (_, res) => res.status(200).send({ msg: "Pong", version: global.VERSION }));
 
 app.use("/api/balance", balanceRouter);
 app.use("/api/transaction", transactionRouter);
@@ -74,6 +76,7 @@ const onError = error => {
             logger.error("Unknown error occurred: " + error);
             setTimeout(() => {
                 try {
+                    // I'm not sure this will do what you expect
                     logger.info("Attempting to listen again");
                     server.close();
                     server.listen(global.PORT);
@@ -115,8 +118,14 @@ setupDatabase(process.env.DB_TYPE).then(success => {
     }
     global.ACTIVE_DB_TYPE = process.env.DB_TYPE;
     logger.info("Database '" + global.ACTIVE_DB_TYPE + "' set up successfully");
+    // should probably extract this better (or not use http server at all)
+    if (global.env === "test" && process.env.RUN_SERVER === "false") {
+        return;
+    }
     server.listen(global.PORT);
 }).catch((err) => {
     logger.error("An error occurred while setting up the database: " + err);
     process.exit(1);
 });
+
+module.exports = app;

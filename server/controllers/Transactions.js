@@ -28,18 +28,18 @@ module.exports.addTransaction = (req, res) => {
 
     if (!isNumber(Number(amount))) {
         logger.warn("User tried to add a transaction without an amount");
-        res.send(400).send({ msg: "You need to have the transaction amount" });
+        res.status(400).send({ msg: "You need to have the transaction amount" });
     }
     amount = Number(amount);
 
     if (amount === 0) {
         logger.warn("User tried to add a transaction with an amount of 0");
-        res.send(400).send({ msg: "You need to have a valid transaction amount" });
+        res.status(400).send({ msg: "You need to have a valid transaction amount" });
     }
 
     if (!name) {
         logger.warn("User tried to add a transaction without a name");
-        res.send(400).send({ msg: "You need to have the transaction name" });
+        res.status(400).send({ msg: "You need to have the transaction name" });
     }
 
     getDatabase().createTransaction(
