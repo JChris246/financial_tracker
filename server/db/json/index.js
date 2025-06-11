@@ -3,7 +3,7 @@ const fs = require("fs");
 
 const logger = require("../../logger").setup();
 
-const fullDbPath = global.env === "test" ? path.join(__dirname, global.DB_PATH, "data") : path.join(global.DB_PATH, "data");
+const fullDbPath = path.join(global.DB_PATH, "data");
 const DB = ["db-transactions.json",]
     .map(file => path.join(fullDbPath, file));
 const DB_TYPE = { TRANSACTIONS: 0 };

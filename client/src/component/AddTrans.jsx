@@ -63,8 +63,9 @@ export const AddTrans = ({ refresh }) => {
                         <div className="relative flex items-center justify-between w-auto max-w-sm py-5 mx-auto border-full">*/}
 
                 <button
-                    aria-label="Open Trans Model"
-                    title="Open Trans Model"
+                    id="add-transaction-button"
+                    aria-label="Open Transaction Model"
+                    title="Open Transaction Model"
                     className="inline-flex items-center justify-center h-12 px-6 font-medium text-gray-900 transition duration-200 bg-purple-300
                         rounded shadow-md hover:bg-purple-200 focus:shadow-outline focus:outline-none"
                     onClick={() => setIsTestModelOpen(true)}
@@ -74,8 +75,8 @@ export const AddTrans = ({ refresh }) => {
                 </button>
 
                 {/*<button
-                    aria-label="Open Trans Model"
-                    title="Open Trans Model"
+                    aria-label="Open Transaction Model"
+                    title="Open Transaction Model"
                     className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex
                         items-center dark:hover:bg-gray-600 dark:hover:text-white"
                     onClick={() => setIsTestModelOpen(true)}
@@ -111,7 +112,7 @@ export const AddTrans = ({ refresh }) => {
                             <form className="relative flex-auto p-6" onSubmit={addTransaction}>
                                 <div className="flex flex-col mt-0 space-y-2 sm:justify-center sm:-mx-2">
                                     <input
-                                        type="text" value={transaction.name} onChange={enterTransaction} name="name" required
+                                        type="text" value={transaction.name} onChange={enterTransaction} name="name" required id="transaction-name"
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring"
@@ -120,7 +121,7 @@ export const AddTrans = ({ refresh }) => {
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring"
-                                        placeholder="Transaction Amount" />
+                                        placeholder="Transaction Amount" id="transaction-amount" />
 
                                     <input type="datetime-local" value={transaction.date} onChange={enterTransaction} name="date" required
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
@@ -131,7 +132,7 @@ export const AddTrans = ({ refresh }) => {
                                     <button
                                         className="px-4 py-2 text-sm font-bold tracking-wide text-white capitalize transition-colors duration-200
                                             transform bg-blue-700 rounded-md sm:mx-2 hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                                        onClick={addTransaction}>
+                                        onClick={addTransaction} id="submit-transaction">
                                         Add
                                     </button>
                                 </div>

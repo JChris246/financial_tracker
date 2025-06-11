@@ -11,7 +11,7 @@ export default defineConfig({
     testMatch: '*.spec.js',
     fullyParallel: true,
     forbidOnly: !!process.env.CI, // TODO: set this var when setting up CI tests
-    workers: process.env.CI ? 1 : "50%",
+    workers: 1,
     timeout: 15 * 1000, // 15 seconds, maximum time for each test (the expect() assertions)
     reporter: 'html',
     use: {

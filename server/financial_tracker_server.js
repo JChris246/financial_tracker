@@ -28,6 +28,11 @@ app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
 
 if (global.env === "test") {
+    const getDatabase = require("./db/index.js").getDatabase
+    app.use("/api/admin/wipeDb", (_, res) => {
+        getDatabase().init();
+        res.status(200).send();
+    });
     app.use("/", (_, res) => res.status(200).send({ msg: "Ok" })); // return 200 as health check for playwright
 }
 
