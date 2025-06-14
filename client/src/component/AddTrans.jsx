@@ -11,7 +11,10 @@ export const AddTrans = ({ refresh }) => {
     const [transaction, setTransaction] = useState({
         name: "",
         amount: "",
-        date: formatDate(new Date(), DATE_TYPE.INPUT)
+        date: formatDate(new Date(), DATE_TYPE.INPUT),
+        category: "other", // TODO: add endpoint to get these default values (category, assetType, currency)
+        assetType: "cash",
+        currency: "usd"
     });
 
     const { display: displayNotification } = useNotificationContext();
@@ -36,8 +39,9 @@ export const AddTrans = ({ refresh }) => {
             displayNotification({ message: "You need to have a valid transaction amount", type: NotificationType.Error });
             return;
         }
-
         transaction.amount = amount;
+        transaction.type = amount > 0;
+
         request({
             url: "/api/transaction",
             method: "POST",
@@ -122,6 +126,37 @@ export const AddTrans = ({ refresh }) => {
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring"
                                         placeholder="Transaction Amount" id="transaction-amount" />
+
+                                    <select value={transaction.category} onChange={enterTransaction} name="category" required
+                                        id="transaction-category"
+                                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
+                                            dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
+                                            focus:outline-none focus:ring">
+                                        {/* TODO: add an endpoint to return a list of categories (added by user and default) */}
+                                        <option>groceries</option>
+                                        <option>other</option>
+                                    </select>
+
+                                    <select value={transaction.assetType} onChange={enterTransaction} name="assetType" required
+                                        id="transaction-asset-type"
+                                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
+                                            dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
+                                            focus:outline-none focus:ring">
+                                        <option>cash</option>
+                                        <option>stock</option>
+                                        <option>crypto</option>
+                                    </select>
+
+                                    <select value={transaction.currency} onChange={enterTransaction} name="currency" required
+                                        id="transaction-currency"
+                                        className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
+                                            dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
+                                            focus:outline-none focus:ring">
+                                        {/* TODO: add an endpoint to return a list of supported currencies per asset type (return the default as first in list) */}
+                                        <option>usd</option>
+                                        <option>eur</option>
+                                        <option>gbp</option>
+                                    </select>
 
                                     <input type="datetime-local" value={transaction.date} onChange={enterTransaction} name="date" required
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800

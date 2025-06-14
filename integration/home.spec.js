@@ -24,6 +24,9 @@ const addTransaction = async (page, value) => {
     await addTransactionButton.click();
     await page.locator("#transaction-name").fill("Test Transaction"); // Increment a count for this?
     await page.locator("#transaction-amount").fill(value);
+    await page.locator("#transaction-category").selectOption({ value: "other" });
+    await page.locator("#transaction-asset-type").selectOption({ value: "cash" });
+    await page.locator("#transaction-currency").selectOption({ value: "eur" });
     await page.locator("#submit-transaction").click();
 };
 
