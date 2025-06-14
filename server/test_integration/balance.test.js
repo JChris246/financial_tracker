@@ -4,6 +4,7 @@ const server = require("../financial_tracker_server.js");
 const superTestRequest = supertest(server);
 
 const { getDatabase } = require("../db/index");
+const { addTransaction } = require("./helpers");
 
 describe("balance endpoints", () => {
     beforeEach(async () => {
@@ -25,12 +26,11 @@ describe("balance endpoints", () => {
 
     test("should return correct balance when based on existing transactions", async () => {
         // Arrange
-        // technically these should be direct entries to the db to test the balance endpoint in isolation, but should be good enough
-        await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 1", amount: 10, date: "2022-01-01" });
-        await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 2", amount: -10, date: "2022-01-02" });
-        await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 3", amount: -10, date: "2022-01-03" });
-        await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 4", amount: 60, date: "2022-02-04" });
-        await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 5", amount: 20, date: "2022-01-07" });
+        await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2022-01-01" });
+        await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: -10, date: "2022-01-02" });
+        await addTransaction(superTestRequest, { name: "Test Transaction 3", amount: -10, date: "2022-01-03" });
+        await addTransaction(superTestRequest, { name: "Test Transaction 4", amount: 60, date: "2022-02-04" });
+        await addTransaction(superTestRequest, { name: "Test Transaction 5", amount: 20, date: "2022-01-07" });
 
         // Act
         const response = await superTestRequest.get("/api/balance");

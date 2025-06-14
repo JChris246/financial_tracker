@@ -4,6 +4,7 @@ const server = require("../financial_tracker_server.js");
 const superTestRequest = supertest(server);
 
 const { getDatabase } = require("../db/index");
+const { addTransaction } = require("./helpers");
 
 describe("transaction endpoints", () => {
     beforeEach(async () => {
@@ -42,15 +43,61 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("You need to have the transaction name");
         });
 
-        test("should return success response and transaction payload when transaction added successfully", async () => {
+        test("should return bad request when transaction asset type is not provided", async () => {
             // Act
-            const response = await superTestRequest.post("/api/transaction").send({ name: "Test Transaction", amount: 100 });
+            const response = await superTestRequest.post("/api/transaction").send({ date: "2022-01-01", amount: 50, name: "Test Transaction" });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("You need to have the transaction asset type");
+        });
+
+        test("should return bad request when transaction currency is not provided", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction").send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "cash" });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("You need to have the transaction currency");
+        });
+
+        test("should return bad request when transaction currency is not provided", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction").send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "cash" });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("You need to have the transaction currency");
+        });
+
+        test("should return success response and transaction payload when transaction added successfully (without category)", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction").send({ name: "Test Transaction", amount: 100, assetType: "cash", currency: "usd" });
 
             // Assert
             expect(response.status).toBe(201);
             expect(response.body.msg).toEqual("Transaction added successfully");
             expect(response.body.amount).toEqual(100);
             expect(response.body.name).toEqual("Test Transaction");
+            expect(response.body.type).toEqual(true);
+            expect(response.body.assetType).toEqual("cash");
+            expect(response.body.currency).toEqual("usd");
+            expect(response.body.category).toBeUndefined();
+        });
+
+        test("should return success response and transaction payload when transaction added successfully", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction").send({ name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries" });
+
+            // Assert
+            expect(response.status).toBe(201);
+            expect(response.body.msg).toEqual("Transaction added successfully");
+            expect(response.body.amount).toEqual(-100);
+            expect(response.body.name).toEqual("Test Transaction");
+            expect(response.body.type).toEqual(false);
+            expect(response.body.assetType).toEqual("cash");
+            expect(response.body.currency).toEqual("usd");
+            expect(response.body.category).toEqual("Groceries");
         });
 
         // should we add a test to verify the value was inserted into the db?
@@ -68,12 +115,11 @@ describe("transaction endpoints", () => {
 
         test("should return the correct number of transactions per type", async () => {
             // Arrange
-            // technically these should be direct entries to the db to test the balance endpoint in isolation, but should be good enough
-            await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 1", amount: 10, date: "2022-01-01" });
-            await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 2", amount: -10, date: "2022-01-02" });
-            await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 3", amount: -10, date: "2022-01-03" });
-            await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 4", amount: 60, date: "2022-02-04" });
-            await superTestRequest.post("/api/transaction").send({ name: "Test Transaction 5", amount: 20, date: "2022-01-07" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2022-01-01" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: -10, date: "2022-01-02" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 3", amount: -10, date: "2022-01-03" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 4", amount: 60, date: "2022-02-04" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 5", amount: 20, date: "2022-01-07" });
 
             const cases = [
                 { type: "", expected: 5 },

@@ -120,4 +120,4 @@ const getAllTransactionAmounts = (successCallback) => {
     successCallback(results);
 };
 
-module.exports = { init, wipeDb, seedDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };
+module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };

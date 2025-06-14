@@ -17,6 +17,23 @@ const transactionSchema = new Schema({
     date: { // transaction date in seconds
         type: Number,
         required: true
+    },
+    // this field probably only make sense for fiat currency
+    category: {
+        type: String,
+    },
+    assetType: {
+        type: String, // cash, stock, crypto
+        required: true,
+        default: "cash"
+    },
+    // for cash this is USD, EUR, GPD etc,
+    // for crypto this is BTC, ETH, XRP etc
+    // for stock this is AAPL, MSFT, GOOGL etc
+    currency: {
+        type: String,
+        required: true,
+        default: "usd"
     }
 });
 

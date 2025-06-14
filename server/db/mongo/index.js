@@ -4,7 +4,29 @@ const Transaction = require("./models/Transactions");
 
 const logger = require("../../logger").setup();
 
+let databaseConnected = false;
+
+const wipeDb = () => {
+    if (global.env === "test") {
+        // wipe any previous test server data
+        return new Promise((resolve, reject) => {
+            Transaction.deleteMany({}, (err) => {
+                if (err) {
+                    logger.error("An error occurred while wiping the database: " + err);
+                    reject(err);
+                }
+                resolve();
+            })
+        });
+    }
+};
+
 const init = async () => {
+    if (databaseConnected) {
+        await wipeDb();
+        return true;
+    }
+
     const DB_URL = "mongodb://" + process.env.DB_HOST + "/" + process.env.DB_NAME;
     mongoose.set("strictQuery", false); // this should suppress the warning that strictQuery will be set to false by default in Mongoose 7
     try {
@@ -15,6 +37,8 @@ const init = async () => {
             user: process.env.DB_USER,
             pass: process.env.DB_PASSWORD,
         });
+        databaseConnected = true;
+        await wipeDb();
         return true;
     } catch (e) {
         logger.error("Failed to connect to mongo: " + e);
@@ -71,5 +95,5 @@ const getAllTransactionAmounts = (successCallback, errorCallback) => {
     });
 };
 
-module.exports = { init, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };
+module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };
 

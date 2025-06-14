@@ -45,7 +45,7 @@ export const AddTrans = ({ refresh }) => {
             callback: ({ msg, success }) => {
                 if (success) {
                     // clear input and close input
-                    setTransaction({ name: "", amount: "", date: formatDate(new Date(), DATE_TYPE.INPUT)});
+                    setTransaction({ name: "", amount: "", date: formatDate(new Date(), DATE_TYPE.INPUT) });
                     setIsTestModelOpen(false);
                     refresh();
                 } else {

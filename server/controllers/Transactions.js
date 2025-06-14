@@ -1,7 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber } = require("../utils");
+const { isNumber, makeBool, isDefined } = require("../utils");
 
 module.exports.getTransactions = (req, res) => {
     let options = {}; // get all transactions
@@ -20,35 +20,73 @@ module.exports.getTransactions = (req, res) => {
 
 const parseDate = d => (new Date(d).getTime());
 
-module.exports.addTransaction = (req, res) => {
-    let amount = req.body.amount;
-    const name = req.body.name;
-    // get the timestamp from user, if it doesn't exist use the current timestamp
-    const date = parseDate(req.body.date) || Date.now();
+const validateAddTransactionRequest = (req, res) => {
+    const { name, date: userDate, amount: userAmount, type: userType, category, assetType, currency } = req.body;
 
-    if (!isNumber(Number(amount))) {
+    // get the timestamp from user, if it doesn't exist use the current timestamp
+    const date = parseDate(userDate) || Date.now();
+
+    if (!isNumber(Number(userAmount))) {
         logger.warn("User tried to add a transaction without an amount");
         res.status(400).send({ msg: "You need to have the transaction amount" });
+        return null;
     }
-    amount = Number(amount);
+    const amount = Number(userAmount);
 
     if (amount === 0) {
         logger.warn("User tried to add a transaction with an amount of 0");
         res.status(400).send({ msg: "You need to have a valid transaction amount" });
+        return null;
     }
 
     if (!name) {
         logger.warn("User tried to add a transaction without a name");
         res.status(400).send({ msg: "You need to have the transaction name" });
+        return null;
     }
 
+    const type = isDefined(userType) ? makeBool(userType) : amount > 0;
+
+    if (!isDefined(category)) {
+        logger.warn("Transaction adding without a category");
+    }
+
+    // TODO: validate that the asset type is a supported value
+    if (!isDefined(assetType)) {
+        logger.warn("User tried to add a transaction without an asset type");
+        res.status(400).send({ msg: "You need to have the transaction asset type" });
+        return null;
+    }
+
+    // TODO: validate that the currency is a supported value
+    if (!isDefined(currency)) {
+        logger.warn("User tried to add a transaction without a currency");
+        res.status(400).send({ msg: "You need to have the transaction currency" });
+        return null;
+    }
+
+    return { name, date, amount, type, category, assetType, currency };
+}
+
+module.exports.addTransaction = (req , res) => {
+    const result = validateAddTransactionRequest(req, res);
+    if (!result) {
+        return;
+    }
+
+    const { name, date, amount, type, category, assetType, currency } = result;
     getDatabase().createTransaction(
-        { name, amount, type: req.body.type || amount > 0, date },
+        { name, date, amount, type, category, assetType, currency },
         transaction => {
             res.status(201).send({
+                // maybe I should separate the payload from the message ?
                 amount: transaction.amount,
                 name: transaction.name,
                 date: transaction.date,
+                type: transaction.type,
+                category: transaction.category,
+                assetType: transaction.assetType,
+                currency: transaction.currency,
                 msg: "Transaction added successfully",
             });
         },
