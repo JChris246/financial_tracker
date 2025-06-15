@@ -14,6 +14,7 @@ global.DB_PATH = process.env.DB_PATH;
 // Server routes
 const balanceRouter = require("./routes/balance.js");
 const transactionRouter = require("./routes/transaction.js");
+const listRouter = require("./routes/list.js");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/ping", (_, res) => res.status(200).send({ msg: "Pong", version: gl
 app.use("/api/balance", balanceRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
+app.use("/api/list", listRouter);
 
 if (global.env === "test") {
     const getDatabase = require("./db/index.js").getDatabase
