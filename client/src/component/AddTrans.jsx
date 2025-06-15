@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PlusIcon, XIcon } from "@heroicons/react/solid";
 
 import { NotificationType, useNotificationContext } from "./Notification";
@@ -12,10 +12,64 @@ export const AddTrans = ({ refresh }) => {
         name: "",
         amount: "",
         date: formatDate(new Date(), DATE_TYPE.INPUT),
-        category: "other", // TODO: add endpoint to get these default values (category, assetType, currency)
+        category: "other",
         assetType: "cash",
         currency: "usd"
     });
+
+    const [assetTypes, setAssetTypes] = useState([]);
+    const [transactionCategories, setTransactionCategories] = useState([]);
+    const [assetCurrencies, setAssetCurrencies] = useState({ cash: ["usd"], stock: [], crypto: [] });
+
+    const getAvailableAssetTypes = () => {
+        request({
+            url: "/api/list/asset-type",
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    setAssetTypes(json);
+                    setTransaction({ ...transaction, assetType: json[0] });
+                } else {
+                    setAssetTypes(["cash", "stock", "crypto"]); // fallback on default
+                    displayNotification({ message: "An error occurred fetching asset types: " + msg, type: NotificationType.Error });
+                }
+            }
+        });
+    };
+
+    const getAvailableTransactionCategories = () => {
+        request({
+            url: "/api/list/category",
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    setTransactionCategories(json);
+                    setTransaction({ ...transaction, category: json[0] });
+                } else {
+                    setAssetTypes(["groceries", "other"]); // fallback on default
+                    displayNotification({ message: "An error occurred fetching transaction categories: " + msg, type: NotificationType.Error });
+                }
+            }
+        });
+    };
+
+    const getAvailableAssetCurrencies = () => {
+        request({
+            url: "/api/list/currency",
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    setAssetCurrencies(json);
+                    setTransaction({ ...transaction, currency: json[transaction.assetType][0] });
+                } else {
+                    displayNotification({ message: "An error occurred fetching asset currencies: " + msg, type: NotificationType.Error });
+                }
+            }
+        });
+    };
+
+    useEffect(() => {
+        getAvailableAssetTypes();
+        getAvailableTransactionCategories();
+        getAvailableAssetCurrencies();
+    }, []);
 
     const { display: displayNotification } = useNotificationContext();
 
@@ -60,7 +114,7 @@ export const AddTrans = ({ refresh }) => {
     }
 
     return (
-        <section id="addtransaction" className="flex flex-col p-4 mx-4 bg-gray-100 border">
+        <section id="add-transaction" className="flex flex-col p-4 mx-4 bg-gray-100 border">
 
             <div className="relative flex flex-col items-center h-full py-10 mx-auto rounded-sm sm:items-stretch sm:flex-row">
                 {/*<div className="mx-auto bg-gray-300">
@@ -127,38 +181,38 @@ export const AddTrans = ({ refresh }) => {
                                             focus:outline-none focus:ring"
                                         placeholder="Transaction Amount" id="transaction-amount" />
 
-                                    <select value={transaction.category} onChange={enterTransaction} name="category" required
+                                    <select value={transaction.category} onChange={enterTransaction} name="category" required title="category"
                                         id="transaction-category"
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring">
-                                        {/* TODO: add an endpoint to return a list of categories (added by user and default) */}
-                                        <option>groceries</option>
-                                        <option>other</option>
+                                        { transactionCategories.map((category) => (
+                                            <option key={category}>{category}</option>
+                                        ))}
                                     </select>
 
-                                    <select value={transaction.assetType} onChange={enterTransaction} name="assetType" required
+                                    <select value={transaction.assetType} onChange={enterTransaction} name="assetType" required title="asset type"
                                         id="transaction-asset-type"
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring">
-                                        <option>cash</option>
-                                        <option>stock</option>
-                                        <option>crypto</option>
+                                        { assetTypes.map((category) => (
+                                            <option key={category}>{category}</option>
+                                        ))}
                                     </select>
 
-                                    <select value={transaction.currency} onChange={enterTransaction} name="currency" required
+                                    <select value={transaction.currency} onChange={enterTransaction} name="currency" required title="currency"
                                         id="transaction-currency"
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring">
-                                        {/* TODO: add an endpoint to return a list of supported currencies per asset type (return the default as first in list) */}
-                                        <option>usd</option>
-                                        <option>eur</option>
-                                        <option>gbp</option>
+                                        { assetCurrencies[transaction.assetType]?.map((category) => (
+                                            <option key={category}>{category}</option>
+                                        ))}
                                     </select>
 
                                     <input type="datetime-local" value={transaction.date} onChange={enterTransaction} name="date" required
+                                        title="transaction date"
                                         className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                             dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                             focus:outline-none focus:ring"
