@@ -4,7 +4,6 @@ const ASSET_TYPE = {
     CRYPTO: "crypto"
 };
 
-// not working
 // ars, bif, cdf, cop, cve, ern, fkp, gip, gnf, hrk, idr, iqd, irr, khr, krw, kwd, lbp, mga, mmk, mnt, mwk, ngn, pyg, rwf, sll, ssp
 // stn, syp, ugx, uzs, vef, vnd, vuv, wst, zwl
 const FIAT_CURRENCIES = ["eur","aed","afn","xcd","all","amd","aoa","usd","aud","awg","azn","bam","bbd","bdt","xof","bgn","bhd","bmd",
@@ -14,7 +13,13 @@ const FIAT_CURRENCIES = ["eur","aed","afn","xcd","all","amd","aoa","usd","aud","
     "pen","pgk","php","pkr","pln","qar","ron","rsd","rub","sar","sbd","scr","sdg","sek","sgd","sos","srd","thb","tjs","tmt","tnd","top",
     "try","ttd","twd","uah","uyu","yer","zar","zmw"];
 
-const CRYPTO_CURRENCIES = [];
+// TODO: map the full names
+const CRYPTO_CURRENCIES = ["BTC", "ETH", "ADA", "BNB", "USDT", "XRP", "SOL", "DOT", "DOGE", "USDC", "UNI", "LUNA", "LINK", "AVAX", "LTC", "BUSD",
+    "AAVE", "FRAX", "HBAR", "BCH", "ALGO", "WBTC", "ICP", "POL", "FIL", "TRX", "FTT", "XLM", "VET", "ATOM", "ETC", "THETA", "DAI", "XMR", "MANA",
+    "ZEC", "TUSD", "EOS", "AXS", "ONE", "EGLD", "CHZ", "GRT", "1INCH", "INJ", "ENJ", "KSM", "CRO", "SHIB", "LEO", "NEAR", "BTCB", "FLOW", "XTZ",
+    "KCS", "SAND", "KLAY", "MKR", "USDP", "mBTC", "uBTC", "mETH", "XCH", "USDD", "BTT","SUI", "LUNC", "GUSD", "BAT", "NEO", "CAKE",
+    "LRC", "DASH", "XDC"];
+
 const STOCK_CURRENCIES = [];
 
 const ASSET_CURRENCIES = {

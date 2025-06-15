@@ -119,6 +119,23 @@ describe("transaction endpoints", () => {
             expect(response.body.category).toEqual("Groceries");
         });
 
+        test("should return success response and transaction payload when transaction added successfully (crypto)", async () => {
+            // Act
+            const response = await superTestRequest
+                .post("/api/transaction")
+                .send({ name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries" });
+
+            // Assert
+            expect(response.status).toBe(201);
+            expect(response.body.msg).toEqual("Transaction added successfully");
+            expect(response.body.amount).toEqual(-1);
+            expect(response.body.name).toEqual("Test Transaction");
+            expect(response.body.type).toEqual(false);
+            expect(response.body.assetType).toEqual("crypto");
+            expect(response.body.currency).toEqual("btc");
+            expect(response.body.category).toEqual("Groceries");
+        });
+
         // should we add a test to verify the value was inserted into the db?
     });
 

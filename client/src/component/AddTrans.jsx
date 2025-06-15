@@ -14,12 +14,12 @@ export const AddTrans = ({ refresh }) => {
         date: formatDate(new Date(), DATE_TYPE.INPUT),
         category: "other",
         assetType: "cash",
-        currency: "usd"
+        currency: "eur"
     });
 
     const [assetTypes, setAssetTypes] = useState([]);
     const [transactionCategories, setTransactionCategories] = useState([]);
-    const [assetCurrencies, setAssetCurrencies] = useState({ cash: ["usd"], stock: [], crypto: [] });
+    const [assetCurrencies, setAssetCurrencies] = useState({ cash: ["eur"], stock: [], crypto: [] });
 
     const getAvailableAssetTypes = () => {
         request({
@@ -74,10 +74,14 @@ export const AddTrans = ({ refresh }) => {
     const { display: displayNotification } = useNotificationContext();
 
     const enterTransaction = (e) => {
-        setTransaction({
-            ...transaction,
-            [e.target.name]: e.target.value
-        });
+        let newObject = { ...transaction, [e.target.name]: e.target.value };
+        setTransaction(newObject);
+
+        if (e.target.name === "assetType") {
+            newObject = { ...newObject, currency: assetCurrencies[e.target.value][0] };
+        }
+
+        setTransaction(newObject);
     };
 
     const addTransaction = async (e) => {
@@ -111,7 +115,7 @@ export const AddTrans = ({ refresh }) => {
                 }
             }
         });
-    }
+    };
 
     return (
         <section id="add-transaction" className="flex flex-col p-4 mx-4 bg-gray-100 border">

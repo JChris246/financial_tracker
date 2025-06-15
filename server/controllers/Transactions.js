@@ -69,7 +69,8 @@ const validateAddTransactionRequest = (req, res) => {
         return null;
     }
 
-    if (ASSET_CURRENCIES[assetType].indexOf(currency.toLowerCase()) === -1) {
+    // TODO: make all asset currencies a common case
+    if (ASSET_CURRENCIES[assetType.toLowerCase()].map(x => x.toLowerCase()).indexOf(currency.toLowerCase()) === -1) {
         logger.warn("User tried to add a transaction with an invalid currency: " + currency + " for asset type: " + assetType);
         res.status(400).send({ msg: "Asset currency not supported" });
         return null;
