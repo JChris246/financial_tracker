@@ -1,7 +1,7 @@
 const http = require("http");
 const https = require("https");
 
-const logger = require("./logger").setup();
+const logger = require("../logger").setup();
 
 const isNumber = (value) => {
     return (typeof value === "number" || (typeof value === "string" && isFinite(Number(value)))) && !isNaN(value);
@@ -30,6 +30,17 @@ const makeBool = (value) => {
 
     return value.toUpperCase() === "TRUE" || value === "1" || value.toUpperCase() === "YES";
 };
+
+const format = (str, args) => {
+    // use replace to iterate over the string
+    // select the match and check if the related argument is present
+    // if yes, replace the match with the argument
+    return str.replace(/{([0-9]+)}/g, function (match, index) {
+        // check if the argument is present
+        return typeof args[index] == "undefined" ? match : args[index];
+    });
+};
+
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -75,4 +86,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
     });
 };
 
-module.exports = { isNumber, request, sleep, makeBool, isDefined };
+module.exports = { isNumber, request, sleep, makeBool, isDefined, format };

@@ -1,7 +1,8 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, makeBool, isDefined } = require("../utils");
+const { isNumber, makeBool, isDefined } = require("../utils/utils");
+const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
     let options = {}; // get all transactions
@@ -9,7 +10,6 @@ module.exports.getTransactions = (req, res) => {
     // if req specifies type of transactions to retrieve, add it to options
     if (req.params.type === "income" || req.params.type === "spend") {
         options = { "type": req.params.type === "income" };
-        logger.warn("No type specified, using default 'income' type");
     }
 
     getDatabase().getTransactions(options,
@@ -51,21 +51,31 @@ const validateAddTransactionRequest = (req, res) => {
         logger.warn("Transaction adding without a category");
     }
 
-    // TODO: validate that the asset type is a supported value
     if (!isDefined(assetType)) {
         logger.warn("User tried to add a transaction without an asset type");
         res.status(400).send({ msg: "You need to have the transaction asset type" });
         return null;
     }
 
-    // TODO: validate that the currency is a supported value
+    if (Object.values(ASSET_TYPE).indexOf(assetType.toLowerCase()) === -1) {
+        logger.warn("User tried to add a transaction with an invalid asset type");
+        res.status(400).send({ msg: "You need to have a valid transaction asset type" });
+        return null;
+    }
+
     if (!isDefined(currency)) {
         logger.warn("User tried to add a transaction without a currency");
         res.status(400).send({ msg: "You need to have the transaction currency" });
         return null;
     }
 
-    return { name, date, amount, type, category, assetType, currency };
+    if (ASSET_CURRENCIES[assetType].indexOf(currency.toLowerCase()) === -1) {
+        logger.warn("User tried to add a transaction with an invalid currency: " + currency + " for asset type: " + assetType);
+        res.status(400).send({ msg: "Asset currency not supported" });
+        return null;
+    }
+
+    return { name, date, amount, type, category, assetType: assetType.toLowerCase(), currency: currency.toLowerCase() };
 }
 
 module.exports.addTransaction = (req , res) => {

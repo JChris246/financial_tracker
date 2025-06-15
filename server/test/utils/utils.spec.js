@@ -1,6 +1,6 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { isNumber, makeBool, isDefined } = require("../utils");
+const { isNumber, makeBool, isDefined } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {

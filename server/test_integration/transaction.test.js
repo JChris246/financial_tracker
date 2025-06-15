@@ -54,25 +54,42 @@ describe("transaction endpoints", () => {
 
         test("should return bad request when transaction currency is not provided", async () => {
             // Act
-            const response = await superTestRequest.post("/api/transaction").send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "cash" });
+            const response = await superTestRequest
+                .post("/api/transaction")
+                .send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "cash" });
 
             // Assert
             expect(response.status).toBe(400);
             expect(response.body.msg).toEqual("You need to have the transaction currency");
         });
 
-        test("should return bad request when transaction currency is not provided", async () => {
+        test("should return bad request when invalid transaction asset type is provided", async () => {
             // Act
-            const response = await superTestRequest.post("/api/transaction").send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "cash" });
+            const response = await superTestRequest
+                .post("/api/transaction")
+                .send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "junk" });
 
             // Assert
             expect(response.status).toBe(400);
-            expect(response.body.msg).toEqual("You need to have the transaction currency");
+            expect(response.body.msg).toEqual("You need to have a valid transaction asset type");
+        });
+
+        test("should return bad request when invalid transaction asset currency is provided", async () => {
+            // Act
+            const response = await superTestRequest
+                .post("/api/transaction")
+                .send({ date: "2022-01-01", amount: 50, name: "Test Transaction", assetType: "cash", currency: "btc" });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("Asset currency not supported");
         });
 
         test("should return success response and transaction payload when transaction added successfully (without category)", async () => {
             // Act
-            const response = await superTestRequest.post("/api/transaction").send({ name: "Test Transaction", amount: 100, assetType: "cash", currency: "usd" });
+            const response = await superTestRequest
+                .post("/api/transaction")
+                .send({ name: "Test Transaction", amount: 100, assetType: "cash", currency: "usd" });
 
             // Assert
             expect(response.status).toBe(201);
@@ -87,7 +104,9 @@ describe("transaction endpoints", () => {
 
         test("should return success response and transaction payload when transaction added successfully", async () => {
             // Act
-            const response = await superTestRequest.post("/api/transaction").send({ name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries" });
+            const response = await superTestRequest
+                .post("/api/transaction")
+                .send({ name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries" });
 
             // Assert
             expect(response.status).toBe(201);
