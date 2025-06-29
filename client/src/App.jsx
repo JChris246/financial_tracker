@@ -5,27 +5,25 @@ import { useState, useEffect } from "react";
 import Balance from "./component/Balance";
 import IncomeExpense from "./component/IncomeExpense";
 import TransactionHistory from "./component/TransactionHistory";
-import {NavBar} from "./component/NavBar";
-import {AddTrans} from "./component/AddTrans";
+import { NavBar } from "./component/NavBar";
 import SpendingGraph from "./component/SpendingGraph";
-// import SpendingGraph from "./component/SpendingGraph";
 
 function App() {
     const [sync, setSync] = useState(true);
     const updateValues = () => setSync(false);
 
-    useEffect(() =>  setSync(true), [sync]);
+    useEffect(() => setSync(true), [sync]);
 
     return (
-        <div className="place-items-center">
+        <div className="place-items-center bg-gray-900 min-h-screen">
             <NavBar/>
 
-            <Balance sync={sync}/>
+            <Balance sync={sync} refresh={updateValues}/>
             <IncomeExpense sync={sync}/>
-            <TransactionHistory transactionhistory="List of transactions" sync={sync}/>
-            {/* <SpendingGraph spendinggraph="Graph"/> */}
-            <AddTrans refresh={updateValues}/>
-            <SpendingGraph/>
+            <div class="flex flex-col lg:flex-row w-full items-center lg:items-start lg:justify-center">
+                <TransactionHistory transactionhistory="List of transactions" sync={sync}/>
+                <SpendingGraph/>
+            </div>
         </div>
     );
 }

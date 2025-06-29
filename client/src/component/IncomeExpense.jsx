@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { NotificationType, useNotificationContext } from "./Notification";
 import { requestSync } from "../utils/Fetch";
+import { symbol } from "../utils/constants";
 
 const getTransactions = async (type, displayNotification) => {
     const { msg, success, json } = await requestSync({ url: "/api/transactions/" + type, method: "GET" });
@@ -14,6 +15,18 @@ const getTransactions = async (type, displayNotification) => {
         displayNotification({ message: "An error occurred while getting " + type + " transactions: " + msg, type: NotificationType.Error });
         return [];
     }
+};
+
+// TODO: rename this?
+const IndexCard = ({ title, amount, accentColor, symbol }) => {
+    return (
+        <div className={"w-full lg:1/4 border-1 border-l-8 border-gray-600 rounded-md pl-4 py-2 h-fit " + accentColor + "-accent"}>
+            <h1 className="text-2xl font-bold text-gray-500 mb-2">{title}</h1>
+            <h6 className={"text-4xl font-bold sm:text-5xl mb-1 " + accentColor + "-text-accent"}>
+                {symbol} {Math.abs(amount)}
+            </h6>
+        </div>
+    );
 };
 
 const IncomeExpense = ({ sync }) => {
@@ -37,27 +50,15 @@ const IncomeExpense = ({ sync }) => {
     }, [sync]);
 
     return (
-        <section id="incomeexpense" className="flex flex-col p-4 mx-4 bg-gray-100 border">
-
-            <div className="relative flex flex-col items-center h-full py-10 mx-auto bg-white rounded-sm sm:items-stretch sm:flex-row">
-                <div className="px-12 py-8 md:w-72 ">
-                    <h1 className="text-2xl font-bold text-gray-700">Income</h1>
-                    <h6 className="text-4xl font-bold text-center text-green-400 sm:text-5xl">
-                    $ {amount.income}
-                    </h6>
-                </div>
-                <div className="w-56 h-1 transition duration-300 transform bg-gray-300 rounded-full group-hover:bg-deep-purple-accent-400
-                    group-hover:scale-110 sm:h-auto sm:w-1" />
-                <div className="px-12 py-8 md:w-72">
-                    <h1 className="text-2xl font-bold text-gray-700">Expense</h1>
-                    <h6 className="text-4xl font-bold text-center text-red-400 sm:text-5xl">
-                    $ {amount.expense}
-                    </h6>
-                </div>
-            </div>
-
-        </section>
+        <div id="incomeexpense" className="flex flex-col items-center py-10 rounded-sm lg:flex-row
+            lg:mx-auto w-full xl:w-2/3 space-y-4 lg:space-y-0 lg:space-x-2 px-8 xl:px-0">
+            <IndexCard title="Income" amount={amount.income} accentColor="green" symbol={symbol.CASH}/>
+            <IndexCard title="Expense" amount={amount.expense} accentColor="red" symbol={symbol.CASH} />
+            {/* Allow user to customize which asset balances appear here? less may have to be shown on smaller screens*/}
+            <IndexCard title="Stock" amount={0} accentColor="blue" symbol={symbol.CASH} />
+            <IndexCard title="Crypto" amount={0} accentColor="orange" symbol={symbol.CRYPTO}/>
+        </div>
     );
-}
+};
 
 export default IncomeExpense;

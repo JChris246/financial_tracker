@@ -10,7 +10,7 @@ const pad = (v, n = 2) => {
     return v;
 };
 
-const DATE_TYPE = { INPUT: 0, DISPLAY: 1 };
+const DATE_TYPE = { INPUT: 0, DISPLAY_FULL: 1, DISPLAY_DATE: 2 };
 
 const formatDate = (d, type) => {
     if (!d)
@@ -25,8 +25,10 @@ const formatDate = (d, type) => {
 
     if (type === DATE_TYPE.INPUT)
         return date + "T" + time; // YYYY-MM-DDThh:mm - 2022-01-07T23:43:09
-    else if (type === DATE_TYPE.DISPLAY)
+    else if (type === DATE_TYPE.DISPLAY_FULL)
         return date + " " + time; // YYYY-MM-DD hh:mm - 2022-01-07 23:43:09
+    else if (type === DATE_TYPE.DISPLAY_DATE)
+        return date; // YYYY-MM-DD - 2022-01-07
     else return date + " " + time; // YYYY-MM-DD hh:mm - 2022-01-07 23:43:09
 };
 

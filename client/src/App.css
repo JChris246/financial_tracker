@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+.green-accent {
+    @apply border-l-green-400
+}
+
+.red-accent {
+    @apply border-l-red-400
+}
+
+.blue-accent {
+    @apply border-l-sky-400
+}
+
+.orange-accent {
+    @apply border-l-orange-400
+}
+
+.green-text-accent {
+    @apply text-green-400
+}
+
+.red-text-accent {
+    @apply text-red-400
+}
+
+.blue-text-accent {
+    @apply text-sky-400
+}
+
+.orange-text-accent {
+    @apply text-orange-400
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.modalcontent {
+    animation: modalopen 0.8s;
+}
+
+@keyframes modalopen {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}

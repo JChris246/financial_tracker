@@ -78,8 +78,12 @@ const SpendingGraph = () => {
         getSpendingData();
     }, []);
 
-    return data?.labels ? <Line options={options} data={data} /> : <></>;
-}
+    return data?.labels ? (
+        <div className="w-full h-full lg:w-1/3 p-2 border-1 border-gray-800 lg:rounded-lg">
+            <Line options={options} data={data} />
+        </div>
+    ): <></>;
+};
 
 
 export default SpendingGraph;

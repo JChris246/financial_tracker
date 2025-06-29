@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect, test } from "@jest/globals";
 
 import { pad, formatDate, DATE_TYPE } from "./utils";
 
@@ -23,17 +23,22 @@ describe("utils", () => {
         const validDateCases = [new Date(), new Date().getTime(), new Date().toISOString(), new Date("2023-01-07"), 1749348549650];
 
         test.each(validDateCases)("should format date to string as YYYY-MM-DDThh:mm for '%s'", input => {
-            expect(formatDate(input, DATE_TYPE.INPUT)).toMatch(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})$/);
+            expect(formatDate(input, DATE_TYPE.INPUT)).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
         });
 
         test.each(validDateCases)("should format date to string as YYYY-MM-DDThh:mm for '%s'", input => {
-            expect(formatDate(input, DATE_TYPE.DISPLAY)).toMatch(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2})$/);
+            expect(formatDate(input, DATE_TYPE.DISPLAY_FULL)).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+        });
+
+        test.each(validDateCases)("should format date to string as YYYY-MM-DD for '%s'", input => {
+            expect(formatDate(input, DATE_TYPE.DISPLAY_DATE)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         });
 
         test("should return blank string if provided date is falsy", () => {
             expect(formatDate(null, DATE_TYPE.INPUT)).toBe("");
-            expect(formatDate(undefined, DATE_TYPE.DISPLAY)).toBe("");
-            expect(formatDate("", DATE_TYPE.DISPLAY)).toBe("");
+            expect(formatDate(undefined, DATE_TYPE.DISPLAY_DATE)).toBe("");
+            expect(formatDate("", DATE_TYPE.DISPLAY_DATE)).toBe("");
+            expect(formatDate("", DATE_TYPE.DISPLAY_FULL)).toBe("");
         });
     });
 });

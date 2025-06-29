@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-body {
-    background-color: rgba(17, 24, 39);
+body * {
+    transition: background-color 250ms ease-in-out, color 250ms ease-in-out;
 }
 
 h1.underline-decoration::after {

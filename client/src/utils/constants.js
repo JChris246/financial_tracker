@@ -1,0 +1,1 @@
+export const symbol = { CASH: "$", CRYPTO: "₿", STOCK: "" };
