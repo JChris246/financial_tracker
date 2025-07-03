@@ -21,7 +21,7 @@ describe("balance endpoints", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({ balance: 0 });
+        expect(response.body).toEqual({ balance: 0, totalCrypto: 0, totalIncome: 0, totalSpend: 0, totalStock: 0 });
     });
 
     test("should return correct balance when based on existing transactions", async () => {
@@ -37,6 +37,6 @@ describe("balance endpoints", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(response.body).toEqual({ balance: 70 });
+        expect(response.body).toEqual({ balance: 70, totalCrypto: 0, totalIncome: 90, totalSpend: -20, totalStock: 0 });
     });
 });

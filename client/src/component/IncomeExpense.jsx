@@ -1,21 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { NotificationType, useNotificationContext } from "./Notification";
-import { requestSync } from "../utils/Fetch";
+import { request } from "../utils/Fetch";
 import { symbol } from "../utils/constants";
-
-const getTransactions = async (type, displayNotification) => {
-    const { msg, success, json } = await requestSync({ url: "/api/transactions/" + type, method: "GET" });
-
-    if (success) {
-        return json;
-    } else {
-        // if status comes back as an error
-        // return as an empty array for now
-        displayNotification({ message: "An error occurred while getting " + type + " transactions: " + msg, type: NotificationType.Error });
-        return [];
-    }
-};
 
 // TODO: rename this?
 const IndexCard = ({ title, amount, accentColor, symbol }) => {
@@ -23,7 +10,7 @@ const IndexCard = ({ title, amount, accentColor, symbol }) => {
         <div className={"w-full lg:1/4 border-1 border-l-8 border-gray-600 rounded-md pl-4 py-2 h-fit " + accentColor + "-accent"}>
             <h1 className="text-2xl font-bold text-gray-500 mb-2">{title}</h1>
             <h6 className={"text-4xl font-bold sm:text-5xl mb-1 " + accentColor + "-text-accent"}>
-                {symbol} {Math.abs(amount)}
+                {symbol} {typeof(amount) === "number" ? Math.abs(amount) : amount}
             </h6>
         </div>
     );
@@ -31,22 +18,31 @@ const IndexCard = ({ title, amount, accentColor, symbol }) => {
 
 const IncomeExpense = ({ sync }) => {
     const [amount, setAmount] = useState({
-        income: 0,
-        expense: 0
+        income: 0, // cash
+        expense: 0, // cash
+        stock: 0,
+        crypto: 0
     });
 
     const { display: displayNotification } = useNotificationContext();
 
     useEffect(() => {
-        (async () => {
-            // this is probably inefficient
-            const income = (await getTransactions("income", displayNotification)).reduce((acc, cur) => acc + cur.amount, 0);
-            const spend = (await getTransactions("spend", displayNotification)).reduce((acc, cur) => acc + cur.amount, 0);
-            setAmount({
-                income,
-                expense: spend
-            });
-        })();
+        // TODO: make this request 1x and store in context
+        request({
+            url: "/api/balance",
+            method: "GET",
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    const { totalIncome, totalSpend, totalStock, totalCrypto } = json;
+                    setAmount({ income: totalIncome, expense: totalSpend, stock: totalStock, crypto: totalCrypto });
+                } else {
+                    // if status comes back as an error
+                    // set balances as - for now
+                    setAmount({ income: "-", expense: "-", stock: "-", crypto: "-" });
+                    displayNotification({ message: "Unable to get balances: " + msg, type: NotificationType.Error });
+                }
+            }
+        });
     }, [sync]);
 
     return (
@@ -55,8 +51,8 @@ const IncomeExpense = ({ sync }) => {
             <IndexCard title="Income" amount={amount.income} accentColor="green" symbol={symbol.CASH}/>
             <IndexCard title="Expense" amount={amount.expense} accentColor="red" symbol={symbol.CASH} />
             {/* Allow user to customize which asset balances appear here? less may have to be shown on smaller screens*/}
-            <IndexCard title="Stock" amount={0} accentColor="blue" symbol={symbol.CASH} />
-            <IndexCard title="Crypto" amount={0} accentColor="orange" symbol={symbol.CRYPTO}/>
+            <IndexCard title="Stock" amount={amount.stock} accentColor="blue" symbol={symbol.CASH} />
+            <IndexCard title="Crypto" amount={amount.crypto} accentColor="orange" symbol={symbol.CRYPTO}/>
         </div>
     );
 };
