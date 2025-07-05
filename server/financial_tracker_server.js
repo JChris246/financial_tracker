@@ -9,7 +9,10 @@ const morganLogger = require("./logger/morganLogger");
 const logger = require("./logger/index.js").setup();
 
 global.env = process.env.NODE_ENV || "development";
+global.MOCK_CONVERSIONS = process.env.MOCK_CONVERSIONS;
 global.DB_PATH = process.env.DB_PATH;
+
+const CACHE_REFRESH_INTERVAL = global.env === "test" ? 0 : (process.env.CACHE_REFRESH_INTERVAL || 1000 * 60 * 60 * 4); // 4 hours
 
 // Server routes
 const balanceRouter = require("./routes/balance.js");
@@ -117,7 +120,51 @@ const server = http.createServer(app);
 server.on("error", onError);
 server.on("listening", onListening);
 
-const setupDatabase = require("./db/index.js").setupDatabase;
+const { setupDatabase, getDatabase } = require("./db/index.js");
+const runCacheWorker = async () => {
+    const { generateCryptoConversionMap, generateFiatConversionMap } = require("./utils/currency");
+    const { makeBool, sleep } = require("./utils/utils");
+    const fs = require("fs");
+
+    while(true) {
+        const cache = getDatabase().getCache();
+
+        // wait for the cache to expire, on first run (if existed)
+        if (cache.lastUpdated) {
+            global.cacheCreated = true; // don't block endpoints if a cache exist
+            const nextRefresh = cache.lastUpdated + CACHE_REFRESH_INTERVAL;
+            const now = new Date().getTime();
+            if (nextRefresh > now) {
+                const wait = nextRefresh - now;
+                logger.info("Cache refresh in " + (wait) + "ms");
+                await sleep(wait);
+            }
+        }
+
+        //  might need to maintain values from previous runs, so merge values
+        const returnMockValues = global.env === "test" && makeBool(global.MOCK_CONVERSIONS);
+        const fiatMap = returnMockValues
+            ? JSON.parse(fs.readFileSync("./test/assets/fiatConversionMap.json"))
+            : await generateFiatConversionMap();
+        const cryptoMap = returnMockValues
+            ? JSON.parse(fs.readFileSync("./test/assets/cryptoConversionMap.json"))
+            : await generateCryptoConversionMap();
+        cache.cryptoConversions = { ...(cache.cryptoConversions ?? {}), ...cryptoMap };
+        cache.fiatConversions = { ...(cache.fiatConversions ?? {}), ...fiatMap };
+
+        getDatabase().saveCache(cache);
+        global.cacheCreated = true;
+
+        if (global.env === "test") {
+            break; // only run 1x in test env
+        }
+
+        logger.info("Cache worker sleeping for " + CACHE_REFRESH_INTERVAL + "ms");
+        await sleep(CACHE_REFRESH_INTERVAL);
+        logger.info("Cache worker waking");
+    }
+}
+
 setupDatabase(process.env.DB_TYPE).then(success => {
     if (!success) {
         logger.error("Failed to set up database");
@@ -125,6 +172,7 @@ setupDatabase(process.env.DB_TYPE).then(success => {
     }
     global.ACTIVE_DB_TYPE = process.env.DB_TYPE;
     logger.info("Database '" + global.ACTIVE_DB_TYPE + "' set up successfully");
+    runCacheWorker(); // might need to wait for this to run the first time?
     // should probably extract this better (or not use http server at all)
     if (global.env === "test" && process.env.RUN_SERVER === "false") {
         return;

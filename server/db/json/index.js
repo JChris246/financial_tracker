@@ -4,9 +4,9 @@ const fs = require("fs");
 const logger = require("../../logger").setup();
 
 const fullDbPath = path.join(global.DB_PATH, "data");
-const DB = ["db-transactions.json",]
+const DB = ["db-transactions.json", "db-cache.json"]
     .map(file => path.join(fullDbPath, file));
-const DB_TYPE = { TRANSACTIONS: 0 };
+const DB_TYPE = { TRANSACTIONS: 0, CACHE: 1 };
 
 global.dbLock = false;
 
@@ -17,7 +17,16 @@ const wipeDb = () => {
     if (global.env === "test") {
         // wipe any previous test server data
         if (fs.existsSync(fullDbPath)) {
-            fs.rmSync(fullDbPath, { recursive: true });
+            // fs.rmSync(fullDbPath, { recursive: true });
+            for (const db of DB) {
+                if (db.endsWith(DB[DB_TYPE.CACHE])) {
+                    continue; // skip removing cache db
+                }
+                logger.debug("removing " + db);
+                if (fs.existsSync(db)) {
+                    fs.unlinkSync(db);
+                }
+            }
         }
     }
 };
@@ -31,7 +40,20 @@ const seedDb = () => {
 
     for (const db of DB) {
         if (!fs.existsSync(db)) {
-            fs.writeFileSync(db, "[]"); // create empty file...it may not always be a array needed
+            let ObjectType;
+            switch(db) {
+                case DB[DB_TYPE.TRANSACTIONS]:
+                    ObjectType = "[]";
+                    break;
+                case DB[DB_TYPE.CACHE]:
+                    ObjectType = "{}";
+                    break;
+                default:
+                    logger.warn("Invalid DB type to seed: " + db);
+                    ObjectType = "[]";
+                    return;
+            }
+            fs.writeFileSync(db, ObjectType);
         }
     }
 };
@@ -120,4 +142,16 @@ const getAllTransactionAmounts = (successCallback) => {
     successCallback(results);
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };
+
+// should this maybe be a redis cache?
+
+// don't update cache on retrieval if it's old, a background process will update the cache
+// to avoid requests being lengthy because of the cache refresh process
+const getCache = () => getItems(DB_TYPE.CACHE, "get cache");
+
+const saveCache = (cache) => {
+    cache.lastUpdated = Date.now();
+    saveItems(DB_TYPE.CACHE, cache)
+};
+
+module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts, getCache, saveCache };

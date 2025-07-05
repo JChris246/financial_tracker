@@ -7,10 +7,11 @@ import { symbol } from "../utils/constants";
 // TODO: rename this?
 const IndexCard = ({ title, amount, accentColor, symbol }) => {
     return (
-        <div className={"w-full lg:1/4 border-1 border-l-8 border-gray-600 rounded-md pl-4 py-2 h-fit " + accentColor + "-accent"}>
+        <div id={title} className={"w-full lg:1/4 border-1 border-l-8 border-gray-600 rounded-md pl-4 py-2 h-fit " + accentColor + "-accent"}
+            title={title + " value in usd"}>
             <h1 className="text-2xl font-bold text-gray-500 mb-2">{title}</h1>
-            <h6 className={"text-4xl font-bold sm:text-5xl mb-1 " + accentColor + "-text-accent"}>
-                {symbol} {typeof(amount) === "number" ? Math.abs(amount) : amount}
+            <h6 id={title + "-value"} className={"text-4xl font-bold sm:text-5xl mb-1 " + accentColor + "-text-accent"}>
+                {symbol} {typeof(amount) === "number" ? Math.abs(amount).toFixed(2) : amount}
             </h6>
         </div>
     );

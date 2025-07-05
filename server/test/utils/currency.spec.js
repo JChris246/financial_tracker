@@ -1,6 +1,7 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { getConversionRate, generateFiatConversionMap, getConversionCoinGecko } = require("../../utils/currency");
+const { getConversionRate, generateFiatConversionMap, getConversionCoinGecko, generateCryptoConversionMap } = require("../../utils/currency");
+const { CRYPTO_CURRENCIES } = require("../../utils/constants");
 const { isNumber } = require("../../utils/utils");
 
 describe("currency", () => {
@@ -55,6 +56,7 @@ describe("currency", () => {
             { crypto: ["btc"], fiat: [] },
             { crypto: [], fiat: ["usd"] },
             { crypto: ["usd"], fiat: ["bitcoin"] },
+            { crypto: ["btc"], fiat: ["usd"] },
         ];
 
         test.each(pairs)("should return rates for valid pairs: %s", async ({ crypto, fiat }) => {
@@ -64,7 +66,17 @@ describe("currency", () => {
 
         test.each(invalidPairs)("should return null for invalid pairs: %s", async ({ crypto, fiat }) => {
             const result = await getConversionCoinGecko(crypto, fiat);
-            expect(isNumber(result)).toBeFalsy();
+            expect(result).toBeNull();
+        });
+    });
+
+    describe("generateCryptoConversionMap", () => {
+        // these tests rely on an external api (and the internet)
+        test.only("should return non empty map of crypto conversion rates", async () => {
+            const result = await generateCryptoConversionMap();
+            const resultLength = Object.keys(result).length;
+            expect(resultLength).toBeGreaterThan(0);
+            expect(resultLength).toBe(CRYPTO_CURRENCIES.length);
         });
     });
 });

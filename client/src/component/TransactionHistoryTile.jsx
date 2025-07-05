@@ -3,7 +3,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/solid";
 import { formatDate, DATE_TYPE } from "../utils/utils";
 import { symbol } from "../utils/constants";
 
-const TransactionHistoryTile = ({ item }) => {
+const TransactionHistoryTile = ({ item, index }) => {
     return (
         <div className="flex items-center p-2 my-1 bg-gray-700 border rounded max:w-96 md:w-96">
             {item.amount > 0 ?
@@ -23,8 +23,8 @@ const TransactionHistoryTile = ({ item }) => {
                         <span className="pl-1 text-white font-semibold">{item.name}</span>
                         <span className="text-gray-400 text-sm">{formatDate(item.date, DATE_TYPE.DISPLAY_DATE)}</span>
                     </div>
-                    <span className={"font-semibold" + (item.amount > 0 ? " text-green-600" : " text-red-600")}>
-                        {item.amount > 0 ? "+" : "-"} {symbol[item.assetType ?? "CASH"]}{Math.abs(item.amount)}</span>
+                    <span id={"transaction-history-amount-" + index} className={"font-semibold" + (item.amount > 0 ? " text-green-600" : " text-red-600")}>
+                        {item.amount > 0 ? "+" : "-"} {symbol[item.assetType ?? "CASH"]}{Math.abs(item.amount).toFixed(2)}</span>
                 </div>
             </div>
         </div>

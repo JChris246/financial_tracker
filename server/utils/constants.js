@@ -13,12 +13,73 @@ const FIAT_CURRENCIES = ["eur","aed","afn","xcd","all","amd","aoa","usd","aud","
     "pen","pgk","php","pkr","pln","qar","ron","rsd","rub","sar","sbd","scr","sdg","sek","sgd","sos","srd","thb","tjs","tmt","tnd","top",
     "try","ttd","twd","uah","uyu","yer","zar","zmw"];
 
-// TODO: map the full names
-const CRYPTO_CURRENCIES = ["BTC", "ETH", "ADA", "BNB", "USDT", "XRP", "SOL", "DOT", "DOGE", "USDC", "UNI", "LUNA", "LINK", "AVAX", "LTC", "BUSD",
-    "AAVE", "FRAX", "HBAR", "BCH", "ALGO", "WBTC", "ICP", "POL", "FIL", "TRX", "FTT", "XLM", "VET", "ATOM", "ETC", "THETA", "DAI", "XMR", "MANA",
-    "ZEC", "TUSD", "EOS", "AXS", "ONE", "EGLD", "CHZ", "GRT", "1INCH", "INJ", "ENJ", "KSM", "CRO", "SHIB", "LEO", "NEAR", "BTCB", "FLOW", "XTZ",
-    "KCS", "SAND", "KLAY", "MKR", "USDP", "mBTC", "uBTC", "mETH", "XCH", "USDD", "BTT","SUI", "LUNC", "GUSD", "BAT", "NEO", "CAKE",
-    "LRC", "DASH", "XDC"];
+// technically don't need this if I have the below map
+const CRYPTO_CURRENCIES = ["BTC", "ETH", "ADA", "BNB", "USDT", "XRP", "SOL", "DOT", "DOGE", "USDC", "UNI", "LINK", "LTC",
+    "AAVE", "FRAX", "BCH", "ALGO", "WBTC", "ICP", "FIL", "TRX", "FTT", "XLM", "VET", "ATOM", "ETC", "THETA", "DAI", "XMR", "MANA",
+    "ZEC", "TUSD", "AXS", "ONE", "CHZ", "GRT", "1INCH", "ENJ", "KSM", "SHIB", "LEO", "FLOW", "XTZ",
+    "SAND", "KLAY", "MKR", "USDP", "XCH", "USDD", "BTT","SUI", "LUNC", "GUSD", "BAT", "NEO", "CAKE", "LRC", "DASH"];
+
+// at this point, these aren't really friendly names, just ids used by coin gecko
+const CRYPTO_CURRENCY_NAMES = {
+    BTC: "Bitcoin",
+    ETH: "Ethereum",
+    ADA: "Cardano",
+    BNB: "BinanceCoin",
+    USDT: "Tether",
+    XRP: "Ripple",
+    SOL: "Solana",
+    DOT: "Polkadot",
+    DOGE: "Dogecoin",
+    USDC: "USD-Coin",
+    UNI: "Uniswap",
+    LINK: "Chainlink",
+    LTC: "Litecoin",
+    AAVE: "Aave",
+    FRAX: "Frax",
+    BCH: "Bitcoin-Cash",
+    ALGO: "Algorand",
+    WBTC: "Wrapped-Bitcoin",
+    ICP: "Internet-Computer",
+    FIL: "Filecoin",
+    TRX: "Tron",
+    FTT: "FTX-Token",
+    XLM: "Stellar",
+    VET: "VeChain",
+    ATOM: "Cosmos",
+    ETC: "Ethereum-Classic",
+    THETA: "Theta-Token",
+    DAI: "Dai",
+    XMR: "Monero",
+    MANA: "Decentraland",
+    ZEC: "Zcash",
+    TUSD: "True-USD",
+    AXS: "Axie-Infinity",
+    ONE: "Harmony",
+    CHZ: "Chiliz",
+    GRT: "The-Graph",
+    "1INCH": "1inch",
+    ENJ: "EnjinCoin",
+    KSM: "Kusama",
+    SHIB: "Shiba-Inu",
+    LEO: "LEO-Token",
+    FLOW: "Flow",
+    XTZ: "Tezos",
+    SAND: "The-Sandbox",
+    KLAY: "Klayr",
+    MKR: "Maker",
+    USDP: "paxos-standard",
+    XCH: "Chia",
+    USDD: "USDD",
+    BTT: "BitTorrent",
+    SUI: "Sui",
+    LUNC: "terra-luna",
+    GUSD: "Gemini-Dollar",
+    BAT: "Basic-Attention-Token",
+    NEO: "Neo",
+    CAKE: "PancakeSwap-token",
+    LRC: "Loopring",
+    DASH: "Dash",
+};
 
 const STOCK_CURRENCIES = [];
 
@@ -30,4 +91,4 @@ const ASSET_CURRENCIES = {
 
 const DEFAULT_CATEGORIES = ["groceries", "health", "transport", "rent", "other"];
 
-module.exports = { ASSET_TYPE, FIAT_CURRENCIES, ASSET_CURRENCIES, STOCK_CURRENCIES, CRYPTO_CURRENCIES, DEFAULT_CATEGORIES };
+module.exports = { ASSET_TYPE, FIAT_CURRENCIES, ASSET_CURRENCIES, STOCK_CURRENCIES, CRYPTO_CURRENCIES, DEFAULT_CATEGORIES, CRYPTO_CURRENCY_NAMES };

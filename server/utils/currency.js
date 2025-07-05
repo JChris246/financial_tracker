@@ -1,5 +1,5 @@
 const { request, format, isDefined, sleep } = require("./utils");
-const { FIAT_CURRENCIES } = require("./constants");
+const { FIAT_CURRENCIES, CRYPTO_CURRENCIES, CRYPTO_CURRENCY_NAMES } = require("./constants");
 
 const logger = require("../logger").setup();
 
@@ -9,7 +9,9 @@ const COIN_GECKO_URL = "https://api.coingecko.com"
 const COIN_GECKO_API_PATH = "/api/v3/simple/price?ids={0}&vs_currencies={1}"
 
 const FIAT_BASE = "usd";
+const BUFFER_SIZE = 15;
 
+// note: this api endpoint can return non values as a rate limit feature
 const getConversionRate = async ([from, to], retry=3) => {
     if (from === to) {
         logger.warn("Same currency: " + from);
@@ -54,6 +56,7 @@ const getConversionRate = async ([from, to], retry=3) => {
     return Number(priceMatch[1]);
 }
 
+// note: this api endpoint does suffer from 429
 // crypto must be the full name, while fiat is the code
 const getConversionCoinGecko = async (crypto, fiat) => {
     if (!isDefined(crypto) && !isDefined(fiat)) {
@@ -73,14 +76,13 @@ const getConversionCoinGecko = async (crypto, fiat) => {
         }
     }
 
-    // TODO: validate crypto
-    // const cryptoSet = new Set(CRYPTO_CURRENCIES.map((x) => x.toLowerCase()));
-    // for (let i = 0; i < crypto.length; i++) {
-    //     if (!cryptoSet.has(crypto[i].toLowerCase())) {
-    //         logger.error("Invalid crypto currency: " + crypto[i]);
-    //         return null;
-    //     }
-    // }
+    const cryptoSet = new Set(Object.entries(CRYPTO_CURRENCY_NAMES).map((x) => x[1].toLowerCase()));
+    for (let i = 0; i < crypto.length; i++) {
+        if (!cryptoSet.has(crypto[i].toLowerCase())) {
+            logger.error("Invalid crypto currency: " + crypto[i]);
+            return null;
+        }
+    }
 
     const { data, statusCode } = await request({
         site: COIN_GECKO_URL,
@@ -93,7 +95,7 @@ const getConversionCoinGecko = async (crypto, fiat) => {
         return null;
     }
 
-    return data;
+    return JSON.parse(data);
 }
 
 const generateFiatConversionMap = async () => {
@@ -114,4 +116,36 @@ const generateFiatConversionMap = async () => {
     return map;
 };
 
-module.exports = { getConversionRate, generateFiatConversionMap, getConversionCoinGecko };
+const generateCryptoConversionMap = async () => {
+    const map = {};
+
+    let buffer = [];
+    for (let i = 0; i < CRYPTO_CURRENCIES.length; i++) {
+        buffer.push({ name: CRYPTO_CURRENCY_NAMES[CRYPTO_CURRENCIES[i]], symbol: CRYPTO_CURRENCIES[i] });
+
+        if (buffer.length < BUFFER_SIZE) {
+            continue;
+        }
+
+        const result = await getConversionCoinGecko(buffer.map((x) => x.name), [FIAT_BASE]);
+        if (result !== null) {
+            for (let j = 0; j < buffer.length; j++) {
+                map[buffer[j].symbol] = result[buffer[j].name.toLowerCase()][FIAT_BASE];
+            }
+            buffer = []; // is there better way than this memory reallocation?
+        }
+    }
+
+    if (buffer.length > 0) {
+        const result = await getConversionCoinGecko(buffer.map((x) => x.name), [FIAT_BASE]);
+        if (result !== null) {
+            for (let j = 0; j < buffer.length; j++) {
+                map[buffer[j].symbol] = result[buffer[j].name.toLowerCase()][FIAT_BASE];
+            }
+        }
+    }
+
+    return map;
+}
+
+module.exports = { getConversionRate, generateFiatConversionMap, getConversionCoinGecko, generateCryptoConversionMap };

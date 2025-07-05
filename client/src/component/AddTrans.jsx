@@ -6,6 +6,7 @@ import { formatDate, DATE_TYPE } from "../utils/utils";
 import { request } from "../utils/Fetch";
 import { Modal } from "./Modal";
 
+// TODO: rename this and the file name
 export const AddTrans = ({ refresh }) => {
     const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
     const [transaction, setTransaction] = useState({
@@ -182,7 +183,7 @@ export const AddTrans = ({ refresh }) => {
                         </select>
 
                         <input type="datetime-local" value={transaction.date} onChange={enterTransaction} name="date" required
-                            title="transaction date"
+                            title="transaction date" id="transaction-date"
                             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
                                 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
                                 focus:outline-none focus:ring"

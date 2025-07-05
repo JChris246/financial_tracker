@@ -1,10 +1,12 @@
 const logger = require("../logger").setup();
 const { getDatabase } = require("../db/index");
 const { ASSET_TYPE } = require("../utils/constants");
+const { sleep } = require("../utils/utils");
 
 module.exports.getBalance = (_, res) => {
-    getDatabase().getAllTransactions(
-        transactions => {
+    const db = getDatabase();
+    db.getAllTransactions(
+        async transactions => {
             // TODO: there may be an optimized query for this (especially in sql)
             if (!transactions || transactions.length < 1) {
                 res.status(200).send({ balance: 0, totalIncome: 0, totalSpend: 0, totalStock: 0, totalCrypto: 0 });
@@ -15,8 +17,14 @@ module.exports.getBalance = (_, res) => {
                 let totalStock = 0;
                 let totalCrypto = 0;
 
+                if (!global.cache) {
+                    while (!global.cacheCreated) {
+                        await sleep(100);
+                    }
+                    global.cache = db.getCache();
+                }
+
                 for (let i = 0; i < transactions.length; i++) {
-                    // TODO: do currency conversions
                     if (transactions[i].assetType === ASSET_TYPE.CASH) {
                         const value = calculateCashAmount(transactions[i]);
                         netTotal += value;
@@ -36,6 +44,7 @@ module.exports.getBalance = (_, res) => {
                     }
                 }
 
+                global.cache = null;
                 res.status(200).send({ balance: netTotal, totalIncome, totalSpend, totalStock, totalCrypto });
             }
         },
@@ -49,13 +58,16 @@ module.exports.getBalance = (_, res) => {
 };
 
 const calculateCashAmount = (transaction) => {
-    // TODO: configure a default currency
-    if (transaction.currency === "USD") {
+    // TODO: configure a default currency, for now assuming usd
+    if (transaction.currency.toUpperCase() === "USD") { // this may not be necessary, the base currency should also be in cache
         return transaction.amount;
     }
 
-    // TODO: convert to base currency
-    return transaction.amount;
+    // the rate should be against the base currency
+    const rate = global.cache.fiatConversions[transaction.currency.toLowerCase()] ?? 1;
+
+    // convert to base currency
+    return transaction.amount * rate;
 }
 
 const calculateStockAmount = (transaction) => {
@@ -65,7 +77,9 @@ const calculateStockAmount = (transaction) => {
 }
 
 const calculateCryptoAmount = (transaction) => {
-    // return the amount * value of the coin
-    // TODO: convert to base currency
-    return 0;
+    // the rate should be against the base fiat currency
+    const rate = global.cache.cryptoConversions[transaction.currency.toUpperCase()] ?? 1; // TODO: remove conditional
+
+    // convert to base fiat currency
+    return transaction.amount * rate;
 }

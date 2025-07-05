@@ -35,8 +35,11 @@ const TransactionHistory = ({ sync }) => {
                 <div className="mt-2 text-stone-200 text-2xl font-semibold capitalize mb-2 lg:mb-0">Transaction History</div>
                 <a href="" className="font-semibold text-sky-400 hover:text-sky-600">View all</a>
             </div>
-            <div>{
-                transactions.slice(0, MAX_TRANSACTION_ITEMS).map((item, i) => <TransactionHistoryTile key={i} item={item} />)
+            <div id="transaction-history-list">{
+                transactions
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, MAX_TRANSACTION_ITEMS)
+                    .map((item, i) => <TransactionHistoryTile key={i} item={item} index={i} />)
             }</div>
         </section>
     );

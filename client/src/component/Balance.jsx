@@ -33,7 +33,7 @@ const Balance = ({ sync, refresh }) => {
         <section id="balance" className="flex flex-col p-2 mx-4 text-gray-100 bg-gray-800 rounded-md w-3/4">
             <div className="flex flex-col p-6">
                 <div className="mb-2 uppercase">Your Balance</div>
-                <span id="balance-value" className="text-3xl font-semibold">$ { balance } </span>
+                <span id="balance-value" className="text-3xl font-semibold">$ { balance.toFixed(2) } </span>
             </div>
             <AddTrans refresh={refresh} />
         </section>

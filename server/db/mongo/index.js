@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const Transaction = require("./models/Transactions");
+const { getCache: getCacheJson, saveCache: saveCacheJson } = require("../json");
 
 const logger = require("../../logger").setup();
 
@@ -95,5 +96,18 @@ const getAllTransactionAmounts = (successCallback, errorCallback) => {
     });
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts };
+// because I'm lazy, and don't think the cache record should be a whole collection (also should this be redis?)
+const getCache = () => {
+    const cache = getCacheJson();
+    if (Array.isArray(cache) && cache.length === 0) {
+        return {};
+    }
+    return cache;
+};
+
+const saveCache = (cache) => {
+    saveCacheJson(cache);
+};
+
+module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts, getCache, saveCache };
 
