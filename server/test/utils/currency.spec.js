@@ -3,7 +3,7 @@ const { describe, expect, test } = require("@jest/globals");
 const { getConversionRate, generateFiatConversionMap, getConversionCoinGecko, generateCryptoConversionMap,
     getYahooFinanceInfo, getStockPriceGoogle, generateStockPriceMap
 } = require("../../utils/currency");
-const { CRYPTO_CURRENCIES } = require("../../utils/constants");
+const { DEFAULT_CURRENCIES } = require("../../utils/constants");
 const { isNumber } = require("../../utils/utils");
 
 describe("currency", () => {
@@ -37,9 +37,9 @@ describe("currency", () => {
         })
     });
 
-    describe.skip("generateFiatConversionMap", () => { // this is an expensive test
+    describe("generateFiatConversionMap", () => { // this is an expensive test
         test("should return non empty map of fiat conversion rates", async () => {
-            const result = await generateFiatConversionMap();
+            const result = await generateFiatConversionMap(DEFAULT_CURRENCIES.cash);
             expect(Object.keys(result).length).toBeGreaterThan(0);
         });
     });
@@ -72,13 +72,13 @@ describe("currency", () => {
         });
     });
 
-    describe.skip("generateCryptoConversionMap", () => {
+    describe("generateCryptoConversionMap", () => {
         // these tests rely on an external api (and the internet)
-        test.only("should return non empty map of crypto conversion rates", async () => { // expensive test
-            const result = await generateCryptoConversionMap();
+        test("should return non empty map of crypto conversion rates", async () => { // expensive test
+            const result = await generateCryptoConversionMap(DEFAULT_CURRENCIES.crypto);
             const resultLength = Object.keys(result).length;
             expect(resultLength).toBeGreaterThan(0);
-            expect(resultLength).toBe(CRYPTO_CURRENCIES.length);
+            expect(resultLength).toBe(DEFAULT_CURRENCIES.crypto.length);
         });
     });
 
@@ -128,9 +128,9 @@ describe("currency", () => {
         });
     });
 
-    describe.skip("generateStockPriceMap", () => { // this is an expensive test
+    describe("generateStockPriceMap", () => { // this is an expensive test
         test("should return non empty map of stock prices", async () => {
-            const result = await generateStockPriceMap();
+            const result = await generateStockPriceMap(DEFAULT_CURRENCIES.stock);
             expect(Object.keys(result).length).toBeGreaterThan(0);
         });
     });

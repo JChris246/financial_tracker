@@ -96,6 +96,20 @@ const getAllTransactionAmounts = (successCallback, errorCallback) => {
     });
 };
 
+const getAllTransactionCurrencies = async () => {
+    const results = await Promise.all([
+        Transaction.distinct("currency", { assetType: "cash" }),
+        Transaction.distinct("currency", { assetType: "crypto" }),
+        Transaction.distinct("currency", { assetType: "stock" })
+    ]);
+
+    return {
+        cash: results[0],
+        crypto: results[1],
+        stock: results[2]
+    }
+};
+
 // because I'm lazy, and don't think the cache record should be a whole collection (also should this be redis?)
 const getCache = () => {
     const cache = getCacheJson();
@@ -109,5 +123,6 @@ const saveCache = (cache) => {
     saveCacheJson(cache);
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts, getCache, saveCache };
+module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts,
+    getCache, saveCache, getAllTransactionCurrencies };
 

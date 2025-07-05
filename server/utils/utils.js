@@ -7,6 +7,10 @@ const isNumber = (value) => {
     return (typeof value === "number" || (typeof value === "string" && isFinite(Number(value)))) && !isNaN(value);
 };
 
+const isValidArray = (value) => {
+    return isDefined(value) && Array.isArray(value) && value.length > 0;
+};
+
 const isDefined = (value) => {
     return value !== undefined && value !== null;
 };
@@ -90,4 +94,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
     });
 };
 
-module.exports = { isNumber, request, sleep, makeBool, isDefined, format };
+module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray };

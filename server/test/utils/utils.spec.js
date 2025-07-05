@@ -1,6 +1,6 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { isNumber, makeBool, isDefined } = require("../../utils/utils");
+const { isNumber, makeBool, isDefined, isValidArray } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
@@ -95,8 +95,27 @@ describe("utils", () => {
             { value: "a", expected: true },
             { value: {}, expected: true },
             { value: [], expected: true },
-        ])("returns true if the input is defined and not null or undefined: '%s'", ({ value, expected }) => {
+        ])("returns true if the input is defined and not null or undefined (false otherwise): '%s'", ({ value, expected }) => {
             expect(isDefined(value)).toBe(expected);
+        });
+    });
+
+    describe("isValidArray", () => {
+        test.each([
+            { value: undefined, expected: false },
+            { value: null, expected: false },
+            { expected: false },
+            { value: {}, expected: false },
+            { value: 1, expected: false },
+            { value: "", expected: false },
+            { value: true, expected: false },
+            { value: false, expected: false },
+            { value: [], expected: false },
+            { value: [""], expected: true },
+            { value: [1], expected: true },
+            { value: ["a", 1], expected: true },
+        ])("returns true if the input is an array with at least one element (false otherwise): '%s'", ({ value, expected }) => {
+            expect(isValidArray(value)).toBe(expected);
         });
     });
 });

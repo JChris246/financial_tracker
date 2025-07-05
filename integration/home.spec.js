@@ -90,7 +90,7 @@ test.describe("index cards", () => {
         await addTransaction(page, "-50", "crypto", "ETH");
         await addTransaction(page, "-20", "crypto", "ADA");
 
-        await expect(page.locator("#Crypto-value")).toHaveText(/\₿\s*951394[.]13/);
+        await expect(page.locator("#Crypto-value")).toHaveText(/\₿\s*951,394[.]13/);
     });
 
     test("stock card has balance correct balance based on transaction history", async ({ page }) => {
@@ -100,7 +100,7 @@ test.describe("index cards", () => {
         await addTransaction(page, "-2", "stock", "AAPL");
         await addTransaction(page, "50", "stock", "NVDA");
 
-        await expect(page.locator("#Stock-value")).toHaveText(/\$\s*9675\.40/);
+        await expect(page.locator("#Stock-value")).toHaveText(/\$\s*9,675\.40/);
     });
 });
 

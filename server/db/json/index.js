@@ -142,6 +142,24 @@ const getAllTransactionAmounts = (successCallback) => {
     successCallback(results);
 };
 
+const getAllTransactionCurrencies = () => {
+    const currenciesSet = new Set();
+    const distinctCurrencies = { crypto: [], cash: [], stock: [] };
+
+    const transactions = getItems(DB_TYPE.TRANSACTIONS, "get all transactions to get distinct currencies");
+
+    transactions.forEach(t => {
+        if (currenciesSet.has(t.currency)) {
+            return;
+        }
+
+        currenciesSet.add(t.currency);
+        distinctCurrencies[t.assetType].push(t.currency);
+    });
+
+    return distinctCurrencies;
+};
+
 
 // should this maybe be a redis cache?
 
@@ -154,4 +172,5 @@ const saveCache = (cache) => {
     saveItems(DB_TYPE.CACHE, cache)
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts, getCache, saveCache };
+module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts,
+    getCache, saveCache, getAllTransactionCurrencies };

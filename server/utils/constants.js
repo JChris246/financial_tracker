@@ -117,5 +117,11 @@ const ASSET_CURRENCIES = {
 };
 
 const DEFAULT_CATEGORIES = ["groceries", "health", "transport", "rent", "other"];
+const DEFAULT_CURRENCIES = {
+    [ASSET_TYPE.CASH]: ["eur", "usd", "cad", "jpy", "aud"],
+    [ASSET_TYPE.STOCK]: ["msft", "goog", "aapl", "nvda", "amzn"],
+    [ASSET_TYPE.CRYPTO]: ["btc", "eth", "ltc", "xrp", "ada"]
+}
 
-module.exports = { ASSET_TYPE, FIAT_CURRENCIES, ASSET_CURRENCIES, STOCK_CURRENCIES, CRYPTO_CURRENCIES, DEFAULT_CATEGORIES, CRYPTO_CURRENCY_NAMES };
+module.exports = { ASSET_TYPE, FIAT_CURRENCIES, ASSET_CURRENCIES, STOCK_CURRENCIES, CRYPTO_CURRENCIES,
+    DEFAULT_CATEGORIES, CRYPTO_CURRENCY_NAMES, DEFAULT_CURRENCIES };

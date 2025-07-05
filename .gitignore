@@ -26,6 +26,7 @@ yarn-error.log*
 package-lock.json
 
 logs/
+data/
 
 # Playwright
 **/test-results/**

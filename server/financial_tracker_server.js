@@ -124,10 +124,12 @@ const { setupDatabase, getDatabase } = require("./db/index.js");
 const runCacheWorker = async () => {
     const { generateCryptoConversionMap, generateFiatConversionMap, generateStockPriceMap } = require("./utils/currency");
     const { makeBool, sleep } = require("./utils/utils");
+    const { DEFAULT_CURRENCIES } = require("./utils/constants");
     const fs = require("fs");
 
     while(true) {
-        const cache = getDatabase().getCache();
+        const db = getDatabase();
+        const cache = db.getCache();
 
         // wait for the cache to expire, on first run (if existed)
         if (cache.lastUpdated) {
@@ -141,22 +143,31 @@ const runCacheWorker = async () => {
             }
         }
 
+        // merge user currencies with default currencies
+        // TODO: store these currencies in cache (and update when new transaction comes in) ?
+        const userCurrencies = db.getAllTransactionCurrencies();
+        const useCurrencies = {
+            stock: [...new Set([...userCurrencies.stock, ...DEFAULT_CURRENCIES.stock]).values()],
+            crypto: [...new Set([...userCurrencies.crypto, ...DEFAULT_CURRENCIES.crypto]).values()],
+            cash: [...new Set([...userCurrencies.cash, ...DEFAULT_CURRENCIES.cash]).values()]
+        };
+
         //  might need to maintain values from previous runs, so merge values
         const returnMockValues = global.env === "test" && makeBool(global.MOCK_CONVERSIONS);
         const fiatMap = returnMockValues
             ? JSON.parse(fs.readFileSync("./test/assets/fiatConversionMap.json"))
-            : await generateFiatConversionMap();
+            : await generateFiatConversionMap(useCurrencies.cash);
         const cryptoMap = returnMockValues
             ? JSON.parse(fs.readFileSync("./test/assets/cryptoConversionMap.json"))
-            : await generateCryptoConversionMap();
+            : await generateCryptoConversionMap(useCurrencies.crypto);
         const stockMap = returnMockValues
             ? JSON.parse(fs.readFileSync("./test/assets/stockPrices.json"))
-            : await generateStockPriceMap();
+            : await generateStockPriceMap(useCurrencies.stock);
         cache.cryptoConversions = { ...(cache.cryptoConversions ?? {}), ...cryptoMap };
         cache.fiatConversions = { ...(cache.fiatConversions ?? {}), ...fiatMap };
         cache.stockPrices = { ...(cache.stockPrices ?? {}), ...stockMap };
 
-        getDatabase().saveCache(cache);
+        db.saveCache(cache);
         global.cacheCreated = true;
 
         if (global.env === "test") {
