@@ -1,6 +1,8 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { getConversionRate, generateFiatConversionMap, getConversionCoinGecko, generateCryptoConversionMap } = require("../../utils/currency");
+const { getConversionRate, generateFiatConversionMap, getConversionCoinGecko, generateCryptoConversionMap,
+    getYahooFinanceInfo, getStockPriceGoogle, generateStockPriceMap
+} = require("../../utils/currency");
 const { CRYPTO_CURRENCIES } = require("../../utils/constants");
 const { isNumber } = require("../../utils/utils");
 
@@ -29,7 +31,7 @@ describe("currency", () => {
             expect(isNumber(result)).toBeFalsy();
         });
 
-        test("should 1 when currencies are the same", async () => {
+        test("should return 1 when currencies are the same", async () => {
             const result = await getConversionRate(["USD", "USD"]);
             expect(result).toBe(1);
         })
@@ -70,13 +72,66 @@ describe("currency", () => {
         });
     });
 
-    describe("generateCryptoConversionMap", () => {
+    describe.skip("generateCryptoConversionMap", () => {
         // these tests rely on an external api (and the internet)
-        test.only("should return non empty map of crypto conversion rates", async () => {
+        test.only("should return non empty map of crypto conversion rates", async () => { // expensive test
             const result = await generateCryptoConversionMap();
             const resultLength = Object.keys(result).length;
             expect(resultLength).toBeGreaterThan(0);
             expect(resultLength).toBe(CRYPTO_CURRENCIES.length);
+        });
+    });
+
+    describe.skip("getYahooFinanceInfo", () => {
+        // these tests rely on an external api (and the internet)
+        const symbols = ["AAPL", "NVDA", "MSFT", "AMD"];
+
+        test.each(symbols)("should return basic stock info for: %s", async (symbol) => {
+            // act
+            const result = await getYahooFinanceInfo(symbol);
+
+            // assert
+            expect(isNumber(result.price)).toBeTruthy();
+            expect(isNumber(result.change)).toBeTruthy();
+            expect(result.changePercent).toMatch(/^[+-][0-9.]+%$/);
+            expect(result.price).toBeGreaterThan(0);
+        });
+
+        test("should return null for invalid symbol", async () => {
+            // act
+            const result = await getYahooFinanceInfo("DEFINITELYNOTASYMBOL");
+
+            // assert
+            expect(result).toBeNull();
+        });
+    });
+
+    describe("getStockPriceGoogle", () => {
+        // these tests rely on an external api (and the internet)
+        const symbols = ["AAPL", "NVDA", "MSFT", "AMD"];
+
+        test.each(symbols)("should return basic stock info for: %s", async (symbol) => {
+            // act
+            const result = await getStockPriceGoogle(symbol);
+
+            // assert
+            expect(isNumber(result)).toBeTruthy();
+            expect(result).toBeGreaterThan(0);
+        });
+
+        test("should return null for invalid symbol", async () => {
+            // act
+            const result = await getStockPriceGoogle("DEFINITELYNOTASYMBOL", 1);
+
+            // assert
+            expect(result).toBeNull();
+        });
+    });
+
+    describe.skip("generateStockPriceMap", () => { // this is an expensive test
+        test("should return non empty map of stock prices", async () => {
+            const result = await generateStockPriceMap();
+            expect(Object.keys(result).length).toBeGreaterThan(0);
         });
     });
 });

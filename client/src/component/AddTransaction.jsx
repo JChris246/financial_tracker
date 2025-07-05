@@ -7,7 +7,7 @@ import { request } from "../utils/Fetch";
 import { Modal } from "./Modal";
 
 // TODO: rename this and the file name
-export const AddTrans = ({ refresh }) => {
+export const AddTransaction = ({ refresh }) => {
     const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
     const [transaction, setTransaction] = useState({
         name: "",
@@ -15,12 +15,12 @@ export const AddTrans = ({ refresh }) => {
         date: formatDate(new Date(), DATE_TYPE.INPUT),
         category: "other",
         assetType: "cash",
-        currency: "eur"
+        currency: "aed"
     });
 
     const [assetTypes, setAssetTypes] = useState([]);
     const [transactionCategories, setTransactionCategories] = useState([]);
-    const [assetCurrencies, setAssetCurrencies] = useState({ cash: ["eur"], stock: [], crypto: [] });
+    const [assetCurrencies, setAssetCurrencies] = useState({ cash: ["aed"], stock: [], crypto: [] });
 
     const getAvailableAssetTypes = () => {
         request({

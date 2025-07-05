@@ -122,7 +122,7 @@ server.on("listening", onListening);
 
 const { setupDatabase, getDatabase } = require("./db/index.js");
 const runCacheWorker = async () => {
-    const { generateCryptoConversionMap, generateFiatConversionMap } = require("./utils/currency");
+    const { generateCryptoConversionMap, generateFiatConversionMap, generateStockPriceMap } = require("./utils/currency");
     const { makeBool, sleep } = require("./utils/utils");
     const fs = require("fs");
 
@@ -149,8 +149,12 @@ const runCacheWorker = async () => {
         const cryptoMap = returnMockValues
             ? JSON.parse(fs.readFileSync("./test/assets/cryptoConversionMap.json"))
             : await generateCryptoConversionMap();
+        const stockMap = returnMockValues
+            ? JSON.parse(fs.readFileSync("./test/assets/stockPrices.json"))
+            : await generateStockPriceMap();
         cache.cryptoConversions = { ...(cache.cryptoConversions ?? {}), ...cryptoMap };
         cache.fiatConversions = { ...(cache.fiatConversions ?? {}), ...fiatMap };
+        cache.stockPrices = { ...(cache.stockPrices ?? {}), ...stockMap };
 
         getDatabase().saveCache(cache);
         global.cacheCreated = true;

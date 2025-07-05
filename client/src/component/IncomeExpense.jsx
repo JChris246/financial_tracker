@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { NotificationType, useNotificationContext } from "./Notification";
 import { request } from "../utils/Fetch";
 import { symbol } from "../utils/constants";
+import { formatMoney } from "../utils/utils";
 
 // TODO: rename this?
 const IndexCard = ({ title, amount, accentColor, symbol }) => {
@@ -11,7 +12,7 @@ const IndexCard = ({ title, amount, accentColor, symbol }) => {
             title={title + " value in usd"}>
             <h1 className="text-2xl font-bold text-gray-500 mb-2">{title}</h1>
             <h6 id={title + "-value"} className={"text-4xl font-bold sm:text-5xl mb-1 " + accentColor + "-text-accent"}>
-                {symbol} {typeof(amount) === "number" ? Math.abs(amount).toFixed(2) : amount}
+                {symbol} {typeof(amount) === "number" ? formatMoney(Math.abs(amount)) : amount}
             </h6>
         </div>
     );

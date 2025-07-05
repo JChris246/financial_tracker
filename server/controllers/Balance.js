@@ -71,14 +71,15 @@ const calculateCashAmount = (transaction) => {
 }
 
 const calculateStockAmount = (transaction) => {
-    // return the amount * value of the stock
-    // TODO: convert to base currency
-    return 0;
+    // this rate is in most likely in USD
+    const rate = global.cache.stockPrices[transaction.currency.toUpperCase()] ?? 1;
+
+    return transaction.amount * rate;
 }
 
 const calculateCryptoAmount = (transaction) => {
     // the rate should be against the base fiat currency
-    const rate = global.cache.cryptoConversions[transaction.currency.toUpperCase()] ?? 1; // TODO: remove conditional
+    const rate = global.cache.cryptoConversions[transaction.currency.toUpperCase()] ?? 1;
 
     // convert to base fiat currency
     return transaction.amount * rate;

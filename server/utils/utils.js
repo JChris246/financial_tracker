@@ -76,7 +76,11 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
             let chunks = [];
 
             response.on("data", fragments => chunks.push(fragments));
-            response.on("end", () => resolve({ data: Buffer.concat(chunks).toString(), statusCode: response.statusCode }));
+            response.on("end", () => resolve({
+                data: Buffer.concat(chunks).toString(),
+                statusCode: response.statusCode,
+                headers: response.headers
+            }));
             response.on("error", (error) => reject(error));
         });
         req.on("error", (error) => reject(error));

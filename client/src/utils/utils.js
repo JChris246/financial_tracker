@@ -32,4 +32,13 @@ const formatDate = (d, type) => {
     else return date + " " + time; // YYYY-MM-DD hh:mm - 2022-01-07 23:43:09
 };
 
-export { pad, formatDate, DATE_TYPE };
+const formatMoney = (m) => {
+    if (typeof m !== "number") {
+        return m;
+    }
+
+    // this not necessarily locale friendly (i.e. uses commas even if locale expects periods)
+    return m.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+export { pad, formatDate, DATE_TYPE, formatMoney };

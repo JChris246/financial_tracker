@@ -92,6 +92,16 @@ test.describe("index cards", () => {
 
         await expect(page.locator("#Crypto-value")).toHaveText(/\₿\s*951394[.]13/);
     });
+
+    test("stock card has balance correct balance based on transaction history", async ({ page }) => {
+        await pageSetup({ page });
+
+        await addTransaction(page, "10", "stock", "AAPL");
+        await addTransaction(page, "-2", "stock", "AAPL");
+        await addTransaction(page, "50", "stock", "NVDA");
+
+        await expect(page.locator("#Stock-value")).toHaveText(/\$\s*9675\.40/);
+    });
 });
 
 test.describe("transaction history", () => {

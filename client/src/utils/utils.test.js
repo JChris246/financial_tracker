@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 
-import { pad, formatDate, DATE_TYPE } from "./utils";
+import { pad, formatDate, DATE_TYPE, formatMoney } from "./utils";
 
 describe("utils", () => {
     describe("pad", () => {
@@ -39,6 +39,30 @@ describe("utils", () => {
             expect(formatDate(undefined, DATE_TYPE.DISPLAY_DATE)).toBe("");
             expect(formatDate("", DATE_TYPE.DISPLAY_DATE)).toBe("");
             expect(formatDate("", DATE_TYPE.DISPLAY_FULL)).toBe("");
+        });
+    });
+
+    describe("formatMoney", () => {
+        const testCases = [
+            { input: 0, expected: "0.00" },
+            { input: 100, expected: "100.00" },
+            { input: 1000, expected: "1,000.00" },
+            { input: 10000, expected: "10,000.00" },
+            { input: 100000, expected: "100,000.00" },
+            { input: 1000000, expected: "1,000,000.00" },
+            { input: 10000000, expected: "10,000,000.00" },
+
+            { input: .45, expected: "0.45" },
+            { input: 100.56, expected: "100.56" },
+            { input: 1000.43, expected: "1,000.43" },
+            { input: 10000.64, expected: "10,000.64" },
+            { input: 100000.546676, expected: "100,000.55" },
+            { input: 1000000.6, expected: "1,000,000.60" },
+            { input: 10000000.1, expected: "10,000,000.10" },
+        ];
+
+        test.each(testCases)("should format number to string with 2 decimal places and group with commas for every 3 digits: '%s'", ({ input, expected }) => {
+            expect(formatMoney(input)).toBe(expected);
         });
     });
 });

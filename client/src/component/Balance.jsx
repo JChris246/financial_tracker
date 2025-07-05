@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 import { NotificationType, useNotificationContext } from "./Notification";
 import { request } from "../utils/Fetch";
-import { AddTrans } from "./AddTrans";
+import { formatMoney } from "../utils/utils";
+import { AddTransaction } from "./AddTransaction";
 
 const Balance = ({ sync, refresh }) => {
     const [balance, setBalance] = useState(0);
@@ -33,9 +34,9 @@ const Balance = ({ sync, refresh }) => {
         <section id="balance" className="flex flex-col p-2 mx-4 text-gray-100 bg-gray-800 rounded-md w-3/4">
             <div className="flex flex-col p-6">
                 <div className="mb-2 uppercase">Your Balance</div>
-                <span id="balance-value" className="text-3xl font-semibold">$ { balance.toFixed(2) } </span>
+                <span id="balance-value" className="text-3xl font-semibold">$ { formatMoney(balance) } </span>
             </div>
-            <AddTrans refresh={refresh} />
+            <AddTransaction refresh={refresh} />
         </section>
 
     );
