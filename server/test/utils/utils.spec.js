@@ -1,14 +1,21 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { isNumber, makeBool, isDefined, isValidArray } = require("../../utils/utils");
+const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
         const validNumbers = [
             { input: 1, expected: true },
             { input: 2.5, expected: true },
+            { input: 0, expected: true },
+            { input: -1, expected: true },
+            { input: -2.5, expected: true },
             { input: "2.5", expected: true },
-            { input: "1", expected: true }
+            { input: "1", expected: true },
+            { input: "-1", expected: true },
+            { input: "-1.25", expected: true },
+            { input: "1.25", expected: true },
+            { input: "0", expected: true },
         ];
 
         const invalidNumbers = [
@@ -16,7 +23,8 @@ describe("utils", () => {
             { input: null, expected: false },
             { input: undefined, expected: false },
             { input: {}, expected: false },
-            { input: [], expected: false }
+            { input: [], expected: false },
+            { input: "", expected: false }
         ];
 
         test.each(validNumbers)("should return true for numbers when valid: '%s'", ({ input, expected }) => {
@@ -116,6 +124,53 @@ describe("utils", () => {
             { value: ["a", 1], expected: true },
         ])("returns true if the input is an array with at least one element (false otherwise): '%s'", ({ value, expected }) => {
             expect(isValidArray(value)).toBe(expected);
+        });
+    });
+
+    describe("positiveNumberOrZero", () => {
+        test.each([
+            { value: undefined, expected: 0 },
+            { value: null, expected: 0 },
+            { expected: 0 },
+            { value: {}, expected: 0 },
+            { value: "", expected: 0 },
+            { value: true, expected: 0 },
+            { value: false, expected: 0 },
+            { value: [], expected: 0 },
+            { value: 0, expected: 0 },
+            { value: -1, expected: 0 },
+            { value: -12.45, expected: 0 },
+            { value: -.45, expected: 0 },
+            { value: -0.45, expected: 0 },
+            { value: 1, expected: 1 },
+            { value: 12, expected: 12 },
+            { value: 12.67, expected: 12.67 },
+        ])("returns the number as is if it is a positive number and 0 otherwise: '%s'", ({ value, expected }) => {
+            expect(positiveNumberOrZero(value)).toBe(expected);
+        });
+    });
+
+    describe("toPrecision", () => {
+        test.each([
+            { value: undefined, places: 1, expected: undefined },
+            { value: null, places: 2, expected: null },
+            { expected: undefined },
+            { value: {}, expected: {} },
+            { value: "", expected: "" },
+            { value: true, expected: true },
+            { value: false, expected: false },
+            { value: [], expected: [] },
+            { value: 0, expected: 0 },
+            { value: 0, places: 2, expected: 0 },
+            { value: -1, expected: -1 },
+            { value: -12.45, expected: -12.45 },
+            { value: -.45, places: 2, expected: -.45 },
+            { value: 1, expected: 1 },
+            { value: 12, places: 2, expected: 12 },
+            { value: 12.67546232, expected: 12.6755 },
+            { value: 0.30000000000000004, expected: 0.3 },
+        ])("returns the number to n decimal places (sig figs) or as is if is not a number '%s'", ({ value, places, expected }) => {
+            expect(toPrecision(value, places)).toEqual(expected);
         });
     });
 });

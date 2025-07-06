@@ -4,7 +4,7 @@ const https = require("https");
 const logger = require("../logger").setup();
 
 const isNumber = (value) => {
-    return (typeof value === "number" || (typeof value === "string" && isFinite(Number(value)))) && !isNaN(value);
+    return (typeof value === "number" || (typeof value === "string" && value !== "" && isFinite(Number(value)))) && !isNaN(value);
 };
 
 const isValidArray = (value) => {
@@ -34,6 +34,22 @@ const makeBool = (value) => {
 
     return value.toUpperCase() === "TRUE" || value === "1" || value.toUpperCase() === "YES";
 };
+
+const positiveNumberOrZero = (value) => {
+    if (!isNumber(value)) {
+        return 0;
+    }
+
+    return value > 0 ? value : 0;
+}
+
+const toPrecision = (value, precision=4) => {
+    if (!isNumber(value)) {
+        return value;
+    }
+
+    return Number(value.toFixed(precision));
+}
 
 const format = (str, args) => {
     // use replace to iterate over the string
@@ -94,4 +110,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
     });
 };
 
-module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray };
+module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray, positiveNumberOrZero, toPrecision };

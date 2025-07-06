@@ -3,7 +3,6 @@ var router = express.Router();
 var controller = require("../controllers/Balance");
 
 router
-    .get("/", controller.getBalance)
-    .get("/all", controller.getAllBalances);
+    .get("/", controller.getBalance);
 
 module.exports = router;
