@@ -87,7 +87,7 @@ module.exports.addTransaction = (req , res) => {
 
     const { name, date, amount, type, category, assetType, currency } = result;
     getDatabase().createTransaction(
-        { name, date, amount, type, category, assetType, currency },
+        { name, date, amount, type, category, assetType, currency: currency.toUpperCase() },
         transaction => {
             res.status(201).send({
                 // maybe I should separate the payload from the message ?

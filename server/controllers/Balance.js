@@ -48,10 +48,31 @@ module.exports.getBalance = (_, res) => {
             }
         },
         err => {
-            logger.error("An error occurred while getting balance: " + err);
-            res.status(500).send({
-                msg: err
-            });
+            logger.error("getBalance - An error occurred while getting balance: " + err);
+            res.status(500).send({ msg: err });
+        }
+    );
+};
+
+// does this really need to be a separate endpoint?
+module.exports.getAllBalances = (_, res) => {
+    const db = getDatabase();
+    db.getAllTransactions(
+        async transactions => {
+            const balances = { crypto: {}, cash: {}, stock: {} };
+            if (!transactions || transactions.length < 1) {
+                res.status(200).send(balances);
+            } else {
+                for (let i = 0; i < transactions.length; i++) {
+                    balances[transactions[i].assetType][transactions[i].currency] =
+                        (balances[transactions[i].assetType][transactions[i].currency] ?? 0) + transactions[i].amount;
+                }
+                res.status(200).send(balances);
+            }
+        },
+        err => {
+            logger.error("getAllBalances - An error occurred while getting balances: " + err);
+            res.status(500).send({ msg: err });
         }
     );
 };
