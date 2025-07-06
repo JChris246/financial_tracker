@@ -7,7 +7,6 @@ module.exports.getBalance = (_, res) => {
     const db = getDatabase();
     db.getAllTransactions(
         async transactions => {
-            // TODO: there may be an optimized query for this (especially in sql)
             if (!transactions || transactions.length < 1) {
                 res.status(200).send({ balance: 0, totalIncome: 0, totalSpend: 0, totalStock: 0, totalCrypto: 0 });
             } else {

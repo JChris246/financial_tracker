@@ -30,7 +30,7 @@ const TransactionHistory = ({ sync }) => {
     }, [sync]);
 
     return (
-        <section id="history" className="flex flex-col p-4 mx-4 bg-gray-800 rounded-md w-full sm:w-fit mb-4 h-fit lg:h-1/3">
+        <section id="history" className="flex flex-col p-4 mx-4 bg-gray-800 rounded-md w-full md:w-fit my-4 md:my-2 h-fit lg:h-1/3">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-4">
                 <div className="mt-2 text-stone-200 text-2xl font-semibold capitalize mb-2 lg:mb-0">Transaction History</div>
                 <a href="" className="font-semibold text-sky-400 hover:text-sky-600">View all</a>

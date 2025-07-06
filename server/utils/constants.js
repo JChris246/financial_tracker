@@ -118,9 +118,9 @@ const ASSET_CURRENCIES = {
 
 const DEFAULT_CATEGORIES = ["groceries", "health", "transport", "rent", "other"];
 const DEFAULT_CURRENCIES = {
-    [ASSET_TYPE.CASH]: ["eur", "usd", "cad", "jpy", "aud"],
-    [ASSET_TYPE.STOCK]: ["msft", "goog", "aapl", "nvda", "amzn"],
-    [ASSET_TYPE.CRYPTO]: ["btc", "eth", "ltc", "xrp", "ada"]
+    [ASSET_TYPE.CASH]: ["EUR", "USD", "CAD", "JPY", "AUD"],
+    [ASSET_TYPE.STOCK]: ["MSFT", "GOOG", "AAPL", "NVDA", "AMZN"],
+    [ASSET_TYPE.CRYPTO]: ["BTC", "ETH", "LTC", "XRP", "ADA"]
 }
 
 module.exports = { ASSET_TYPE, FIAT_CURRENCIES, ASSET_CURRENCIES, STOCK_CURRENCIES, CRYPTO_CURRENCIES,

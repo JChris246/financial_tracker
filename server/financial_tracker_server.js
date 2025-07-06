@@ -18,6 +18,7 @@ const CACHE_REFRESH_INTERVAL = global.env === "test" ? 0 : (process.env.CACHE_RE
 const balanceRouter = require("./routes/balance.js");
 const transactionRouter = require("./routes/transaction.js");
 const listRouter = require("./routes/list.js");
+const priceRouter = require("./routes/price.js");
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/balance", balanceRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/api/list", listRouter);
+app.use("/api/price", priceRouter);
 
 if (global.env === "test") {
     const getDatabase = require("./db/index.js").getDatabase
@@ -41,11 +43,9 @@ if (global.env === "test") {
     app.use("/", (_, res) => res.status(200).send({ msg: "Ok" })); // return 200 as health check for playwright
 }
 
-// error handler
-app.use((err, req, res) => {
-    // render the error page
-    res.status(err.status || 500);
-    res.render("error");
+// catch 404
+app.use((req, res, next) => {
+    res.status(404).send({ msg: "Not Found" });
 });
 
 /**
@@ -145,7 +145,7 @@ const runCacheWorker = async () => {
 
         // merge user currencies with default currencies
         // TODO: store these currencies in cache (and update when new transaction comes in) ?
-        const userCurrencies = db.getAllTransactionCurrencies();
+        const userCurrencies = await db.getAllTransactionCurrencies();
         const useCurrencies = {
             stock: [...new Set([...userCurrencies.stock, ...DEFAULT_CURRENCIES.stock]).values()],
             crypto: [...new Set([...userCurrencies.crypto, ...DEFAULT_CURRENCIES.crypto]).values()],

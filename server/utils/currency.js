@@ -1,5 +1,5 @@
 const { request, format, isDefined, sleep, isValidArray } = require("./utils");
-const { FIAT_CURRENCIES, CRYPTO_CURRENCIES, CRYPTO_CURRENCY_NAMES, STOCK_CURRENCIES } = require("./constants");
+const { FIAT_CURRENCIES, CRYPTO_CURRENCY_NAMES } = require("./constants");
 
 const logger = require("../logger").setup();
 
@@ -168,6 +168,8 @@ const getYahooFinanceInfo = async (symbol, retry=0) => {
 }
 
 const getStockPriceGoogle = async (symbol, retry=3) => {
+    // add validation for the symbol provided?
+
     const { data, statusCode } = await request({ site: GOOGLE_URL, path: format(GOOGLE_STOCK_URL_PATH, [symbol]), method: "GET" });
 
     if (statusCode !== 200) {

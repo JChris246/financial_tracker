@@ -98,7 +98,7 @@ describe("transaction endpoints", () => {
             expect(response.body.name).toEqual("Test Transaction");
             expect(response.body.type).toEqual(true);
             expect(response.body.assetType).toEqual("cash");
-            expect(response.body.currency).toEqual("usd");
+            expect(response.body.currency).toEqual("USD");
             expect(response.body.category).toBeUndefined();
         });
 
@@ -115,7 +115,7 @@ describe("transaction endpoints", () => {
             expect(response.body.name).toEqual("Test Transaction");
             expect(response.body.type).toEqual(false);
             expect(response.body.assetType).toEqual("cash");
-            expect(response.body.currency).toEqual("usd");
+            expect(response.body.currency).toEqual("USD");
             expect(response.body.category).toEqual("Groceries");
         });
 
@@ -132,7 +132,7 @@ describe("transaction endpoints", () => {
             expect(response.body.name).toEqual("Test Transaction");
             expect(response.body.type).toEqual(false);
             expect(response.body.assetType).toEqual("crypto");
-            expect(response.body.currency).toEqual("btc");
+            expect(response.body.currency).toEqual("BTC");
             expect(response.body.category).toEqual("Groceries");
         });
 

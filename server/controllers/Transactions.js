@@ -97,7 +97,7 @@ module.exports.addTransaction = (req , res) => {
                 type: transaction.type,
                 category: transaction.category,
                 assetType: transaction.assetType,
-                currency: transaction.currency,
+                currency: transaction.currency.toUpperCase(),
                 msg: "Transaction added successfully",
             });
         },
