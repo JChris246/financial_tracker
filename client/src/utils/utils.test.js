@@ -61,7 +61,7 @@ describe("utils", () => {
             { input: 10000000.1, expected: "10,000,000.10" },
         ];
 
-        test.each(testCases)("should format number to string with 2 decimal places and group with commas for every 3 digits: '%s'", ({ input, expected }) => {
+        test.each(testCases)("should format number with 2 decimal places and group with commas for every 3 digits: '%s'", ({ input, expected }) => {
             expect(formatMoney(input)).toBe(expected);
         });
     });
