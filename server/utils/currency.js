@@ -26,7 +26,11 @@ const getConversionRate = async ([from, to], retry=3) => {
         return null;
     }
 
-    const { data, statusCode } = await request({ site: GOOGLE_URL, path: format(GOOGLE_FINANCE_URL_PATH, [from, to]), method: "GET" });
+    const { data, statusCode } = await request({
+        site: GOOGLE_URL,
+        path: format(GOOGLE_FINANCE_URL_PATH, [from.toLowerCase(), to.toLowerCase()]),
+        method: "GET"
+    });
 
     if (statusCode !== 200) {
         logger.error("getConversionRate - Conversion rate request failed with status code: " + statusCode);

@@ -104,9 +104,9 @@ const getAllTransactionCurrencies = async () => {
     ]);
 
     return {
-        cash: results[0],
-        crypto: results[1],
-        stock: results[2]
+        cash: results[0] ?? [],
+        crypto: results[1] ?? [],
+        stock: results[2] ?? []
     }
 };
 

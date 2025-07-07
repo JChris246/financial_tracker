@@ -43,6 +43,7 @@ const positiveNumberOrZero = (value) => {
     return value > 0 ? value : 0;
 }
 
+// Note: rounding on the server AND client can result in a higher loss of precision
 const toPrecision = (value, precision=4) => {
     if (!isNumber(value)) {
         return value;
