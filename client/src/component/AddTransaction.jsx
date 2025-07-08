@@ -6,7 +6,6 @@ import { formatDate, DATE_TYPE } from "../utils/utils";
 import { request } from "../utils/Fetch";
 import { Modal } from "./Modal";
 
-// TODO: rename this and the file name
 export const AddTransaction = ({ refresh }) => {
     const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
     const [transaction, setTransaction] = useState({

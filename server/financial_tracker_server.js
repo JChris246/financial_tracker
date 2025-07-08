@@ -124,7 +124,7 @@ const { setupDatabase, getDatabase } = require("./db/index.js");
 const runCacheWorker = async () => {
     const { generateCryptoConversionMap, generateFiatConversionMap, generateStockPriceMap } = require("./utils/currency");
     const { makeBool, sleep } = require("./utils/utils");
-    const { DEFAULT_CURRENCIES } = require("./utils/constants");
+    const { DEFAULT_CURRENCIES, ASSET_TYPE } = require("./utils/constants");
     const fs = require("fs");
 
     while(true) {
@@ -147,9 +147,9 @@ const runCacheWorker = async () => {
         // TODO: store these currencies in cache (and update when new transaction comes in) ?
         const userCurrencies = await db.getAllTransactionCurrencies();
         const useCurrencies = {
-            stock: [...new Set([...userCurrencies.stock, ...DEFAULT_CURRENCIES.stock]).values()],
-            crypto: [...new Set([...userCurrencies.crypto, ...DEFAULT_CURRENCIES.crypto]).values()],
-            cash: [...new Set([...userCurrencies.cash, ...DEFAULT_CURRENCIES.cash]).values()]
+            stock: [...new Set([...userCurrencies.stock, ...DEFAULT_CURRENCIES[ASSET_TYPE.STOCK]]).values()],
+            crypto: [...new Set([...userCurrencies.crypto, ...DEFAULT_CURRENCIES[ASSET_TYPE.CRYPTO]]).values()],
+            cash: [...new Set([...userCurrencies.cash, ...DEFAULT_CURRENCIES[ASSET_TYPE.CASH]]).values()]
         };
 
         //  might need to maintain values from previous runs, so merge values

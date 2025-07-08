@@ -11,7 +11,7 @@ const COIN_GECKO_API_PATH = "/api/v3/simple/price?ids={0}&vs_currencies={1}"
 const YAHOO_FINANCE_URL = "https://finance.yahoo.com"
 const YAHOO_FINANCE_URL_PATH = "/quote/{0}/";
 
-const FIAT_BASE = "usd";
+const FIAT_BASE = "USD";
 const BUFFER_SIZE = 15;
 
 // note: this api endpoint can return non values as a rate limit feature

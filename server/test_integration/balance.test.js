@@ -47,7 +47,7 @@ describe("balance endpoints", () => {
             });
         });
 
-        test("should return correct balance when based on existing transactions with various currencies", async () => {
+        test("should return correct balance based on existing transactions with various currencies", async () => {
             // Arrange
             await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, currency: "USD", date: "2022-01-01" }); // 10 usd
             await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: -10, currency: "USD", date: "2022-01-02" }); // 0 usd
