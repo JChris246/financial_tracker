@@ -7,7 +7,7 @@
     "start": "node financial_tracker_server.js",
     "dev": "nodemon financial_tracker_server.js",
     "test:unit": "NODE_ENV=test jest --runTestsByPath test/**/*.spec.js",
-    "test:integration": "NODE_ENV=test DB_TYPE=json DB_PATH=test_db RUN_SERVER=false MOCK_CONVERSIONS=true jest --runTestsByPath test_integration/**",
+    "test:integration": "NODE_ENV=test DB_TYPE=json DB_PATH=test_db RUN_SERVER=false MOCK_CONVERSIONS=true jest --runTestsByPath test_integration/** --runInBand",
     "test:server": "NODE_ENV=test DB_PATH=test_db DB_TYPE=json MOCK_CONVERSIONS=true node financial_tracker_server.js"
   },
   "keywords": [
