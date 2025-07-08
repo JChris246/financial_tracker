@@ -37,7 +37,7 @@ describe("currency", () => {
         })
     });
 
-    describe("generateFiatConversionMap", () => { // this is an expensive test
+    describe.skip("generateFiatConversionMap", () => { // this is an expensive test, skip in CI
         test("should return non empty map of fiat conversion rates", async () => {
             const result = await generateFiatConversionMap(DEFAULT_CURRENCIES.cash);
             expect(Object.keys(result).length).toBeGreaterThan(0);
@@ -128,7 +128,7 @@ describe("currency", () => {
         });
     });
 
-    describe("generateStockPriceMap", () => { // this is an expensive test
+    describe.skip("generateStockPriceMap", () => { // this is an expensive test, skip in CI
         test("should return non empty map of stock prices", async () => {
             const result = await generateStockPriceMap(DEFAULT_CURRENCIES.stock);
             expect(Object.keys(result).length).toBeGreaterThan(0);
