@@ -21,6 +21,7 @@ const getConversionRate = async ([from, to], retry=3) => {
         return 1;
     }
 
+    // this doubles as ssrf protection
     if (!FIAT_CURRENCIES.includes(from.toLowerCase()) || !FIAT_CURRENCIES.includes(to.toLowerCase())) {
         logger.error("getConversionRate - Invalid currency: " + from + " - " + to);
         return null;
@@ -75,6 +76,7 @@ const getConversionCoinGecko = async (crypto, fiat) => {
         return null;
     }
 
+    // // this doubles as ssrf protection
     const fiatSet = new Set(FIAT_CURRENCIES.map((x) => x.toLowerCase()));
     for (let i = 0; i < fiat.length; i++) {
         if (!fiatSet.has(fiat[i].toLowerCase())) {
@@ -172,7 +174,11 @@ const getYahooFinanceInfo = async (symbol, retry=0) => {
 }
 
 const getStockPriceGoogle = async (symbol, retry=3) => {
-    // add validation for the symbol provided?
+    // this doubles as ssrf protection
+    if (!STOCK_CURRENCIES.includes(symbol.toUpperCase())) {
+        logger.error("getStockPriceGoogle - Invalid stock symbol: " + symbol);
+        return null;
+    }
 
     const { data, statusCode } = await request({ site: GOOGLE_URL, path: format(GOOGLE_STOCK_URL_PATH, [symbol]), method: "GET" });
 

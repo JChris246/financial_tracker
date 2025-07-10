@@ -11,17 +11,19 @@ export default defineConfig({
     testMatch: '*.spec.js',
     fullyParallel: true,
     forbidOnly: !!process.env.CI, // TODO: set this var when setting up CI tests
-    workers: 1,
+    workers: 1, // avoid concurrent tests since the db needs to be reset after each test
     timeout: 15 * 1000, // 15 seconds, maximum time for each test (the expect() assertions)
     reporter: 'html',
     use: {
         ignoreHTTPSErrors: true,
         actionTimeout: 5 * 1000,
         baseURL: baseUrl,
-        video: 'on', // TODO: maybe turn this off in CI
+        video: !!process.env.CI ? "off" : "on",
+        trace: 'on'
     },
 
     /* Configure projects for major browsers */
+    // TODO: configure for mobile vs desktop
     projects: [
         {
             name: 'chromium',
@@ -33,10 +35,10 @@ export default defineConfig({
             use: { ...devices['Desktop Firefox'] },
         },
 
-        {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] },
-        },
+        // {
+        //     name: 'webkit',
+        //     use: { ...devices['Desktop Safari'] },
+        // },
 
         /* Test against mobile viewports. */
         // {

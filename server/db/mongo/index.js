@@ -40,6 +40,7 @@ const init = async () => {
         });
         databaseConnected = true;
         await wipeDb();
+        Transaction.createIndexes();
         return true;
     } catch (e) {
         logger.error("Failed to connect to mongo: " + e);

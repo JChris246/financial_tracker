@@ -37,6 +37,9 @@ const transactionSchema = new Schema({
     }
 });
 
+transactionSchema.index({ assetType: 1 });
+transactionSchema.index({ category: 1 });
+
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
 module.exports = Transaction;
