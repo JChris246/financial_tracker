@@ -1,6 +1,6 @@
 # 💰 Finance Tracker
 
-Finance Tracker started as a simple hobby project by [@c0d3r](https://github.com/c0d3rJ), [@JChris246](https://github.com/JChris246) and [@Krystal Clarke](https://github.com/kac246).
+Finance Tracker started as a simple hobby project by [@c0d3r](https://github.com/c0d3rJ), [@JChris246](https://github.com/JChris246) and [@kac246](https://github.com/kac246).
 Today the features include: 
 
 - ➕ Adding transactions for various currency types including:
@@ -40,7 +40,7 @@ The application stack consists of [React ⚛](https://reactjs.org/) (js) with [V
 
 ### 🐋 Building with Docker
 
-TODO: add instructions (first dockerize the app ofc 😅)
+TODO: add instructions (first I need to dockerize the app ofc 😅)
 
 ## 👀 Preview
 

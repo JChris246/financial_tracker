@@ -264,7 +264,8 @@ describe("transaction endpoints", () => {
 
         test("should return bad request when only the csv header is provided", async () => {
             // Act
-            const response = await superTestRequest.post("/api/transaction/csv").send({ csv: "name, amount, type, date, category, assetType, currency" });
+            const response = await superTestRequest.post("/api/transaction/csv")
+                .send({ csv: "name, amount, type, date, category, assetType, currency" });
 
             // Assert
             expect(response.status).toBe(400);
@@ -313,15 +314,15 @@ describe("transaction endpoints", () => {
             expect(response.status).toBe(200);
             expect(response.body.msg).toEqual("CSV processed successfully");
             expect(response.body.transactions).toEqual([
-                { amount: 4, assetType: "stock", category: "Investment", currency: "nvda",
+                { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
                     date: 1711929600000, name: "Test transaction", type: true, valid: true },
-                { amount: 760, assetType: "cash", category: "Side job", currency: "usd",
+                { amount: 760, assetType: "cash", category: "Side job", currency: "USD",
                     date: 1743552000000, name: "Test transaction 2", type: true, valid: true },
-                { amount: 4, assetType: "crypto", category: "Smart contracts", currency: "eth",
+                { amount: 4, assetType: "crypto", category: "Smart contracts", currency: "ETH",
                     date: 1711929600000, name: "Test transaction 3", type: true, valid: true },
-                { amount: 0.3, assetType: "crypto", category: "", currency: "btc",
+                { amount: 0.3, assetType: "crypto", category: "", currency: "BTC",
                     date: 1714521600000, name: "Test transaction 4", type: true, valid: true },
-                { amount: 50, assetType: "crypto", category: "", currency: "ada",
+                { amount: 50, assetType: "crypto", category: "", currency: "ADA",
                     date: 1722470400000, name: "Test transaction 5", type: true, valid: true }
             ]);
         });
@@ -337,15 +338,15 @@ describe("transaction endpoints", () => {
             expect(response.status).toBe(200);
             expect(response.body.msg).toEqual("CSV processed successfully");
             expect(response.body.transactions).toEqual([
-                { amount: 4, assetType: "stock", category: "Investment", currency: "nvda",
+                { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
                     date: 1711929600000, name: "Test transaction", type: true, valid: true },
-                { amount: 760, assetType: "cash", category: "Other", currency: "usd",
+                { amount: 760, assetType: "cash", category: "Other", currency: "USD",
                     date: 1743552000000, name: "Test transaction 2", type: true, valid: true },
-                { amount: 4, assetType: "crypto", category: "Other", currency: "eth",
+                { amount: 4, assetType: "crypto", category: "Other", currency: "ETH",
                     date: 1711929600000, name: "Test transaction 3", type: true, valid: true },
-                { amount: 0.3, assetType: "crypto", category: "", currency: "btc",
+                { amount: 0.3, assetType: "crypto", category: "", currency: "BTC",
                     date: 1714521600000, name: "Test transaction 4", type: true, valid: true },
-                { amount: 50, assetType: "crypto", category: "", currency: "ada",
+                { amount: 50, assetType: "crypto", category: "", currency: "ADA",
                     date: 1722470400000, name: "Test transaction 5", type: true, valid: true }
             ]);
         });

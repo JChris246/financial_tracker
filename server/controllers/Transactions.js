@@ -73,7 +73,7 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "Asset currency not supported" };
     }
 
-    return { valid: true, name, date, amount, type, category, assetType: assetType.toLowerCase(), currency: currency.toLowerCase() };
+    return { valid: true, name, date, amount, type, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() };
 }
 
 module.exports.addTransaction = (req , res) => {
@@ -173,7 +173,7 @@ const expectedCsvHeader = (header) => {
             return { map, valid: true };
         }
 
-        return { missingFields, valid: false };
+        return { missingFields: missingFields.map(([key]) => key), valid: false };
     }
 
     return { map, valid: true };
@@ -238,7 +238,7 @@ module.exports.processCSV = (req, res) => {
         return res.status(200).send({ msg: "CSV processed successfully", transactions });
     } else {
         // TODO: use AI to determine what the header fields correspond to, if possible
-        return res.status(400).send({ msg: "Invalid CSV header missing fields: " + missingFields.map(x => x[0]).join(",") });
+        return res.status(400).send({ msg: "Invalid CSV header missing fields: " + missingFields.join(",") });
     }
 };
 
@@ -264,4 +264,10 @@ module.exports.getGraphData = (_, res) => {
             res.status(500).send({ msg: err });
         }
     );
+};
+
+// export for unit testing
+module.exports = {
+    ...module.exports,
+    validateAddTransactionRequest, expectedCsvHeader
 };
