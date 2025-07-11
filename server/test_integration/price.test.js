@@ -5,7 +5,7 @@ const superTestRequest = supertest(server);
 
 const { ASSET_TYPE } = require("../utils/constants");
 
-describe.only("price endpoints", () => {
+describe("price endpoints", () => {
     describe("getCurrencies", () => {
         test("should return bad request if invalid asset type is provided", async () => {
             // Act

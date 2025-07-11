@@ -1,0 +1,6 @@
+name,type,date,category,assetType
+Test transaction,true,2024-04-01,Investment,stock
+Test transaction 2,true,2025-04-02,Side job,cash
+Test transaction 3,true,2024-04-01,Smart contracts,crypto
+Test transaction 4,true,2024-05-01,,crypto
+Test transaction 5,true,2024-08-01,,crypto

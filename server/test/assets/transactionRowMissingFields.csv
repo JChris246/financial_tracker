@@ -1,0 +1,3 @@
+name,amount,type,date,category,assetType,currency
+Test transaction,4,true,2024-04-01,Investment,stock,NVDA
+Test transaction 2,true,2025-04-02,Side job,cash,USD

@@ -5,6 +5,8 @@ var controller = require("../controllers/Transactions");
 router
     .get("/:type?", controller.getTransactions)
     .post("/", controller.addTransaction)
+    .post("/all", controller.addTransactions)
+    .post("/csv", controller.processCSV)
     .get("/all/graph", controller.getGraphData);
 
 module.exports = router;

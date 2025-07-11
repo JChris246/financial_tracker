@@ -12,6 +12,7 @@ global.env = process.env.NODE_ENV || "development";
 global.MOCK_CONVERSIONS = process.env.MOCK_CONVERSIONS;
 global.DB_PATH = process.env.DB_PATH;
 
+// TODO: add logic to make sure this value is at least a certain amount before assigning?
 const CACHE_REFRESH_INTERVAL = global.env === "test" ? 0 : (process.env.CACHE_REFRESH_INTERVAL || 1000 * 60 * 60 * 4); // 4 hours
 
 // Server routes

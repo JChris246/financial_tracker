@@ -1,5 +1,5 @@
 const { request, format, isDefined, sleep, isValidArray } = require("./utils");
-const { FIAT_CURRENCIES, CRYPTO_CURRENCY_NAMES } = require("./constants");
+const { FIAT_CURRENCIES, CRYPTO_CURRENCY_NAMES, STOCK_CURRENCIES } = require("./constants");
 
 const logger = require("../logger").setup();
 
