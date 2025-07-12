@@ -244,7 +244,7 @@ const generateCryptoConversionMap = async (currencies) => {
         const result = await getConversionCoinGecko(buffer.map((x) => x.name), [FIAT_BASE]);
         if (result !== null) {
             for (let j = 0; j < buffer.length; j++) {
-                map[buffer[j].symbol] = result[buffer[j].name.toLowerCase()][FIAT_BASE];
+                map[buffer[j].symbol] = result[buffer[j].name.toLowerCase()][FIAT_BASE.toLowerCase()];
             }
             buffer = []; // is there better way than this memory reallocation?
         }

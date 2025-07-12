@@ -154,5 +154,18 @@ test.describe("transaction history", () => {
         await expect(items.first().locator("#transaction-history-amount-0")).toHaveText(/-\s*20\.00/);
         await expect(items.last().locator("#transaction-history-amount-4")).toHaveText(/-\s*40\.00/);
     });
-});
 
+    test.describe("at a glance prices", () => {
+        test("at a glance price should be displayed; there should be 10 items, with key and value", async ({ page }) => {
+            await pageSetup({ page });
+
+            const items = page.locator("[glance-price]");
+            await expect(items).toHaveCount(10);
+
+            for (let i = 0; i < 10; i++) {
+                expect(items.nth(i).locator("span").nth(0)).toHaveText(/[A-Z]+/);
+                expect(items.nth(i).locator("span").nth(1)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
+            }
+        })
+    });
+});
