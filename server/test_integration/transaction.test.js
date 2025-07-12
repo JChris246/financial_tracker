@@ -351,4 +351,47 @@ describe("transaction endpoints", () => {
             ]);
         });
     });
+
+    describe("exportTransactions", () => {
+        test("should return bad request when an invalid format is provided", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/transaction/export/xls");
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toBe("Invalid export format");
+        });
+
+        test("should return success response and all transactions as json when transactions added successfully", async () => {
+            // Arrange
+            await superTestRequest.post("/api/transaction/all").send([
+                { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
+                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "btc", date: "2023-01-01" },
+                { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL", category: "Investment", date: "2024-01-01" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.get("/api/transaction/export/json");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.length).toBe(3);
+        });
+
+        test("should return success response and all transactions as csv when transactions added successfully", async () => {
+            // Arrange
+            await superTestRequest.post("/api/transaction/all").send([
+                { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
+                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "btc", date: "2023-01-01" },
+                { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL", category: "Investment", date: "2024-01-01" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.get("/api/transaction/export/csv");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.csv.split("\n").length).toBe(4);
+        });
+    });
 });

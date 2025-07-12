@@ -1,5 +1,5 @@
 const { describe, expect, test } = require("@jest/globals");
-const { validateAddTransactionRequest, expectedCsvHeader} = require("../../controllers/Transactions");
+const { validateAddTransactionRequest, expectedCsvHeader, csv } = require("../../controllers/Transactions");
 const { isNumber } = require("../../utils/utils");
 
 describe("Transactions", () => {
@@ -83,6 +83,15 @@ describe("Transactions", () => {
 
         test.each(validCsvHeaders)("should return true for valid transaction payloads: %s", ({ input, expected }) => {
             expect(expectedCsvHeader(input)).toEqual(expected);
+        });
+    });
+
+    describe("csv", () => {
+        test("should return csv for provided json transactions", () => {
+            const input = [{ name: "Test", amount: 50, type: true, date: 1640995200000, category: "Groceries", assetType: "cash", currency: "USD" }];
+            const expected = `Name,Amount,Date,Category,Asset Type,Currency\nTest,50,2021-12-31 20:00,Groceries,cash,USD`;
+
+            expect(csv(input)).toEqual(expected);
         });
     });
 });

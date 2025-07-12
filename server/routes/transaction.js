@@ -7,6 +7,7 @@ router
     .post("/", controller.addTransaction)
     .post("/all", controller.addTransactions)
     .post("/csv", controller.processCSV)
+    .get("/export/:format", controller.exportTransactions)
     .get("/all/graph", controller.getGraphData);
 
 module.exports = router;

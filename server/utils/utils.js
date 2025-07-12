@@ -52,6 +52,44 @@ const toPrecision = (value, precision=4) => {
     return Number(value.toFixed(precision));
 }
 
+// here is where code sharing would be useful
+const pad = (v, n = 2) => {
+    v = v + ""; // convert to string
+    if (v.length >= n)
+        return v;
+    for (let i = 0; i < n; i++) {
+        v = "0" + v;
+        if (v.length >= n)
+            break;
+    }
+    return v;
+};
+
+const formatDate = (d) => {
+    if (typeof d === "string") {
+        d = d.trim();
+    }
+
+    if (!d) {
+        return "";
+    }
+
+    if (typeof d === "string" || typeof d === "number") {
+        d = new Date(d);
+    } else if (!(d instanceof Date)) {
+        return "";
+    }
+
+    if (d.toString() === "Invalid Date") {
+        return "";
+    }
+
+    const date = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    const time = pad(d.getHours()) + ":" + pad(d.getMinutes());
+
+    return date + " " + time; // YYYY-MM-DD hh:mm - 2022-01-07 23:43
+};
+
 const format = (str, args) => {
     // use replace to iterate over the string
     // select the match and check if the related argument is present
@@ -111,4 +149,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
     });
 };
 
-module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray, positiveNumberOrZero, toPrecision };
+module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray, positiveNumberOrZero, toPrecision, formatDate, pad };

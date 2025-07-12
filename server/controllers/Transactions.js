@@ -1,7 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, makeBool, isDefined, isValidArray } = require("../utils/utils");
+const { isNumber, makeBool, isDefined, isValidArray, formatDate } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
@@ -242,6 +242,36 @@ module.exports.processCSV = (req, res) => {
     }
 };
 
+const csv = transactions => {
+    return "Name,Amount,Date,Category,Asset Type,Currency\n" +
+    transactions.map(transaction =>
+        transaction.name + "," + transaction.amount + "," + formatDate(transaction.date) + "," + transaction.category + "," +
+        transaction.assetType + "," + transaction.currency
+    ).join("\n");
+};
+
+module.exports.exportTransactions = (req, res) => {
+    const format = req.params.format;
+    if (format !== "csv" && format !== "json") {
+        logger.warn("User tried to export transactions with invalid format: " + format);
+        return res.status(400).send({ msg: "Invalid export format" });
+    }
+
+    getDatabase().getAllTransactions(
+        transactions => {
+            if (format === "csv") {
+                res.status(200).send({ csv: csv(transactions) });
+            } else {
+                res.status(200).send(transactions); // this really just the same as get transactions endpoint
+            }
+        },
+        err => {
+            logger.error("An error occurred while exporting transactions: " + err);
+            res.status(500).send({ msg: "An error occurred while exporting transactions" });
+        }
+    );
+}
+
 module.exports.getGraphData = (_, res) => {
     getDatabase().getAllTransactions(
         transactions => {
@@ -269,5 +299,5 @@ module.exports.getGraphData = (_, res) => {
 // export for unit testing
 module.exports = {
     ...module.exports,
-    validateAddTransactionRequest, expectedCsvHeader
+    validateAddTransactionRequest, expectedCsvHeader, csv
 };

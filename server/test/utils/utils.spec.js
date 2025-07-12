@@ -1,6 +1,6 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision } = require("../../utils/utils");
+const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision, formatDate, pad } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
@@ -171,6 +171,36 @@ describe("utils", () => {
             { value: 0.30000000000000004, expected: 0.3 },
         ])("returns the number to n decimal places (sig figs) or as is if is not a number '%s'", ({ value, places, expected }) => {
             expect(toPrecision(value, places)).toEqual(expected);
+        });
+    });
+
+    describe("pad", () => {
+        const testCases = [
+            { input: 123, n: 2, expected: "123" },
+            { input: 12345, n: 3, expected: "12345" },
+            { input: 1, n: 3, expected: "001" },
+            { input: "abcde", n: 2, expected: "abcde" },
+            { input: "1234", n: 5, expected: "01234" },
+            { input: "01", n: 2, expected: "01" },
+            { input: "1", n: 2, expected: "01" },
+        ];
+
+        test.each(testCases)("should pad string with zeros until length reaches n: '%s'", ({ input, n, expected }) => {
+            expect(pad(input, n)).toBe(expected);
+        });
+    });
+
+    describe("formatDate", () => {
+        test.each([
+            new Date(), new Date().getTime(), new Date().toISOString(), new Date("2023-01-07"), 1749348549650,
+        ])("should format date to string as YYYY-MM-DDThh:mm for '%s'", input => {
+            expect(formatDate(input)).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+        });
+
+        test.each([
+            null, undefined, "", " ", "date", {}, [], false, true
+        ])("should return blank string if provided date is falsy (or not valid input): '%s'", input => {
+            expect(formatDate(input)).toBe("");
         });
     });
 });

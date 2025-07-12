@@ -34,11 +34,15 @@ describe("utils", () => {
             expect(formatDate(input, DATE_TYPE.DISPLAY_DATE)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         });
 
-        test("should return blank string if provided date is falsy", () => {
+        test("should return blank string if provided date is falsy (or invalid input)", () => {
             expect(formatDate(null, DATE_TYPE.INPUT)).toBe("");
             expect(formatDate(undefined, DATE_TYPE.DISPLAY_DATE)).toBe("");
             expect(formatDate("", DATE_TYPE.DISPLAY_DATE)).toBe("");
             expect(formatDate("", DATE_TYPE.DISPLAY_FULL)).toBe("");
+            expect(formatDate(" ", DATE_TYPE.DISPLAY_FULL)).toBe("");
+            expect(formatDate("date", DATE_TYPE.DISPLAY_FULL)).toBe("");
+            expect(formatDate({}, DATE_TYPE.DISPLAY_FULL)).toBe("");
+            expect(formatDate([], DATE_TYPE.DISPLAY_FULL)).toBe("");
         });
     });
 
