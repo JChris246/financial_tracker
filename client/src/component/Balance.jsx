@@ -133,6 +133,7 @@ const Balance = ({ refresh }) => {
 
             <div className="flex flex-col lg:flex-row justify-center lg:justify-between mx-auto lg:mx-0 w-3/4 lg:w-2/4 p-4 h-fit lg:h-75">
                 <Doughnut options={getOptions("Asset Allocation")} data={assetAllocationData}/>
+                {/* TODO: I need to relocate these, putting them here was for POC */}
                 <Doughnut options={getOptions("Crypto Allocation")} data={cryptoAllocationData}/>
                 <Doughnut options={getOptions("Stock Allocation")} data={stockAllocationData}/>
             </div>

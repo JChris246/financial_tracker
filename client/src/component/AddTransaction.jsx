@@ -8,6 +8,7 @@ import { Modal } from "./Modal";
 
 export const AddTransaction = ({ refresh }) => {
     const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
+    const [isCategoryFreeText, setIsCategoryFreeText] = useState(false);
     const [transaction, setTransaction] = useState({
         name: "",
         amount: "",
@@ -41,10 +42,10 @@ export const AddTransaction = ({ refresh }) => {
             url: "/api/list/category",
             callback: ({ msg, success, json }) => {
                 if (success) {
-                    setTransactionCategories(json);
+                    setTransactionCategories(["add custom", ...json]);
                     setTransaction({ ...transaction, category: json[0] });
                 } else {
-                    setAssetTypes(["groceries", "other"]); // fallback on default
+                    setTransactionCategories(["groceries", "other"]); // fallback on default
                     displayNotification({ message: "An error occurred fetching transaction categories: " + msg, type: NotificationType.Error });
                 }
             }
@@ -75,10 +76,16 @@ export const AddTransaction = ({ refresh }) => {
 
     const enterTransaction = (e) => {
         let newObject = { ...transaction, [e.target.name]: e.target.value };
-        setTransaction(newObject);
 
         if (e.target.name === "assetType") {
             newObject = { ...newObject, currency: assetCurrencies[e.target.value][0] };
+        }
+
+        if (e.target.name === "category" && !isCategoryFreeText) {
+            if (e.target.value === "add custom") {
+                setIsCategoryFreeText(true);
+                newObject = { ...newObject, category: "" };
+            }
         }
 
         setTransaction(newObject);
@@ -107,14 +114,30 @@ export const AddTransaction = ({ refresh }) => {
             callback: ({ msg, success }) => {
                 if (success) {
                     // clear input and close input
-                    setTransaction({ name: "", amount: "", date: formatDate(new Date(), DATE_TYPE.INPUT) });
-                    setIsAddTransactionModalOpen(false);
+                    closeAddTransactionModal();
                     refresh();
                 } else {
                     displayNotification({ message: "Unable to add transaction: " + msg, type: NotificationType.Error });
                 }
             }
         });
+    };
+
+    const categoryInputTemplate = () => {
+        return isCategoryFreeText ?
+            <input
+                type="text" value={transaction.category} onChange={enterTransaction} name="category" required title="category"
+                id="transaction-category" className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600
+                    focus:border-blue-500 focus:outline-none focus:ring"
+                placeholder="Enter a custom transaction category" />
+            : <select value={transaction.category} onChange={enterTransaction} name="category" required title="category"
+                id="transaction-category"
+                className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600 focus:border-blue-500
+                    focus:outline-none focus:ring">
+                { transactionCategories.map((category) => (
+                    <option key={category}>{category}</option>
+                ))}
+            </select>;
     };
 
     const addTransactionTemplate = () => {
@@ -131,7 +154,7 @@ export const AddTransaction = ({ refresh }) => {
                         title="Close Menu"
                         className="object-right p-2 -mt-2 -mr-2 transition duration-200 rounded-full hover:bg-red-700 focus:bg-gray-700
                             focus:outline-none focus:shadow-outline hover:cursor-pointer"
-                        onClick={() => setIsAddTransactionModalOpen(false)}
+                        onClick={closeAddTransactionModal}
                     >
                         <XIcon className="w-5 text-slate-100 " />
                     </button>
@@ -149,14 +172,7 @@ export const AddTransaction = ({ refresh }) => {
                                 focus:border-blue-500 focus:outline-none focus:ring"
                             placeholder="Transaction Amount" id="transaction-amount" />
 
-                        <select value={transaction.category} onChange={enterTransaction} name="category" required title="category"
-                            id="transaction-category"
-                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600 focus:border-blue-500
-                                focus:outline-none focus:ring">
-                            { transactionCategories.map((category) => (
-                                <option key={category}>{category}</option>
-                            ))}
-                        </select>
+                        { categoryInputTemplate() }
 
                         <select value={transaction.assetType} onChange={enterTransaction} name="assetType" required title="asset type"
                             id="transaction-asset-type"
@@ -195,6 +211,14 @@ export const AddTransaction = ({ refresh }) => {
         );
     };
 
+    const closeAddTransactionModal = () => {
+        setIsAddTransactionModalOpen(false);
+        setIsCategoryFreeText(false);
+        setTransaction({
+            name: "", amount: "", date: formatDate(new Date(), DATE_TYPE.INPUT), category: "other", assetType: "cash", currency: "aed"
+        });
+    };
+
     return (
         <section id="add-transaction" className="flex flex-col p-4">
 
@@ -210,7 +234,7 @@ export const AddTransaction = ({ refresh }) => {
                 Add Transaction
             </button>
 
-            {isAddTransactionModalOpen && <Modal close={() => setIsAddTransactionModalOpen(false)}>
+            {isAddTransactionModalOpen && <Modal close={closeAddTransactionModal}>
                 { addTransactionTemplate() }
             </Modal> }
 
