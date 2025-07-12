@@ -101,7 +101,7 @@ describe("transaction endpoints", () => {
             expect(response.body.type).toEqual(true);
             expect(response.body.assetType).toEqual("cash");
             expect(response.body.currency).toEqual("USD");
-            expect(response.body.category).toBeUndefined();
+            expect(response.body.category).toEqual("other");
         });
 
         test("should return success response and transaction payload when transaction added successfully", async () => {
@@ -238,7 +238,8 @@ describe("transaction endpoints", () => {
             expect(response.body.addedTransactions).toEqual([
                 { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "USD",
                     date: 1640995200000, type: true, category: "Groceries" },
-                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1672531200000, type: false },
+                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1672531200000,
+                    type: false, category: "other" },
                 { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL",
                     date: 1704067200000, type: true, category: "Investment" },
             ]);

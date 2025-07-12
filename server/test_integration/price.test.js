@@ -55,7 +55,6 @@ describe("price endpoints", () => {
 
             // Assert
             expect(response.status).toBe(200);
-            console.log(response.body);
             // expect(Object.keys(response.body).length).toBeGreaterThan(1);
             expect(response.body[Object.keys(response.body)[0]]).toBeGreaterThan(0);
         });

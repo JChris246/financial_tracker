@@ -1,5 +1,6 @@
 const logger = require("../logger").setup();
 
+const { getDatabase } = require("../db/index");
 const { ASSET_TYPE, ASSET_CURRENCIES, DEFAULT_CATEGORIES } = require("../utils/constants");
 const { isDefined } = require("../utils/utils");
 
@@ -19,7 +20,9 @@ module.exports.getCurrencies = (req, res) => {
     }
 };
 
-module.exports.getTransactionCategories = (_, res) => {
-    // TODO: get the user save categories
-    res.status(200).send(DEFAULT_CATEGORIES);
+module.exports.getTransactionCategories = async (_, res) => {
+    const userCategories = await getDatabase().getAllTransactionCategories();
+    const returnCategories = [...new Set([...DEFAULT_CATEGORIES, ...userCategories])].sort();
+
+    res.status(200).send(returnCategories);
 };

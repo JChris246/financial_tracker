@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const Transaction = require("./models/Transactions");
 const { getCache: getCacheJson, saveCache: saveCacheJson } = require("../json");
+const { isValidString } = require("../../utils/utils");
 
 const logger = require("../../logger").setup();
 
@@ -111,6 +112,12 @@ const getAllTransactionCurrencies = async () => {
     }
 };
 
+const getAllTransactionCategories = async () => {
+    const results = await Transaction.distinct("category");
+
+    return results.filter(c => isValidString(c)).map(c => c.toLowerCase());
+};
+
 // because I'm lazy, and don't think the cache record should be a whole collection (also should this be redis?)
 const getCache = () => {
     const cache = getCacheJson();
@@ -125,5 +132,5 @@ const saveCache = (cache) => {
 };
 
 module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts,
-    getCache, saveCache, getAllTransactionCurrencies };
+    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };
 
