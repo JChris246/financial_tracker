@@ -1,6 +1,7 @@
 const { describe, expect, test } = require("@jest/globals");
 
-const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision, formatDate, pad } = require("../../utils/utils");
+const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision,
+    formatDate, pad, isValidString } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
@@ -103,7 +104,7 @@ describe("utils", () => {
             { value: "a", expected: true },
             { value: {}, expected: true },
             { value: [], expected: true },
-        ])("returns true if the input is defined and not null or undefined (false otherwise): '%s'", ({ value, expected }) => {
+        ])("returns true if the input is defined and not null (false otherwise): '%s'", ({ value, expected }) => {
             expect(isDefined(value)).toBe(expected);
         });
     });
@@ -201,6 +202,26 @@ describe("utils", () => {
             null, undefined, "", " ", "date", {}, [], false, true
         ])("should return blank string if provided date is falsy (or not valid input): '%s'", input => {
             expect(formatDate(input)).toBe("");
+        });
+    });
+
+    describe("isValidString", () => {
+        test.each([
+            { value: undefined, expected: false },
+            { value: null, expected: false },
+            { expected: false },
+            { value: 0, expected: false },
+            { value: "", expected: false },
+            { value: " ", expected: false },
+            { value: {}, expected: false },
+            { value: [], expected: false },
+            { value: "a", expected: true },
+            { value: "at", expected: true },
+            { value: "at most", expected: true },
+            { value: " at most ", expected: true },
+        ])("returns true if the input is defined and not null and is a string and is not empty or whitespace (false otherwise): '%s'",
+            ({ value, expected }) => {
+                expect(isValidString(value)).toBe(expected);
         });
     });
 });

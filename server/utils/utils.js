@@ -15,6 +15,10 @@ const isDefined = (value) => {
     return value !== undefined && value !== null;
 };
 
+const isValidString = (value) => {
+    return isDefined(value) && typeof value === "string" && value.trim() !== "";
+};
+
 const makeBool = (value) => {
     if (!isDefined(value)) {
         return false;
@@ -149,4 +153,5 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
     });
 };
 
-module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray, positiveNumberOrZero, toPrecision, formatDate, pad };
+module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray,
+    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString };

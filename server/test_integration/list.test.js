@@ -4,6 +4,7 @@ const server = require("../financial_tracker_server.js");
 const superTestRequest = supertest(server);
 
 const { ASSET_TYPE, DEFAULT_CATEGORIES, ASSET_CURRENCIES } = require("../utils/constants");
+const { addTransaction } = require("./helpers");
 
 describe("list endpoints", () => {
     test("getAssetTypes - should return asset type list", async () => {
@@ -15,13 +16,31 @@ describe("list endpoints", () => {
         expect(response.body).toEqual(Object.values(ASSET_TYPE));
     });
 
-    test("getTransactionCategories - should return list of categories", async () => {
-        // Act
-        const response = await superTestRequest.get("/api/list/category");
+    describe("getTransactionCategories", () => {
+        test("should return default list of categories when user has no transactions", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/list/category");
 
-        // Assert
-        expect(response.status).toBe(200);
-        expect(response.body).toEqual(DEFAULT_CATEGORIES);
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual(DEFAULT_CATEGORIES.sort());
+        });
+
+        test("should return full list of categories when user has transactions", async () => {
+            // Arrange
+            await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 12, category: "Leisure" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: 10, category: "Children" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 3", amount: 6, category: "Groceries" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 4", amount: 50, category: "other" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 5", amount: 2, category: "Other" });
+
+            // Act
+            const response = await superTestRequest.get("/api/list/category");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual([...DEFAULT_CATEGORIES, "leisure", "children"].sort());
+        });
     });
 
     describe("getCurrencies", () => {
@@ -55,5 +74,5 @@ describe("list endpoints", () => {
             expect(response.status).toBe(200);
             expect(response.body).toEqual(ASSET_CURRENCIES);
         })
-    })
+    });
 });

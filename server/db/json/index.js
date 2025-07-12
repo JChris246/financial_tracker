@@ -3,6 +3,8 @@ const fs = require("fs");
 
 const logger = require("../../logger").setup();
 
+const { isValidString } = require("../../utils/utils");
+
 const fullDbPath = path.join(global.DB_PATH, "data");
 const DB = ["db-transactions.json", "db-cache.json"]
     .map(file => path.join(fullDbPath, file));
@@ -160,6 +162,23 @@ const getAllTransactionCurrencies = () => {
     return distinctCurrencies;
 };
 
+const getAllTransactionCategories = () => {
+    const categoriesSet = new Set();
+    const transactions = getItems(DB_TYPE.TRANSACTIONS, "get all transactions to get distinct categories");
+
+    transactions.forEach(t => {
+        if (!isValidString(t.category)) return;
+
+        if (categoriesSet.has(t.category.toLowerCase())) {
+            return;
+        }
+
+        categoriesSet.add(t.category.toLowerCase());
+    });
+
+    return [...categoriesSet.keys()];
+};
+
 
 // should this maybe be a redis cache?
 
@@ -173,4 +192,4 @@ const saveCache = (cache) => {
 };
 
 module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts,
-    getCache, saveCache, getAllTransactionCurrencies };
+    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };

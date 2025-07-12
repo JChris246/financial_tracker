@@ -21,9 +21,10 @@ describe("Transactions", () => {
         const validTransactionPayloads = [
             // name,amount,type?,date?,category?,assetType,currency
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true } },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true, category: "other" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", date: "2022-01-01" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true, date: 1640995200000 } },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true,
+                    date: 1640995200000, category: "other" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" },
                 expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true, category: "Groceries" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries", type: true },

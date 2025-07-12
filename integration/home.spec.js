@@ -22,7 +22,7 @@ test("has title", async ({ page }) => {
 });
 
 const addTransaction = async (page, value, assetType="cash", currency="eur", date) => {
-    const addTransactionButton = await page.locator("#add-transaction-button");
+    const addTransactionButton = page.locator("#add-transaction-button");
 
     await addTransactionButton.click();
     await page.locator("#transaction-name").fill("Test Transaction"); // Increment a count for this?
@@ -35,6 +35,25 @@ const addTransaction = async (page, value, assetType="cash", currency="eur", dat
     }
     await page.locator("#submit-transaction").click();
 };
+
+test.describe("add transaction", () => {
+    test("should allow user to add a transaction with a custom category", async ({ page }) => {
+        await pageSetup({ page });
+
+        const addTransactionButton = page.locator("#add-transaction-button");
+        await addTransactionButton.click();
+
+        await page.locator("#transaction-name").fill("Test Transaction");
+        await page.locator("#transaction-amount").fill("12");
+        await page.locator("#transaction-category").selectOption({ value: "add custom" });
+        await page.locator("#transaction-category").fill("Leisure");
+        await page.locator("#transaction-asset-type").selectOption({ value: "cash" });
+        await page.locator("#transaction-currency").selectOption({ value: "usd" });
+        await page.locator("#submit-transaction").click();
+
+        await expect(page.locator("#transaction-history-list > *")).toHaveCount(1);
+    });
+});
 
 
 test.describe("balance section", () => {
@@ -154,18 +173,18 @@ test.describe("transaction history", () => {
         await expect(items.first().locator("#transaction-history-amount-0")).toHaveText(/-\s*20\.00/);
         await expect(items.last().locator("#transaction-history-amount-4")).toHaveText(/-\s*40\.00/);
     });
+});
 
-    test.describe("at a glance prices", () => {
-        test("at a glance price should be displayed; there should be 10 items, with key and value", async ({ page }) => {
-            await pageSetup({ page });
+test.describe("at a glance prices", () => {
+    test("at a glance price should be displayed; there should be 10 items, with key and value", async ({ page }) => {
+        await pageSetup({ page });
 
-            const items = page.locator("[glance-price]");
-            await expect(items).toHaveCount(10);
+        const items = page.locator("[glance-price]");
+        await expect(items).toHaveCount(10);
 
-            for (let i = 0; i < 10; i++) {
-                expect(items.nth(i).locator("span").nth(0)).toHaveText(/[A-Z]+/);
-                expect(items.nth(i).locator("span").nth(1)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
-            }
-        })
-    });
+        for (let i = 0; i < 10; i++) {
+            expect(items.nth(i).locator("span").nth(0)).toHaveText(/[A-Z]+/);
+            expect(items.nth(i).locator("span").nth(1)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
+        }
+    })
 });

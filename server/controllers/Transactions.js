@@ -22,7 +22,7 @@ const parseDate = d => (new Date(d).getTime());
 
 // TODO: unit test this?
 const validateAddTransactionRequest = (reqBody) => {
-    const { name, date: userDate, amount: userAmount, type: userType, category, assetType, currency } = reqBody;
+    const { name, date: userDate, amount: userAmount, type: userType, category: userCategory, assetType, currency } = reqBody;
 
     // get the timestamp from user, if it doesn't exist use the current timestamp
     const date = parseDate(userDate) || Date.now(); // if the date was not parsed correctly, current timestamp will be used
@@ -43,13 +43,14 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "You need to have the transaction name" };
     }
 
-    // should we valid that the userType (if provided) matches with the transaction amount?
+    // should we validate that the userType (if provided) matches with the transaction amount?
     // should we even be accepting type, just infer
     const type = isDefined(userType) ? makeBool(userType) : amount > 0;
 
-    // TODO: should I make this required?
-    if (!isDefined(category)) {
-        logger.warn("Transaction adding without a category");
+    let category = userCategory;
+    if (!isDefined(userCategory)) {
+        logger.warn("Transaction adding without a category, defaulting to other");
+        category = "other";
     }
 
     if (!isDefined(assetType)) {
