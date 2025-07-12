@@ -141,20 +141,17 @@ export const AddTransaction = ({ refresh }) => {
                     <div className="flex flex-col mt-0 space-y-2 sm:justify-center sm:-mx-2">
                         <input
                             type="text" value={transaction.name} onChange={enterTransaction} name="name" required id="transaction-name"
-                            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
-                                dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
-                                focus:outline-none focus:ring"
+                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600
+                                focus:border-blue-500 focus:outline-none focus:ring"
                             placeholder="Transaction Name" />
                         <input type="number" value={transaction.amount} onChange={enterTransaction} name="amount" required
-                            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
-                                dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
-                                focus:outline-none focus:ring"
+                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600
+                                focus:border-blue-500 focus:outline-none focus:ring"
                             placeholder="Transaction Amount" id="transaction-amount" />
 
                         <select value={transaction.category} onChange={enterTransaction} name="category" required title="category"
                             id="transaction-category"
-                            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
-                                dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
+                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600 focus:border-blue-500
                                 focus:outline-none focus:ring">
                             { transactionCategories.map((category) => (
                                 <option key={category}>{category}</option>
@@ -163,8 +160,7 @@ export const AddTransaction = ({ refresh }) => {
 
                         <select value={transaction.assetType} onChange={enterTransaction} name="assetType" required title="asset type"
                             id="transaction-asset-type"
-                            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
-                                dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
+                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600 focus:border-blue-500
                                 focus:outline-none focus:ring">
                             { assetTypes.map((category) => (
                                 <option key={category}>{category}</option>
@@ -173,8 +169,7 @@ export const AddTransaction = ({ refresh }) => {
 
                         <select value={transaction.currency} onChange={enterTransaction} name="currency" required title="currency"
                             id="transaction-currency"
-                            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
-                                dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
+                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600 focus:border-blue-500
                                 focus:outline-none focus:ring">
                             { assetCurrencies[transaction.assetType]?.map((category) => (
                                 <option key={category}>{category}</option>
@@ -183,9 +178,8 @@ export const AddTransaction = ({ refresh }) => {
 
                         <input type="datetime-local" value={transaction.date} onChange={enterTransaction} name="date" required
                             title="transaction date" id="transaction-date"
-                            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md sm:mx-2 dark:bg-gray-800
-                                dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500
-                                focus:outline-none focus:ring"
+                            className="px-4 py-2 border rounded-md sm:mx-2 bg-gray-800 text-gray-300 border-gray-600
+                                focus:border-blue-500 focus:outline-none focus:ring"
                             placeholder="Transaction Date" />
 
                         <button

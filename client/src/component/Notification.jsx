@@ -55,13 +55,13 @@ const Notification = () => {
     ];
 
     return (
-        open ? <div ref={componentRef} className="max-w-xs bg-white border rounded-md shadow-lg dark:bg-gray-800 dark:border-gray-700 absolute bottom-2 left-2 z-20" role="alert">
+        open ? <div ref={componentRef} className="max-w-xs border rounded-md shadow-lg bg-gray-800 border-gray-700 absolute bottom-2 left-2 z-20" role="alert">
             <div className="flex p-4">
                 <div className="flex-shrink-0">
                     {icons[type]()}
                 </div>
                 <div className="ml-3">
-                    <p className="text-sm text-gray-700 dark:text-gray-400">
+                    <p className="text-sm text-gray-400">
                         {message}
                     </p>
                 </div>
