@@ -30,7 +30,8 @@ export const NavBar = () => {
             <div className="relative flex items-center justify-between">
                 <span className="ml-2 text-xl font-bold tracking-wide text-gray-800 uppercase">
                     <header>
-                        <h1 data-test-id="header-title" className="pb-4 mt-4 lg:mt-0 lg:py-8 text-3xl text-gray-200 underline-decoration">Finance Tracker</h1>
+                        <h1 data-test-id="header-title"
+                            className="pb-4 mt-4 lg:mt-0 lg:py-8 text-3xl text-gray-200 underline-decoration">Finance Tracker</h1>
                     </header>
                 </span>
                 <ul className="items-center hidden space-x-8 lg:flex">{
