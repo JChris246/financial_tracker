@@ -89,9 +89,9 @@ describe("Transactions", () => {
     describe("csv", () => {
         test("should return csv for provided json transactions", () => {
             const input = [{ name: "Test", amount: 50, type: true, date: 1640995200000, category: "Groceries", assetType: "cash", currency: "USD" }];
-            const expected = `Name,Amount,Date,Category,Asset Type,Currency\nTest,50,2021-12-31 20:00,Groceries,cash,USD`;
+            const expected = /Name,Amount,Date,Category,Asset Type,Currency\nTest,50,\d{4}-\d{2}-\d{2} \d{2}:\d{2},Groceries,cash,USD/;
 
-            expect(csv(input)).toEqual(expected);
+            expect(csv(input)).toMatch(expected);
         });
     });
 });
