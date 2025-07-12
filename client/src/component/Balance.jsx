@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { NotificationType, useNotificationContext } from "./Notification";
-import { request } from "../utils/Fetch";
 import { formatMoney } from "../utils/utils";
 import { useProgressColor } from "../utils/useProgressColor";
 import { AddTransaction } from "./AddTransaction";
+
+import { useAppContext } from "../AppContext";
 
 import {
     Chart as ChartJS,
@@ -45,8 +45,8 @@ const prepareGraphData = (assetMap, keyValue) => {
     return { data, labels, colors };
 };
 
-const Balance = ({ sync, refresh }) => {
-    const [balance, setBalance] = useState(0);
+const Balance = ({ refresh }) => {
+    const { balance } = useAppContext();
     const [assetAllocationData, setAssetAllocationData] = useState({
         labels: ["None"],
         datasets: [{
@@ -69,74 +69,56 @@ const Balance = ({ sync, refresh }) => {
         }]
     });
 
-    const { display: displayNotification } = useNotificationContext();
-
     useEffect(() => {
-        request({
-            url: "/api/balance",
-            method: "GET",
-            callback: ({ msg, success, json }) => {
-                if (success) {
-                    // get the balance from the response json
-                    const { balance: b, crypto, stock, cash } = json;
-                    setBalance(b);
-
-                    const data = [];
-                    const labels = [];
-                    const colors = [];
-                    [crypto, stock, cash].forEach((assetType) => {
-                        const { data: assetData, labels: assetLabels, colors: assetColors } = prepareGraphData(assetType, "allocation");
-                        data.push(...assetData);
-                        labels.push(...assetLabels);
-                        colors.push(...assetColors);
-                    });
-
-                    if (data.length > 0) {
-                        setAssetAllocationData({
-                            datasets: [{
-                                label: "Asset Allocation",
-                                data: data,
-                                backgroundColor: colors
-                            }],
-                            // These labels appear in the legend and in the tooltips when hovering different arcs
-                            labels
-                        });
-                    }
-
-                    const { data: cryptoData, labels: cryptoLabels, colors: cryptoColors } = prepareGraphData(crypto, "assetAllocation");
-                    if (cryptoData.length > 0) {
-                        setCryptoAllocationData({
-                            datasets: [{
-                                label: "Crypto Allocation",
-                                data: cryptoData,
-                                backgroundColor: cryptoColors
-                            }],
-                            // These labels appear in the legend and in the tooltips when hovering different arcs
-                            labels: cryptoLabels
-                        });
-                    }
-
-                    const { data: stockData, labels: stockLabels, colors: stockColors } = prepareGraphData(stock, "assetAllocation");
-                    if (stockData.length > 0) {
-                        setStockAllocationData({
-                            datasets: [{
-                                label: "Stock Allocation",
-                                data: stockData,
-                                backgroundColor: stockColors
-                            }],
-                            // These labels appear in the legend and in the tooltips when hovering different arcs
-                            labels: stockLabels
-                        });
-                    }
-                } else {
-                    // if status comes back as an error
-                    // set balance as - for now
-                    setBalance("-");
-                    displayNotification({ message: "Unable to get balance: " + msg, type: NotificationType.Error });
-                }
-            }
+        const data = [];
+        const labels = [];
+        const colors = [];
+        const { crypto, stock, cash } = balance;
+        [crypto, stock, cash].forEach((assetType) => {
+            const { data: assetData, labels: assetLabels, colors: assetColors } = prepareGraphData(assetType, "allocation");
+            data.push(...assetData);
+            labels.push(...assetLabels);
+            colors.push(...assetColors);
         });
-    }, [sync]);
+
+        if (data.length > 0) {
+            setAssetAllocationData({
+                datasets: [{
+                    label: "Asset Allocation",
+                    data: data,
+                    backgroundColor: colors
+                }],
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels
+            });
+        }
+
+        const { data: cryptoData, labels: cryptoLabels, colors: cryptoColors } = prepareGraphData(crypto, "assetAllocation");
+        if (cryptoData.length > 0) {
+            setCryptoAllocationData({
+                datasets: [{
+                    label: "Crypto Allocation",
+                    data: cryptoData,
+                    backgroundColor: cryptoColors
+                }],
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: cryptoLabels
+            });
+        }
+
+        const { data: stockData, labels: stockLabels, colors: stockColors } = prepareGraphData(stock, "assetAllocation");
+        if (stockData.length > 0) {
+            setStockAllocationData({
+                datasets: [{
+                    label: "Stock Allocation",
+                    data: stockData,
+                    backgroundColor: stockColors
+                }],
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: stockLabels
+            });
+        }
+    }, [balance]);
 
     return (
 
@@ -144,7 +126,7 @@ const Balance = ({ sync, refresh }) => {
             <div>
                 <div className="flex flex-col p-6">
                     <div className="mb-2 uppercase">Your Balance</div>
-                    <span id="balance-value" className="text-4xl font-semibold">$ { formatMoney(balance) } </span>
+                    <span id="balance-value" className="text-4xl font-semibold">$ { formatMoney(balance.balance) } </span>
                 </div>
                 <AddTransaction refresh={refresh} />
             </div>

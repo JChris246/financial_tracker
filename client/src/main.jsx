@@ -1,5 +1,5 @@
-import React from "react"
-import ReactDOM from "react-dom/client"
+import React from "react";
+import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./index.css";
@@ -7,6 +7,7 @@ import App from "./App.jsx";
 import Error from "./Error";
 
 import { Notification, NotificationProvider } from "./component/Notification";
+import { AppProvider } from "./AppContext";
 
 const router = createBrowserRouter([
     {
@@ -20,7 +21,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
         <NotificationProvider>
             <Notification/>
-            <RouterProvider router={router} />
+            <AppProvider>
+                <RouterProvider router={router} />
+            </AppProvider>
         </NotificationProvider>
     </React.StrictMode>
-)
+);

@@ -4,6 +4,7 @@ import { test, expect } from "@playwright/test";
 import { pageSetup } from "./setup";
 
 test.afterEach(async () => {
+    // TODO: if this were running as an "integration" test, we'd need to not run this (or mock it)
     await fetch("http://localhost:5000/api/admin/wipeDb"); // TODO: extract url
 });
 
@@ -11,7 +12,9 @@ test("has title", async ({ page }) => {
     const routes = [
         { url: "**/api/transactions/income", response: [], status: 200 },
         { url: "**/api/transactions/spend", response: [], status: 200 },
-        { url: "*/**/api/balance", response: { balance: 12 }, status: 200 }
+        { url: "*/**/api/balance", response: {
+            balance: 12, crypto: {}, stock: {}, cash: {}, totalIncome: 0, totalSpend: 0
+        }, status: 200 }
     ];
     await pageSetup({ page, routes });
 

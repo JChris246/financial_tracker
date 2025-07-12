@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
-
-import { NotificationType, useNotificationContext } from "./Notification";
-import { request } from "../utils/Fetch";
 import { symbol } from "../utils/constants";
 import { formatMoney } from "../utils/utils";
+
+import { useAppContext } from "../AppContext";
 
 // TODO: rename this?
 const IndexCard = ({ title, amount, accentColor, symbol }) => {
@@ -18,43 +16,18 @@ const IndexCard = ({ title, amount, accentColor, symbol }) => {
     );
 };
 
-const IncomeExpense = ({ sync }) => {
-    const [amount, setAmount] = useState({
-        income: 0, // cash
-        expense: 0, // cash
-        stock: 0,
-        crypto: 0
-    });
-
-    const { display: displayNotification } = useNotificationContext();
-
-    useEffect(() => {
-        // TODO: make this request 1x and store in context
-        request({
-            url: "/api/balance",
-            method: "GET",
-            callback: ({ msg, success, json }) => {
-                if (success) {
-                    const { totalIncome, totalSpend, totalStock, totalCrypto } = json;
-                    setAmount({ income: totalIncome, expense: totalSpend, stock: totalStock, crypto: totalCrypto });
-                } else {
-                    // if status comes back as an error
-                    // set balances as - for now
-                    setAmount({ income: "-", expense: "-", stock: "-", crypto: "-" });
-                    displayNotification({ message: "Unable to get balances: " + msg, type: NotificationType.Error });
-                }
-            }
-        });
-    }, [sync]);
+const IncomeExpense = () => {
+    const { balance } = useAppContext();
+    const { totalIncome: income, totalSpend: expense, totalStock: stock, totalCrypto: crypto } = balance;
 
     return (
         <div id="incomeexpense" className="flex flex-col items-center py-10 rounded-sm lg:flex-row
             lg:mx-auto w-full xl:w-2/3 space-y-4 lg:space-y-0 lg:space-x-2 px-8 xl:px-0">
-            <IndexCard title="Income" amount={amount.income} accentColor="green" symbol={symbol.CASH}/>
-            <IndexCard title="Expense" amount={amount.expense} accentColor="red" symbol={symbol.CASH} />
+            <IndexCard title="Income" amount={income} accentColor="green" symbol={symbol.CASH}/>
+            <IndexCard title="Expense" amount={expense} accentColor="red" symbol={symbol.CASH} />
             {/* Allow user to customize which asset balances appear here? less may have to be shown on smaller screens*/}
-            <IndexCard title="Stock" amount={amount.stock} accentColor="blue" symbol={symbol.CASH} />
-            <IndexCard title="Crypto" amount={amount.crypto} accentColor="orange" symbol={symbol.CRYPTO}/>
+            <IndexCard title="Stock" amount={stock} accentColor="blue" symbol={symbol.CASH} />
+            <IndexCard title="Crypto" amount={crypto} accentColor="orange" symbol={symbol.CRYPTO}/>
         </div>
     );
 };
