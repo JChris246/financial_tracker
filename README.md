@@ -1,3 +1,7 @@
+[![Tests CI](https://github.com/JChris246/financial_tracker/actions/workflows/test.yml/badge.svg)](https://github.com/JChris246/financial_tracker/actions/workflows/test.yml)
+[![ESlint](https://github.com/JChris246/financial_tracker/actions/workflows/lint.yml/badge.svg)](https://github.com/JChris246/financial_tracker/actions/workflows/lint.yml)
+[![EditorConfig check](https://github.com/JChris246/financial_tracker/actions/workflows/editor-config-check.yml/badge.svg)](https://github.com/JChris246/financial_tracker/actions/workflows/editor-config-check.yml)
+
 # 💰 Finance Tracker
 
 Finance Tracker started as a simple hobby project by [@c0d3r](https://github.com/c0d3rJ), [@JChris246](https://github.com/JChris246) and [@kac246](https://github.com/kac246).
