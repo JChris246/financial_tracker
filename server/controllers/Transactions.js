@@ -27,7 +27,7 @@ const validateAddTransactionRequest = (reqBody) => {
     // get the timestamp from user, if it doesn't exist use the current timestamp
     const date = parseDate(userDate) || Date.now(); // if the date was not parsed correctly, current timestamp will be used
 
-    if (!isNumber(Number(userAmount))) {
+    if (!isNumber(userAmount)) {
         logger.warn("User tried to add a transaction without an amount");
         return { valid: false, msg: "You need to have the transaction amount" };
     }
@@ -198,7 +198,7 @@ module.exports.processCSV = (req, res) => {
         return res.status(400).send({ msg: "CSV data cannot be empty" });
     }
 
-    const [header, ...rows] = csv.split("\n");
+    const [header, ...rows] = csv.trim().split("\n");
     if (rows.length === 0) {
         logger.warn("User tried to process CSV without at least one row");
         return res.status(400).send({ msg: "Expected at least one csv row along with the csv header" });
@@ -224,9 +224,11 @@ module.exports.processCSV = (req, res) => {
 
         const invalid = {};
         for (let i = 0; i < transactions.length; i++) {
-            transactions[i] = validateAddTransactionRequest(transactions[i]);
-            if (!transactions[i].valid) {
-                invalid[i] = transactions[i].msg;
+            const result = validateAddTransactionRequest(transactions[i]);
+            if (!result.valid) {
+                invalid[i] = result.msg;
+            } else {
+                transactions[i] = result;
             }
         }
 

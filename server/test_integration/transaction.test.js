@@ -298,9 +298,9 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("Invalid CSV");
             expect(response.body.invalid).toEqual({
                 0: "You need to have the transaction asset type",
-                3: "You need to have a valid transaction amount",
+                3: "You need to have the transaction amount",
                 5: "You need to have the transaction name",
-                6: "You need to have a valid transaction amount",
+                6: "You need to have the transaction amount",
             });
         });
 
