@@ -80,7 +80,6 @@ export const AddTransaction = ({ refresh }) => {
 
     const selectFile = async e => {
         const { target: { files } } = e;
-        console.log({ files });
 
         request({
             url: "/api/transaction/csv",
