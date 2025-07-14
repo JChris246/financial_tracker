@@ -6,8 +6,8 @@ export const NavBar = () => {
     const navlinks = [
         {
             id: 1,
-            name: "Balance",
-            route: "#balance"
+            name: "Home",
+            route: "/"
         },
         {
             id: 2,
@@ -17,7 +17,7 @@ export const NavBar = () => {
         {
             id: 3,
             name: "History",
-            route: "#history"
+            route: "/history"
         },
         {
             id: 4,

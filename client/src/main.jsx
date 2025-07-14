@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./index.css";
 import App from "./App.jsx";
+import TransactionHistory from "./TransactionHistory";
 import Error from "./Error";
 
 import { Notification, NotificationProvider } from "./component/Notification";
@@ -13,6 +14,11 @@ const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
+        errorElement: <Error />,
+    },
+    {
+        path: "/history",
+        element: <TransactionHistory />,
         errorElement: <Error />,
     }
 ]);
