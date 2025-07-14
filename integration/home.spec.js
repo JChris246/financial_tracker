@@ -126,7 +126,7 @@ test.describe("index cards", () => {
     });
 });
 
-test.describe("transaction history", () => {
+test.describe("transaction history glance", () => {
     test("transaction section should contain no items if no transactions", async ({ page }) => {
         await pageSetup({ page });
 
