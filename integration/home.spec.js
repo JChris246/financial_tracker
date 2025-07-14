@@ -188,3 +188,64 @@ test.describe("at a glance prices", () => {
         }
     })
 });
+
+test.describe("import transactions", () => {
+    test("should allow user to add a transactions from csv", async ({ page }) => {
+        await pageSetup({ page });
+
+        // since I need to set the file on the input itself in testing, I don't think I need to click the import button
+        const importTransactionsButton = page.locator("#add-transactions-button");
+        await importTransactionsButton.click();
+
+        const fileInput = page.locator("#csv-file-input");
+        await fileInput.setInputFiles("./transactions.csv");
+
+        // basic verification, that the file was processed and loaded in the modal
+        await expect(page.locator("#review-csv-modal")).toBeVisible();
+        await expect(page.locator("tr")).toHaveCount(7);
+
+        // submit the transactions and check transaction history list and balance
+        await page.locator("#submit-transactions").click();
+        await expect(page.locator("#transaction-history-list > *")).toHaveCount(5);
+        await expect(page.locator("#balance-value")).toHaveText(/\$\s*4,497\.74/);
+    })
+
+    test("should not allow user to click upload button if errors not fixed", async ({ page }) => {
+        await pageSetup({ page });
+
+        const fileInput = page.locator("#csv-file-input");
+        await fileInput.setInputFiles("./bad_transactions.csv");
+
+        // basic verification, that the file was processed and loaded in the modal
+        await expect(page.locator("#review-csv-modal")).toBeVisible();
+        await expect(page.locator("tr")).toHaveCount(8);
+
+        // expect the upload button to be disabled since csv had errors
+        await expect(page.locator("#submit-transactions")).toBeDisabled();
+    });
+
+    test("should allow user to click upload button after making changes to the appropriate rows", async ({ page }) => {
+        await pageSetup({ page });
+
+        const fileInput = page.locator("#csv-file-input");
+        await fileInput.setInputFiles("./bad_transactions.csv");
+
+        // basic verification, that the file was processed and loaded in the modal
+        await expect(page.locator("#review-csv-modal")).toBeVisible();
+        await expect(page.locator("tr")).toHaveCount(8);
+
+        // expect the upload button to be disabled since csv had errors
+        await expect(page.locator("#submit-transactions")).toBeDisabled();
+
+        const rows = page.locator("tr");
+        await rows.nth(7).locator("input[name=name]").fill("Test Transaction");
+
+        // the button should now be enabled
+        await expect(page.locator("#submit-transactions")).toBeEnabled();
+
+        // submit the transactions and check transaction history list and balance
+        await page.locator("#submit-transactions").click();
+        await expect(page.locator("#transaction-history-list > *")).toHaveCount(5);
+        await expect(page.locator("#balance-value")).toHaveText(/\$\s*4,507[.]83/);
+    });
+});
