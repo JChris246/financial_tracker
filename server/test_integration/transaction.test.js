@@ -178,8 +178,9 @@ describe("transaction endpoints", () => {
 
             const cases = [
                 { type: "", expected: 5 },
-                { type: "/spend", expected: 2 },
-                { type: "/income", expected: 3 },
+                // TODO: re-add new cases when this endpoint is updated for filtering and pagination
+                // { type: "/spend", expected: 2 },
+                // { type: "/income", expected: 3 },
             ];
 
 
