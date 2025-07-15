@@ -12,7 +12,7 @@ module.exports.getTransactions = (req, res) => {
         options = { "type": req.params.type === "income" };
     }
 
-    getDatabase().getTransactions(options,
+    getDatabase().getAllTransactions(
         transactions => res.status(200).send(transactions),
         err => res.status(500).send({ msg: err })
     );

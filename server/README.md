@@ -15,6 +15,8 @@
 | /api/transactions | GET | Return all transactions |
 | /api/transactions/:type | GET | Return all income/expense transactions (type is either `income` or `spend`) |
 | /api/transactions | POST | Add a transaction |
-
+| /api/transactions/all | POST | Add a list of transactions |
+| /api/transactions/csv | POST | Take a csv list of transactions, transform to json, validate and return (with any errors) |
+| /api/transactions/export/:format | GET | Return all transactions in the specified format (options: `json` or `csv`) |
 
 TODO: use the table above to provide links to more info on each endpoint

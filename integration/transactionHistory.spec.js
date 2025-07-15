@@ -72,7 +72,7 @@ test.describe("transaction history", () => {
         await expect(items.last().locator("#transaction-history-amount-5")).toHaveText(/\s*10/);
     });
 
-    test("transaction history page should allow filtering by transaction name", async ({ page }) => {
+    test("transaction history page should allow filtering", async ({ page }) => {
         await pageSetup({ page });
 
         await addTransaction(page, "10", "crypto", "BTC", "2022-01-07T23:43:09", "Test Transaction 1");
