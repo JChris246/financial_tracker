@@ -19,25 +19,25 @@ describe("Transactions", () => {
         ];
 
         const validTransactionPayloads = [
-            // name,amount,type?,date?,category?,assetType,currency
+            // name,amount,date?,category?,assetType,currency
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true, category: "other" } },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "other" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", date: "2022-01-01" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true,
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD",
                     date: 1640995200000, category: "other" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true, category: "Groceries" } },
-            { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries", type: true },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", type: true, category: "Groceries" } },
-            { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries", type: true, date: 1640995200000 },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" } },
+            { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" } },
+            { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries", date: 1640995200000 },
                 expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD",
-                    type: true, category: "Groceries", date: 1640995200000 } },
-            { input: { amount: 50, name: "Test", assetType: "crypto", currency: "BTC", category: "Groceries", type: true, date: 1640995200000 },
+                    category: "Groceries", date: 1640995200000 } },
+            { input: { amount: 50, name: "Test", assetType: "crypto", currency: "BTC", category: "Groceries", date: 1640995200000 },
                 expected: { valid: true, amount: 50, name: "Test", assetType: "crypto", currency: "BTC",
-                    type: true, category: "Groceries", date: 1640995200000 } },
-            { input: { amount: 50, name: "Test", assetType: "stock", currency: "MSFT", category: "Groceries", type: true, date: 1640995200000 },
+                    category: "Groceries", date: 1640995200000 } },
+            { input: { amount: 50, name: "Test", assetType: "stock", currency: "MSFT", category: "Groceries", date: 1640995200000 },
                 expected: { valid: true, amount: 50, name: "Test", assetType: "stock", currency: "MSFT",
-                    type: true, category: "Groceries", date: 1640995200000 } },
+                    category: "Groceries", date: 1640995200000 } },
         ];
 
         test.each(invalidTransactionPayloads)("should return false for invalid transaction payloads: '%s'", ({ input, expected }) => {
@@ -58,24 +58,25 @@ describe("Transactions", () => {
 
     describe("expectedCsvHeader", () => {
         const invalidCsvHeaders = [
-            { input: "", expected: { valid: false, missingFields: ["name", "amount", "type", "date", "category", "assettype", "currency"] } },
-            { input: "name", expected: { valid: false, missingFields: ["amount", "type", "date", "category", "assettype", "currency"] } },
-            { input: "name,amount", expected: { valid: false, missingFields: ["type", "date", "category", "assettype", "currency"] } },
-            { input: "name,amount,type", expected: { valid: false, missingFields: ["date", "category", "assettype", "currency"] } },
-            { input: "name,date,amount,type", expected: { valid: false, missingFields: ["category", "assettype", "currency"] } },
-            { input: "name,date,amount,category,type", expected: { valid: false, missingFields: ["assettype", "currency"] } },
-            { input: "name,date,amount,category,type,assetType", expected: { valid: false, missingFields: ["currency"] } },
+            { input: "", expected: { valid: false, missingFields: ["name", "amount", "date", "category", "assettype", "currency"] } },
+            { input: "name", expected: { valid: false, missingFields: ["amount", "date", "category", "assettype", "currency"] } },
+            { input: "name,amount", expected: { valid: false, missingFields: ["date", "category", "assettype", "currency"] } },
+            { input: "name,date,amount", expected: { valid: false, missingFields: ["category", "assettype", "currency"] } },
+            { input: "name,date,amount,category", expected: { valid: false, missingFields: ["assettype", "currency"] } },
+            { input: "name,date,amount,category,assetType", expected: { valid: false, missingFields: ["currency"] } },
         ];
 
         const validCsvHeaders = [
-            { input: "name,date,amount,category,type,currency,assetType",
-                expected: { valid: true, map: { name: 0, date: 1, amount: 2, category: 3, type: 4, assettype: 6, currency: 5 } } },
-            { input: "currency,name,date,amount,type,assetType,category",
-                expected: { valid: true, map: { name: 1, date: 2, amount: 3, category: 6, type: 4, assettype: 5, currency: 0 } } },
-            { input: "name,amount,currency,category,type,assettype,date",
-                expected: { valid: true, map: { name: 0, date: 6, amount: 1, category: 3, type: 4, assettype: 5, currency: 2 } } },
+            { input: "name,date,amount,category,currency,assetType",
+                expected: { valid: true, map: { name: 0, date: 1, amount: 2, category: 3, assettype: 5, currency: 4 } } },
+            { input: "currency,name,date,amount,assetType,category",
+                expected: { valid: true, map: { name: 1, date: 2, amount: 3, category: 5, assettype: 4, currency: 0 } } },
             { input: "name,amount,currency,category,assettype,date",
-                expected: { valid: true, map: { name: 0, date: 5, amount: 1, category: 3, type: null, assettype: 4, currency: 2 } } },
+                expected: { valid: true, map: { name: 0, date: 5, amount: 1, category: 3, assettype: 4, currency: 2 } } },
+            { input: "name,amount,currency,category,assettype,date",
+                expected: { valid: true, map: { name: 0, date: 5, amount: 1, category: 3, assettype: 4, currency: 2 } } },
+            { input: "name,amount,currency,assettype,date",
+                expected: { valid: true, map: { name: 0, date: 4, amount: 1, category: null, assettype: 3, currency: 2 } } }
         ];
 
         test.each(invalidCsvHeaders)("should return false for invalid csv headers: '%s'", ({ input, expected }) => {

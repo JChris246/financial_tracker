@@ -128,7 +128,6 @@ export const AddTransaction = ({ refresh }) => {
             return;
         }
         transaction.amount = amount;
-        transaction.type = amount > 0;
 
         request({
             url: "/api/transaction",

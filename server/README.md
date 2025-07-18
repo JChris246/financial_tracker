@@ -2,7 +2,7 @@
 
 | Route | Method | Description |
 | ----- | ------ | ----------- |
-| /api/list//asset-type | GET | Return list of the supported asset types |
+| /api/list/asset-type | GET | Return list of the supported asset types |
 | /api/list/currency | GET | Return a map of currencies per asset type |
 | /api/list/currency/:assetType | GET | Return list of currencies for a given asset type (`crypto`, `cash`, `stock`) |
 | /api/list/category | GET | Return list transaction category options (soon deprecated) |
@@ -13,7 +13,6 @@
 | /api/balance | GET | Return the balances of the assets and their allocation info |
 | |
 | /api/transactions | GET | Return all transactions |
-| /api/transactions/:type | GET | Return all income/expense transactions (type is either `income` or `spend`) |
 | /api/transactions | POST | Add a transaction |
 | /api/transactions/all | POST | Add a list of transactions |
 | /api/transactions/csv | POST | Take a csv list of transactions, transform to json, validate and return (with any errors) |

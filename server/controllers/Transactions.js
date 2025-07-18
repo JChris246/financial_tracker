@@ -1,15 +1,16 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, makeBool, isDefined, isValidArray, formatDate } = require("../utils/utils");
+const { isNumber, isDefined, isValidArray, formatDate } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
     let options = {}; // get all transactions
 
+    // TODO: update the filtering logic
     // if req specifies type of transactions to retrieve, add it to options
     if (req.params.type === "income" || req.params.type === "spend") {
-        options = { "type": req.params.type === "income" };
+        // options = { "type": req.params.type === "income" };
     }
 
     getDatabase().getAllTransactions(
@@ -20,9 +21,8 @@ module.exports.getTransactions = (req, res) => {
 
 const parseDate = d => (new Date(d).getTime());
 
-// TODO: unit test this?
 const validateAddTransactionRequest = (reqBody) => {
-    const { name, date: userDate, amount: userAmount, type: userType, category: userCategory, assetType, currency } = reqBody;
+    const { name, date: userDate, amount: userAmount, category: userCategory, assetType, currency } = reqBody;
 
     // get the timestamp from user, if it doesn't exist use the current timestamp
     const date = parseDate(userDate) || Date.now(); // if the date was not parsed correctly, current timestamp will be used
@@ -43,16 +43,13 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "You need to have the transaction name" };
     }
 
-    // should we validate that the userType (if provided) matches with the transaction amount?
-    // should we even be accepting type, just infer
-    const type = isDefined(userType) ? makeBool(userType) : amount > 0;
-
     let category = userCategory;
     if (!isDefined(userCategory)) {
         logger.warn("Transaction adding without a category, defaulting to other");
         category = "other";
     }
 
+    // TODO: should we allow a default?
     if (!isDefined(assetType)) {
         logger.warn("User tried to add a transaction without an asset type");
         return { valid: false, msg: "You need to have the transaction asset type" };
@@ -63,6 +60,7 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "You need to have a valid transaction asset type" };
     }
 
+    // TODO: should we allow a default? use configured base currency (maybe USD) for assetType cash for example?
     if (!isDefined(currency)) {
         logger.warn("User tried to add a transaction without a currency");
         return { valid: false, msg: "You need to have the transaction currency" };
@@ -74,7 +72,7 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "Asset currency not supported" };
     }
 
-    return { valid: true, name, date, amount, type, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() };
+    return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() };
 }
 
 module.exports.addTransaction = (req , res) => {
@@ -85,14 +83,13 @@ module.exports.addTransaction = (req , res) => {
 
     const { name, date, amount, type, category, assetType, currency } = result;
     getDatabase().createTransaction(
-        { name, date, amount, type, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
+        { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
         transaction => {
             res.status(201).send({
                 // maybe I should separate the payload from the message ?
                 amount: transaction.amount,
                 name: transaction.name,
                 date: transaction.date,
-                type: transaction.type,
                 category: transaction.category,
                 assetType: transaction.assetType.toLowerCase(),
                 currency: transaction.currency.toUpperCase(),
@@ -129,16 +126,15 @@ module.exports.addTransactions = (req , res) => {
 
     const addedTransactions = [];
     for (let i = 0; i < transaction.length; i++) {
-        const { name, date, amount, type, category, assetType, currency } = transaction[i];
+        const { name, date, amount, category, assetType, currency } = transaction[i];
         // I'm almost pretty sure there's a better way than inserting 1 by 1
         getDatabase().createTransaction(
-            { name, date, amount, type, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
+            { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
             transaction => {
                 addedTransactions.push({
                     amount: transaction.amount,
                     name: transaction.name,
                     date: transaction.date,
-                    type: transaction.type,
                     category: transaction.category,
                     assetType: transaction.assetType.toLowerCase(),
                     currency: transaction.currency.toUpperCase()
@@ -155,9 +151,8 @@ module.exports.addTransactions = (req , res) => {
     return res.status(201).send({ msg: "Transactions added successfully", addedTransactions });
 };
 
-// TODO: unit test this?
 const expectedCsvHeader = (header) => {
-    const map = { name: null, amount: null, type: null, date: null, category: null, assettype: null, currency: null };
+    const map = { name: null, amount: null, date: null, category: null, assettype: null, currency: null };
 
     const headerFields = header.split(",").map(x => x.toLowerCase().trim());
     const expectedFields = Object.keys(map);
@@ -169,8 +164,8 @@ const expectedCsvHeader = (header) => {
 
     const missingFields = Object.entries(map).filter(([_, value]) => value === null);
     if (missingFields.length > 0) {
-        if (missingFields.length === 1 && missingFields[0][0] === "type") {
-            // this field is allowed to be missing, since it can be inferred from the amount
+        if (missingFields.length === 1 && missingFields[0][0] === "category") {
+            // this field is allowed to be missing, since we can default it to "other"?
             return { map, valid: true };
         }
 
@@ -214,9 +209,8 @@ module.exports.processCSV = (req, res) => {
             return {
                 name: fields[csvStructMap.name],
                 amount: fields[csvStructMap.amount],
-                type: csvStructMap.type ? fields[csvStructMap.type] : fields[csvStructMap.amount] > 0,
                 date: fields[csvStructMap.date],
-                category: fields[csvStructMap.category],
+                category: csvStructMap.category ? fields[csvStructMap.category] : "other",
                 assetType: fields[csvStructMap.assettype],
                 currency: fields[csvStructMap.currency]
             }

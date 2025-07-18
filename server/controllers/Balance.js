@@ -27,7 +27,7 @@ module.exports.getBalance = (_, res) => {
                     if (transactions[i].assetType === ASSET_TYPE.CASH) {
                         const value = calculateCashAmount(transactions[i]);
                         response.balance += value;
-                        if (transactions[i].type) {
+                        if (transactions[i].amount > 0) {
                             response.totalIncome += value;
                         } else {
                             response.totalSpend += value;

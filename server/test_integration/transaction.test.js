@@ -98,7 +98,6 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("Transaction added successfully");
             expect(response.body.amount).toEqual(100);
             expect(response.body.name).toEqual("Test Transaction");
-            expect(response.body.type).toEqual(true);
             expect(response.body.assetType).toEqual("cash");
             expect(response.body.currency).toEqual("USD");
             expect(response.body.category).toEqual("other");
@@ -115,7 +114,6 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("Transaction added successfully");
             expect(response.body.amount).toEqual(-100);
             expect(response.body.name).toEqual("Test Transaction");
-            expect(response.body.type).toEqual(false);
             expect(response.body.assetType).toEqual("cash");
             expect(response.body.currency).toEqual("USD");
             expect(response.body.category).toEqual("Groceries");
@@ -132,7 +130,6 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("Transaction added successfully");
             expect(response.body.amount).toEqual(-1);
             expect(response.body.name).toEqual("Test Transaction");
-            expect(response.body.type).toEqual(false);
             expect(response.body.assetType).toEqual("crypto");
             expect(response.body.currency).toEqual("BTC");
             expect(response.body.category).toEqual("Groceries");
@@ -149,7 +146,6 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("Transaction added successfully");
             expect(response.body.amount).toEqual(-1);
             expect(response.body.name).toEqual("Test Transaction");
-            expect(response.body.type).toEqual(false);
             expect(response.body.assetType).toEqual("stock");
             expect(response.body.currency).toEqual("AAPL");
             expect(response.body.category).toEqual("Investment");
@@ -205,7 +201,7 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("You need to have at least one transaction");
         });
 
-        test("should return bad request when no transactions are provided", async () => {
+        test("should return bad request when some invalid transactions are provided", async () => {
             // Act
             const response = await superTestRequest.post("/api/transaction/all").send([
                 { name: "Test Transaction", date: "2022-01-01" }, // invalid
@@ -237,12 +233,9 @@ describe("transaction endpoints", () => {
             expect(response.status).toBe(201);
             expect(response.body.msg).toEqual("Transactions added successfully");
             expect(response.body.addedTransactions).toEqual([
-                { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "USD",
-                    date: 1640995200000, type: true, category: "Groceries" },
-                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1672531200000,
-                    type: false, category: "other" },
-                { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL",
-                    date: 1704067200000, type: true, category: "Investment" },
+                { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "USD", date: 1640995200000, category: "Groceries" },
+                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1672531200000, category: "other" },
+                { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL", date: 1704067200000, category: "Investment" },
             ]);
         });
     });
@@ -267,7 +260,7 @@ describe("transaction endpoints", () => {
         test("should return bad request when only the csv header is provided", async () => {
             // Act
             const response = await superTestRequest.post("/api/transaction/csv")
-                .send({ csv: "name, amount, type, date, category, assetType, currency" });
+                .send({ csv: "name, amount, date, category, assetType, currency" });
 
             // Assert
             expect(response.status).toBe(400);
@@ -317,19 +310,19 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("CSV processed successfully");
             expect(response.body.transactions).toEqual([
                 { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
-                    date: 1711929600000, name: "Test transaction", type: true, valid: true },
+                    date: 1711929600000, name: "Test transaction", valid: true },
                 { amount: 760, assetType: "cash", category: "Side job", currency: "USD",
-                    date: 1743552000000, name: "Test transaction 2", type: true, valid: true },
+                    date: 1743552000000, name: "Test transaction 2", valid: true },
                 { amount: 4, assetType: "crypto", category: "Smart contracts", currency: "ETH",
-                    date: 1711929600000, name: "Test transaction 3", type: true, valid: true },
+                    date: 1711929600000, name: "Test transaction 3", valid: true },
                 { amount: 0.3, assetType: "crypto", category: "", currency: "BTC",
-                    date: 1714521600000, name: "Test transaction 4", type: true, valid: true },
+                    date: 1714521600000, name: "Test transaction 4", valid: true },
                 { amount: 50, assetType: "crypto", category: "", currency: "ADA",
-                    date: 1722470400000, name: "Test transaction 5", type: true, valid: true }
+                    date: 1722470400000, name: "Test transaction 5", valid: true }
             ]);
         });
 
-        test("should return successful response with interpreted transactions when csv contains all expected fields (except type)", async () => {
+        test("should return successful response with interpreted transactions when csv contains all expected fields (except category)", async () => {
             // Arrange
             const data = fs.readFileSync("./test/assets/fiveGoodTransactions.csv", "utf-8");
 
@@ -340,16 +333,16 @@ describe("transaction endpoints", () => {
             expect(response.status).toBe(200);
             expect(response.body.msg).toEqual("CSV processed successfully");
             expect(response.body.transactions).toEqual([
-                { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
-                    date: 1711929600000, name: "Test transaction", type: true, valid: true },
-                { amount: 760, assetType: "cash", category: "Other", currency: "USD",
-                    date: 1743552000000, name: "Test transaction 2", type: true, valid: true },
-                { amount: 4, assetType: "crypto", category: "Other", currency: "ETH",
-                    date: 1711929600000, name: "Test transaction 3", type: true, valid: true },
-                { amount: 0.3, assetType: "crypto", category: "", currency: "BTC",
-                    date: 1714521600000, name: "Test transaction 4", type: true, valid: true },
-                { amount: 50, assetType: "crypto", category: "", currency: "ADA",
-                    date: 1722470400000, name: "Test transaction 5", type: true, valid: true }
+                { amount: 4, assetType: "stock", category: "other", currency: "NVDA",
+                    date: 1711929600000, name: "Test transaction", valid: true },
+                { amount: 760, assetType: "cash", category: "other", currency: "USD",
+                    date: 1743552000000, name: "Test transaction 2", valid: true },
+                { amount: 4, assetType: "crypto", category: "other", currency: "ETH",
+                    date: 1711929600000, name: "Test transaction 3", valid: true },
+                { amount: 0.3, assetType: "crypto", category: "other", currency: "BTC",
+                    date: 1714521600000, name: "Test transaction 4", valid: true },
+                { amount: 50, assetType: "crypto", category: "other", currency: "ADA",
+                    date: 1722470400000, name: "Test transaction 5", valid: true }
             ]);
         });
     });

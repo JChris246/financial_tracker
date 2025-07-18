@@ -48,7 +48,7 @@ function App() {
         <div className="place-items-center bg-gray-900 min-h-screen">
             <NavBar/>
 
-            <Balance sync={sync} refresh={updateValues}/>
+            <Balance refresh={updateValues}/>
             <IncomeExpense/>
             <div className="flex flex-col lg:flex-row w-full items-center lg:items-end lg:justify-center md:mt-16">
                 <Glance type="stock"/>
