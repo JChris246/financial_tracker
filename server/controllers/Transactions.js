@@ -1,7 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, isDefined, isValidArray, formatDate, padRight } = require("../utils/utils");
+const { isNumber, isDefined, isValidArray, formatDate, padRight, isValidString } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
@@ -27,11 +27,12 @@ const validateAddTransactionRequest = (reqBody) => {
     // get the timestamp from user, if it doesn't exist use the current timestamp
     const date = parseDate(userDate) || Date.now(); // if the date was not parsed correctly, current timestamp will be used
 
-    if (!isNumber(userAmount)) {
+    const uAmount = isValidString(userAmount) ? userAmount.replaceAll(",", "") : userAmount;
+    if (!isNumber(uAmount)) {
         logger.warn("User tried to add a transaction without an amount");
         return { valid: false, msg: "You need to have the transaction amount" };
     }
-    const amount = Number(userAmount);
+    const amount = Number(uAmount);
 
     if (amount === 0) {
         logger.warn("User tried to add a transaction with an amount of 0");
@@ -74,7 +75,7 @@ const validateAddTransactionRequest = (reqBody) => {
 
     // TODO: Please Please make the currencies a common case
     return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(),
-        currency: assetType === ASSET_TYPE.CASH ? currency : currency.toUpperCase() };
+        currency: assetType === ASSET_TYPE.CASH ? currency.toLowerCase() : currency.toUpperCase() };
 }
 
 module.exports.addTransaction = (req , res) => {
@@ -177,6 +178,17 @@ const expectedHeader = (header, separator) => {
     return { map, valid: true };
 };
 
+const isEmptyRow = (fields) => {
+    for (let i = 0; i < fields.length; i++) {
+        if (fields[i].trim() !== "" && !fields[i].trim().match(/^[-]+$/)) {
+            return false;
+        }
+    }
+
+    // all row were either blank or only -'s, this must be an empty record
+    return true;
+};
+
 module.exports.processCSV = (req, res) => {
     const { csv } = req.body;
 
@@ -206,17 +218,19 @@ module.exports.processCSV = (req, res) => {
     if (valid) {
         // should I check if each row has the same number of fields as the header?
         // it will likely still fail, but fail for the wrong reason
-        const transactions = rows.map(row => {
-            const fields = row.split(",");
-            return {
-                name: fields[csvStructMap.name],
-                amount: fields[csvStructMap.amount],
-                date: fields[csvStructMap.date],
-                category: csvStructMap.category ? fields[csvStructMap.category] : "other",
-                assetType: fields[csvStructMap.assettype],
-                currency: fields[csvStructMap.currency]
-            }
-        });
+        const transactions = rows
+            .filter(row => !isEmptyRow(row.split(",")))
+            .map(row => {
+                const fields = row.split(",");
+                return {
+                    name: fields[csvStructMap.name]?.trim(),
+                    amount: fields[csvStructMap.amount]?.trim(),
+                    date: fields[csvStructMap.date]?.trim(),
+                    category: csvStructMap.category ? fields[csvStructMap.category].trim() : "other",
+                    assetType: fields[csvStructMap.assettype]?.trim(),
+                    currency: fields[csvStructMap.currency]?.trim()
+                }
+            });
 
         const invalid = {};
         for (let i = 0; i < transactions.length; i++) {
@@ -277,17 +291,19 @@ module.exports.processMd = (req, res) => {
     if (valid) {
         // should I check if each row has the same number of fields as the header?
         // it will likely still fail, but fail for the wrong reason
-        const transactions = rows.map(row => {
-            const fields = row.split("|");
-            return {
-                name: fields[mdStructMap.name]?.trim(),
-                amount: fields[mdStructMap.amount]?.trim(),
-                date: fields[mdStructMap.date]?.trim(),
-                category: mdStructMap.category ? fields[mdStructMap.category].trim() : "other",
-                assetType: fields[mdStructMap.assettype]?.trim(),
-                currency: fields[mdStructMap.currency]?.trim()
-            }
-        });
+        const transactions = rows
+            .filter(row => !isEmptyRow(row.split("|")))
+            .map(row => {
+                const fields = row.split("|");
+                return {
+                    name: fields[mdStructMap.name]?.trim(),
+                    amount: fields[mdStructMap.amount]?.trim(),
+                    date: fields[mdStructMap.date]?.trim(),
+                    category: mdStructMap.category ? fields[mdStructMap.category].trim() : "other",
+                    assetType: fields[mdStructMap.assettype]?.trim(),
+                    currency: fields[mdStructMap.currency]?.trim()
+                }
+            });
 
         const invalid = {};
         for (let i = 0; i < transactions.length; i++) {
@@ -409,5 +425,5 @@ module.exports.getGraphData = (_, res) => {
 // export for unit testing
 module.exports = {
     ...module.exports,
-    validateAddTransactionRequest, expectedHeader, csv, md
+    validateAddTransactionRequest, expectedHeader, csv, md, isEmptyRow
 };

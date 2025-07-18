@@ -14,7 +14,6 @@
 without tests will likely be REJECTED)
 - [ ] New and existing tests pass locally with my changes
 
-
 ---
 
 ### What is the purpose of your *pull request*?

@@ -97,13 +97,19 @@ export const AddTransaction = ({ refresh }) => {
             url: "/api/transaction/" + extension,
             method: "POST",
             body: JSON.stringify({ [extension]: await files[0].text() }),
-            callback: ({ json, status }) => {
+            callback: ({ json, status, msg }) => {
                 if (status !== 500) {
                     const { transactions, invalid } = json;
+                    if (!transactions) {
+                        displayNotification({
+                            message: "An error occurred processing the " + extension + " file: " + msg, type: NotificationType.Error });
+                        return;
+                    }
                     setCSVData({ transactions, invalid });
                     setIsCSVModalOpen(true);
                 } else {
-                    displayNotification({ message: "An error occurred processing the CSV file", type: NotificationType.Error });
+                    displayNotification({
+                        message: "An error occurred processing the " + extension + " file: " + msg, type: NotificationType.Error });
                 }
             }
         });
@@ -285,8 +291,8 @@ export const AddTransaction = ({ refresh }) => {
 
     const reviewTransactionsTemplate = () => {
         return (
-            <div id="review-transactions-modal" className="flex flex-col w-full h-full rounded-none lg:w-2/3 xl:w-fit md:h-fit bg-slate-900 border-2
-                border-slate-800 md:rounded-lg shadow-lg outline-none focus:outline-none">
+            <div id="review-transactions-modal" className="flex flex-col w-full h-full rounded-none lg:w-2/3 xl:w-fit md:h-fit md:max-h-3/4
+                bg-slate-900 border-2 border-slate-800 md:rounded-lg shadow-lg outline-none focus:outline-none">
                 <div className="flex items-end justify-between p-5 border-b-1 border-solid rounded-t border-slate-800 mb-2">
                     <h3 className="text-3xl font-semibold">Review Transactions</h3>
                     <button aria-label="Close Menu" title="Close Menu" onClick={closeReviewCsvModal}
@@ -301,6 +307,7 @@ export const AddTransaction = ({ refresh }) => {
                     <table className="text-left table-auto">
                         <thead>
                             <tr>
+                                <th className="px-4 py-2"></th>
                                 <th className="px-4 py-2">Name</th>
                                 <th className="px-4 py-2 text-right">Amount</th>
                                 <th className="px-4 py-2">Date</th>
@@ -312,6 +319,7 @@ export const AddTransaction = ({ refresh }) => {
                         <tbody>
                             { csvData.transactions.map((transaction, i) => (
                                 <tr key={i} className={csvData.invalid?.[i] ? "bg-red-900" : ""} title={csvData.invalid?.[i]}>
+                                    <td className="pl-4 text-gray-600 font-thin">{i+1}</td>
                                     <td className="px-4 py-2">
                                         <input type="text" value={transaction.name} size={transaction?.name?.length ?? 20}
                                             placeholder="Transaction Name" name="name" onChange={(e) => updateCsvTransaction(e, i)}/>

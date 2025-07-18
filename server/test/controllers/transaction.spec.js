@@ -1,5 +1,5 @@
 const { describe, expect, test } = require("@jest/globals");
-const { validateAddTransactionRequest, expectedHeader, csv, md } = require("../../controllers/Transactions");
+const { validateAddTransactionRequest, expectedHeader, csv, md, isEmptyRow } = require("../../controllers/Transactions");
 const { isNumber } = require("../../utils/utils");
 
 describe("Transactions", () => {
@@ -21,16 +21,16 @@ describe("Transactions", () => {
         const validTransactionPayloads = [
             // name,amount,date?,category?,assetType,currency
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "other" } },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "usd", category: "other" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", date: "2022-01-01" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD",
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "usd",
                     date: 1640995200000, category: "other" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" } },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "usd", category: "Groceries" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries" } },
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "usd", category: "Groceries" } },
             { input: { amount: 50, name: "Test", assetType: "cash", currency: "USD", category: "Groceries", date: 1640995200000 },
-                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "USD",
+                expected: { valid: true, amount: 50, name: "Test", assetType: "cash", currency: "usd",
                     category: "Groceries", date: 1640995200000 } },
             { input: { amount: 50, name: "Test", assetType: "crypto", currency: "BTC", category: "Groceries", date: 1640995200000 },
                 expected: { valid: true, amount: 50, name: "Test", assetType: "crypto", currency: "BTC",
@@ -147,4 +147,27 @@ describe("Transactions", () => {
             expect(md(input)).toMatch(expected);
         });
     });
+
+    describe("isEmptyRow", () => {
+        const testCases = [
+            { input: "name,amount,date,category,type".split(","), expected: false },
+            { input: "name|amount|date|category|type".split("|"), expected: false },
+            { input: "|name|amount|date|category|type|".split("|"), expected: false },
+            { input: "|name| amount |date|category| type |".split("|"), expected: false },
+            { input: "name,amount,date,,type".split(","), expected: false },
+            { input: "name,,date, ,type".split(","), expected: false },
+            { input: "| ---- | ------ | ---------------- | --------- | ---------- | -------- |".split("|"), expected: true },
+            { input: "|----|------|----------------|---------| ---------- | -------- |".split("|"), expected: true },
+            { input: " ----|------|----------------|---------| ---------- | -------- ".split("|"), expected: true },
+            { input: ",,, ,".split(","), expected: true },
+            { input: " , , , , ".split(","), expected: true },
+            { input: "-,-,-,-,-".split(","), expected: true },
+            { input: "-|-|-|-|-".split("|"), expected: true },
+            { input: " |          | |       | ".split("|"), expected: true },
+        ];
+
+        test.each(testCases)("should return true if the row is only 'empty values' and false otherwise: '%s'", ({ input, expected }) => {
+            expect(isEmptyRow(input)).toBe(expected);
+        });
+    })
 });

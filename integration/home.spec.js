@@ -210,6 +210,26 @@ test.describe("import transactions", () => {
         await expect(page.locator("#balance-value")).toHaveText(/\$\s*4,497\.74/);
     })
 
+    test("should allow user to add transactions from csv with blank rows", async ({ page }) => {
+        await pageSetup({ page });
+
+        // since I need to set the file on the input itself in testing, I don't think I need to click the import button
+        const importTransactionsButton = page.locator("#add-transactions-button");
+        await importTransactionsButton.click();
+
+        const fileInput = page.locator("#transactions-file-input");
+        await fileInput.setInputFiles("./transactionsWithBlankRecords.csv");
+
+        // basic verification, that the file was processed and loaded in the modal
+        await expect(page.locator("#review-transactions-modal")).toBeVisible();
+        await expect(page.locator("tr")).toHaveCount(7);
+
+        // submit the transactions and check transaction history list and balance
+        await page.locator("#submit-transactions").click();
+        await expect(page.locator("#transaction-history-list > *")).toHaveCount(5);
+        await expect(page.locator("#balance-value")).toHaveText(/\$\s*4,497\.74/);
+    })
+
     test("should not allow user to click upload button if errors not fixed from csv", async ({ page }) => {
         await pageSetup({ page });
 
@@ -254,6 +274,26 @@ test.describe("import transactions", () => {
 
         const fileInput = page.locator("#transactions-file-input");
         await fileInput.setInputFiles("./transactions.md");
+
+        // basic verification, that the file was processed and loaded in the modal
+        await expect(page.locator("#review-transactions-modal")).toBeVisible();
+        await expect(page.locator("tr")).toHaveCount(7);
+
+        // submit the transactions and check transaction history list and balance
+        await page.locator("#submit-transactions").click();
+        await expect(page.locator("#transaction-history-list > *")).toHaveCount(5);
+        await expect(page.locator("#balance-value")).toHaveText(/\$\s*4,497\.74/);
+    })
+
+    test("should allow user to add transactions from md with blank rows", async ({ page }) => {
+        await pageSetup({ page });
+
+        // since I need to set the file on the input itself in testing, I don't think I need to click the import button
+        const importTransactionsButton = page.locator("#add-transactions-button");
+        await importTransactionsButton.click();
+
+        const fileInput = page.locator("#transactions-file-input");
+        await fileInput.setInputFiles("./transactionsWithBlankRecords.md");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();

@@ -56,6 +56,7 @@ function TransactionHistory() {
                 <table className="text-left table-auto w-full text-lg border-2 border-slate-800">
                     <thead>
                         <tr className="bg-slate-800">
+                            <th></th>
                             <th className="px-4 py-2 w-2/6">Name</th>
                             <th className="px-4 py-2 text-right w-1/6">Amount</th>
                             <th className="px-4 py-2">Date</th>
@@ -66,6 +67,7 @@ function TransactionHistory() {
                     </thead>
                     <tbody>
                         <tr className="border-1 border-slate-800">
+                            <td></td>
                             <td className="px-4 py-2">
                                 <input placeholder="Filter by name" value={filter.name} onChange={updateFilter} name="name" className="w-full"/>
                             </td>
@@ -93,6 +95,7 @@ function TransactionHistory() {
                             .sort(sortTransactions)
                             .map((transaction, i) => (
                                 <tr key={i} className="hover:bg-slate-700">
+                                    <td className="pl-4 text-gray-600 font-thin">{i+1}</td>
                                     <td className="px-4 py-2">{transaction.name}</td>
                                     <td id={"transaction-history-amount-" + i}
                                         className={"px-2 py-2 text-right " + (transaction.amount < 0 ? "text-red-400": "text-green-400")}>

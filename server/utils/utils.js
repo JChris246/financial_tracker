@@ -69,7 +69,6 @@ const pad = (v, n = 2) => {
     return v;
 };
 
-// TODO: write tests
 const padRight = (v, n, c) => {
     v = v + ""; // convert to string
     if (v.length >= n) {

@@ -1,0 +1,10 @@
+name                                    , date       , amount  , assetType , currency , category
+--------------------------------------- , ---------- , ------- , --------- , -------- , --------
+Descriptive Deposit Subscription Rebate , 2024-03-02 , 10.00   , cash      , usd      , other   
+Descriptive Deposit CC Cashback Rebate  , 2024-03-02 , 6.77    , cash      , usd      , other   
+ACH Deposit APPL - EDIPAYMENT           , 2024-03-15 , 2171.45 , cash      , usd      , income  
+ACH Deposit IRS TREAS 310 - TAX REF     , 2024-03-27 , 138.00  , cash      , usd      , other   
+, , ,, , 
+ACH Deposit APPL - EDIPAYMENT           , 2025-03-29 , 2171.43 , cash      , usd      , income  
+Credit Dividend                         , 2025-03-31 , 0.09    , cash      , usd      , other   
+                                        ,            ,         ,           ,          ,         

@@ -311,7 +311,7 @@ describe("transaction endpoints", () => {
             expect(response.body.transactions).toEqual([
                 { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
                     date: 1711929600000, name: "Test transaction", valid: true },
-                { amount: 760, assetType: "cash", category: "Side job", currency: "USD",
+                { amount: 760, assetType: "cash", category: "Side job", currency: "usd",
                     date: 1743552000000, name: "Test transaction 2", valid: true },
                 { amount: 4, assetType: "crypto", category: "Smart contracts", currency: "ETH",
                     date: 1711929600000, name: "Test transaction 3", valid: true },
@@ -335,7 +335,7 @@ describe("transaction endpoints", () => {
             expect(response.body.transactions).toEqual([
                 { amount: 4, assetType: "stock", category: "other", currency: "NVDA",
                     date: 1711929600000, name: "Test transaction", valid: true },
-                { amount: 760, assetType: "cash", category: "other", currency: "USD",
+                { amount: 760, assetType: "cash", category: "other", currency: "usd",
                     date: 1743552000000, name: "Test transaction 2", valid: true },
                 { amount: 4, assetType: "crypto", category: "other", currency: "ETH",
                     date: 1711929600000, name: "Test transaction 3", valid: true },
@@ -343,6 +343,32 @@ describe("transaction endpoints", () => {
                     date: 1714521600000, name: "Test transaction 4", valid: true },
                 { amount: 50, assetType: "crypto", category: "other", currency: "ADA",
                     date: 1722470400000, name: "Test transaction 5", valid: true }
+            ]);
+        });
+
+        test("should return successful response with interpreted transactions when csv contains expected fields and ignore blank rows", async () => {
+            // Arrange
+            const data = fs.readFileSync("./test/assets/transactionsWithBlankRecords.csv", "utf-8");
+
+            // Act
+            const response = await superTestRequest.post("/api/transaction/csv").send({ csv: data });
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.msg).toEqual("CSV processed successfully");
+            expect(response.body.transactions).toEqual([
+                { amount: 10, assetType: "cash", category: "other", currency: "usd",
+                    date: 1709337600000, name: "Descriptive Deposit Subscription Rebate", valid: true },
+                { amount: 6.77, assetType: "cash", category: "other", currency: "usd",
+                    date: 1709337600000, name: "Descriptive Deposit CC Cashback Rebate", valid: true },
+                { amount: 2171.45, assetType: "cash", category: "income", currency: "usd",
+                    date: 1710460800000, name: "ACH Deposit APPL - EDIPAYMENT", valid: true },
+                { amount: 138, assetType: "cash", category: "other", currency: "usd",
+                    date: 1711497600000, name: "ACH Deposit IRS TREAS 310 - TAX REF", valid: true },
+                { amount: 2171.43, assetType: "cash", category: "income", currency: "usd",
+                    date: 1743206400000, name: "ACH Deposit APPL - EDIPAYMENT", valid: true },
+                { amount: 0.09, assetType: "cash", category: "other", currency: "usd",
+                    date: 1743379200000, name: "Credit Dividend", valid: true }
             ]);
         });
     });
@@ -419,7 +445,7 @@ describe("transaction endpoints", () => {
             expect(response.body.transactions).toEqual([
                 { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
                     date: 1711929600000, name: "Test transaction", valid: true },
-                { amount: 760, assetType: "cash", category: "Side job", currency: "USD",
+                { amount: 12760, assetType: "cash", category: "Side job", currency: "usd",
                     date: 1743552000000, name: "Test transaction 2", valid: true },
                 { amount: 4, assetType: "crypto", category: "Smart contracts", currency: "ETH",
                     date: 1711929600000, name: "Test transaction 3", valid: true },
@@ -442,11 +468,38 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("Markdown table processed successfully");
             expect(response.body.transactions).toEqual([
                 { amount: 4, assetType: "stock", category: "other", currency: "NVDA", date: 1711929600000, name: "Test transaction", valid: true },
-                { amount: 760, assetType: "cash", category: "other", currency: "USD", date: 1743552000000, name: "Test transaction 2", valid: true },
+                { amount: 760, assetType: "cash", category: "other", currency: "usd", date: 1743552000000, name: "Test transaction 2", valid: true },
                 { amount: 4, assetType: "crypto", category: "other", currency: "ETH", date: 1711929600000, name: "Test transaction 3", valid: true },
                 { amount: 0.3, assetType: "crypto", category: "other", currency: "BTC", date: 1714521600000,
                     name: "Test transaction 4", valid: true },
                 { amount: 50, assetType: "crypto", category: "other", currency: "ADA", date: 1722470400000, name: "Test transaction 5", valid: true }
+            ]);
+        });
+
+        test("should return successful response with interpreted transactions when markdown table contains expected fields and ignore blank rows",
+                async () => {
+            // Arrange
+            const data = fs.readFileSync("./test/assets/transactionsWithBlankRecords.md", "utf-8");
+
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md").send({ md: data });
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.msg).toEqual("Markdown table processed successfully");
+            expect(response.body.transactions).toEqual([
+                { amount: 10, assetType: "cash", category: "other", currency: "usd",
+                    date: 1709337600000, name: "Descriptive Deposit Subscription Rebate", valid: true },
+                { amount: 6.77, assetType: "cash", category: "other", currency: "usd",
+                    date: 1709337600000, name: "Descriptive Deposit CC Cashback Rebate", valid: true },
+                { amount: 2171.45, assetType: "cash", category: "income", currency: "usd",
+                    date: 1710460800000, name: "ACH Deposit APPL - EDIPAYMENT", valid: true },
+                { amount: 138, assetType: "cash", category: "other", currency: "usd",
+                    date: 1711497600000, name: "ACH Deposit IRS TREAS 310 - TAX REF", valid: true },
+                { amount: 2171.43, assetType: "cash", category: "income", currency: "usd",
+                    date: 1743206400000, name: "ACH Deposit APPL - EDIPAYMENT", valid: true },
+                { amount: 0.09, assetType: "cash", category: "other", currency: "usd",
+                    date: 1743379200000, name: "Credit Dividend", valid: true }
             ]);
         });
     });
