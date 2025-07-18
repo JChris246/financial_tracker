@@ -81,10 +81,22 @@ export const AddTransaction = ({ refresh }) => {
     const selectFile = async e => {
         const { target: { files } } = e;
 
+        const extension = files[0]?.name?.split(".").slice(-1)[0];
+        if (!extension) {
+            // not all OSes force file extensions, but we need it to determine how to process (apart from reading the byte headers)
+            displayNotification({ message: "Unknown file extension", type: NotificationType.Error });
+            return;
+        }
+
+        if (extension !== "csv" && extension !== "md") {
+            displayNotification({ message: "File does not seem to be a md or csv", type: NotificationType.Error });
+            return;
+        }
+
         request({
-            url: "/api/transaction/csv",
+            url: "/api/transaction/" + extension,
             method: "POST",
-            body: JSON.stringify({ csv: await files[0].text() }),
+            body: JSON.stringify({ [extension]: await files[0].text() }),
             callback: ({ json, status }) => {
                 if (status !== 500) {
                     const { transactions, invalid } = json;
@@ -271,9 +283,9 @@ export const AddTransaction = ({ refresh }) => {
         });
     };
 
-    const reviewCsvTemplate = () => {
+    const reviewTransactionsTemplate = () => {
         return (
-            <div id="review-csv-modal" className="flex flex-col w-full h-full rounded-none lg:w-2/3 xl:w-fit md:h-fit bg-slate-900 border-2
+            <div id="review-transactions-modal" className="flex flex-col w-full h-full rounded-none lg:w-2/3 xl:w-fit md:h-fit bg-slate-900 border-2
                 border-slate-800 md:rounded-lg shadow-lg outline-none focus:outline-none">
                 <div className="flex items-end justify-between p-5 border-b-1 border-solid rounded-t border-slate-800 mb-2">
                     <h3 className="text-3xl font-semibold">Review Transactions</h3>
@@ -396,7 +408,7 @@ export const AddTransaction = ({ refresh }) => {
                             1.125-1.125V11.25a10 9 0 0 0-9-9Z" />
                     </svg>
                 </button>
-                <input type="file" accept=".csv" id="csv-file-input" className="hidden" onChange={selectFile} ref={csvInput} />
+                <input type="file" accept=".csv,.md" id="transactions-file-input" className="hidden" onChange={selectFile} ref={csvInput} />
             </div>
 
             {isAddTransactionModalOpen && <Modal close={closeAddTransactionModal}>
@@ -404,7 +416,7 @@ export const AddTransaction = ({ refresh }) => {
             </Modal> }
 
             {isCSVModalOpen && <Modal close={closeReviewCsvModal}>
-                { reviewCsvTemplate() }
+                { reviewTransactionsTemplate() }
             </Modal> }
 
         </section>

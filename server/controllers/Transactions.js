@@ -1,7 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, isDefined, isValidArray, formatDate } = require("../utils/utils");
+const { isNumber, isDefined, isValidArray, formatDate, padRight } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
@@ -72,7 +72,9 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "Asset currency not supported" };
     }
 
-    return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() };
+    // TODO: Please Please make the currencies a common case
+    return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(),
+        currency: assetType === ASSET_TYPE.CASH ? currency : currency.toUpperCase() };
 }
 
 module.exports.addTransaction = (req , res) => {
@@ -81,7 +83,7 @@ module.exports.addTransaction = (req , res) => {
         return res.status(400).send({ msg: result.msg });
     }
 
-    const { name, date, amount, type, category, assetType, currency } = result;
+    const { name, date, amount, category, assetType, currency } = result;
     getDatabase().createTransaction(
         { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
         transaction => {
@@ -151,10 +153,10 @@ module.exports.addTransactions = (req , res) => {
     return res.status(201).send({ msg: "Transactions added successfully", addedTransactions });
 };
 
-const expectedCsvHeader = (header) => {
+const expectedHeader = (header, separator) => {
     const map = { name: null, amount: null, date: null, category: null, assettype: null, currency: null };
 
-    const headerFields = header.split(",").map(x => x.toLowerCase().trim());
+    const headerFields = header.split(separator).map(x => x.toLowerCase().trim().replace(" ", ""));
     const expectedFields = Object.keys(map);
     for (let i = 0; i < headerFields.length; i++) {
         if (expectedFields.includes(headerFields[i])) {
@@ -173,7 +175,7 @@ const expectedCsvHeader = (header) => {
     }
 
     return { map, valid: true };
-}
+};
 
 module.exports.processCSV = (req, res) => {
     const { csv } = req.body;
@@ -199,7 +201,7 @@ module.exports.processCSV = (req, res) => {
         return res.status(400).send({ msg: "Expected at least one csv row along with the csv header" });
     }
 
-    const { map: csvStructMap, missingFields, valid } = expectedCsvHeader(header)
+    const { map: csvStructMap, missingFields, valid } = expectedHeader(header, ",");
 
     if (valid) {
         // should I check if each row has the same number of fields as the header?
@@ -239,7 +241,79 @@ module.exports.processCSV = (req, res) => {
     }
 };
 
+module.exports.processMd = (req, res) => {
+    const { md } = req.body;
+
+    if (!isDefined(md)) {
+        logger.warn("User tried to process markdown table without md data");
+        return res.status(400).send({ msg: "You need to provide a valid markdown table" });
+    }
+
+    if (typeof md !== "string") {
+        logger.warn("User tried to process markdown table with invalid data");
+        return res.status(400).send({ msg: "payload must be a string" });
+    }
+
+    if (md.trim() === "") {
+        logger.warn("User tried to process markdown table without data");
+        return res.status(400).send({ msg: "payload cannot be empty" });
+    }
+
+    if (md.trim().split("\n").length < 2) {
+        logger.warn("User tried to process a string that may not be a valid markdown table")
+        return res.status(400).send({ msg: "invalid markdown format detected" });
+    }
+
+    const [header, separator, ...rows] = md.trim().split("\n");
+    if (rows.length === 0) {
+        logger.warn("User tried to process markdown table without at least one row");
+        return res.status(400).send({ msg: "Expected at least one markdown table row along with the headers" });
+    }
+
+    // TODO: probably should validate the "separator" is actually the markdown table header separator
+
+    const { map: mdStructMap, missingFields, valid } = expectedHeader(header, "|")
+
+    if (valid) {
+        // should I check if each row has the same number of fields as the header?
+        // it will likely still fail, but fail for the wrong reason
+        const transactions = rows.map(row => {
+            const fields = row.split("|");
+            return {
+                name: fields[mdStructMap.name]?.trim(),
+                amount: fields[mdStructMap.amount]?.trim(),
+                date: fields[mdStructMap.date]?.trim(),
+                category: mdStructMap.category ? fields[mdStructMap.category].trim() : "other",
+                assetType: fields[mdStructMap.assettype]?.trim(),
+                currency: fields[mdStructMap.currency]?.trim()
+            }
+        });
+
+        const invalid = {};
+        for (let i = 0; i < transactions.length; i++) {
+            const result = validateAddTransactionRequest(transactions[i]);
+            if (!result.valid) {
+                invalid[i] = result.msg;
+            } else {
+                transactions[i] = result;
+            }
+        }
+
+        // return how the transactions were interpreted and which ones were invalid
+        if (Object.keys(invalid).length > 0) {
+            return res.status(400).send({ msg: "Invalid markdown table", invalid, transactions });
+        }
+
+        // return the ui to allow to user to verify that the transactions were interpreted correctly
+        return res.status(200).send({ msg: "Markdown table processed successfully", transactions });
+    } else {
+        // TODO: use AI to determine what the header fields correspond to, if possible
+        return res.status(400).send({ msg: "Invalid markdown table header, missing fields: " + missingFields.join(",") });
+    }
+};
+
 const csv = transactions => {
+    // TODO: format money amount?
     return "Name,Amount,Date,Category,Asset Type,Currency\n" +
     transactions.map(transaction =>
         transaction.name + "," + transaction.amount + "," + formatDate(transaction.date) + "," + transaction.category + "," +
@@ -247,9 +321,46 @@ const csv = transactions => {
     ).join("\n");
 };
 
+const md = transactions => {
+    if (transactions.length < 1) {
+        return (
+            `| Name | Amount | Date | Category | Asset Type | Currency |\n| ---- | ------ | ---- | -------- | ---------- | -------- |`
+        );
+    }
+
+    const lengths = { name: 6, amount: 8, date: 6, category: 10, assetType: 12, currency: 10 };
+    for (let i = 0; i < transactions.length; i++) {
+        Object.keys(lengths).forEach(key => {
+            const currentLength = key === "date" ? formatDate(transactions[i][key]).length : String(transactions[i][key]).length;
+            lengths[key] = lengths[key] < currentLength + 2 ? currentLength + 2 : lengths[key];
+        })
+    }
+
+    // TODO: format money amount?
+    const header = "|" + [
+        padRight(" Name", lengths.name, " "), padRight(" Amount", lengths.amount, " "), padRight(" Date", lengths.date, " "),
+        padRight(" Category", lengths.category, " "), padRight(" Asset Type", lengths.assetType, " "), padRight(" Currency", lengths.currency, " ")
+    ].join("|") + "|";
+    const headerSeparator = "|" + [
+        padRight(" ", lengths.name-1, "-") + " ", padRight(" ", lengths.amount-1, "-") + " ", padRight(" ", lengths.date-1, "-") + " ",
+        padRight(" ", lengths.category-1, "-") + " ", padRight(" ", lengths.assetType-1, "-") + " ", padRight(" ", lengths.currency-1, "-") + " "
+    ].join("|") + "|";
+
+    let body = "";
+    for (let i = 0; i < transactions.length; i++) {
+        body += "|" + [
+            padRight(" " + transactions[i].name, lengths.name, " "), padRight(" " + transactions[i].amount, lengths.amount, " "),
+            padRight(" " + formatDate(transactions[i].date), lengths.date, " "), padRight(" " + transactions[i].category, lengths.category, " "),
+            padRight(" " + transactions[i].assetType, lengths.assetType, " "), padRight(" " + transactions[i].currency, lengths.currency, " ")
+        ].join("|") + "|" + (i === transactions.length -1 ? "" : "\n");
+    }
+
+    return header + "\n" + headerSeparator + "\n" + body;
+};
+
 module.exports.exportTransactions = (req, res) => {
     const format = req.params.format;
-    if (format !== "csv" && format !== "json") {
+    if (format !== "csv" && format !== "json" && format !== "md") {
         logger.warn("User tried to export transactions with invalid format: " + format);
         return res.status(400).send({ msg: "Invalid export format" });
     }
@@ -258,8 +369,10 @@ module.exports.exportTransactions = (req, res) => {
         transactions => {
             if (format === "csv") {
                 res.status(200).send({ csv: csv(transactions) });
+            } else if (format == "md") {
+                res.status(200).send({ md: md(transactions) });
             } else {
-                res.status(200).send(transactions); // this really just the same as get transactions endpoint
+                res.status(200).send(transactions); // this is really just the same as get transactions endpoint
             }
         },
         err => {
@@ -296,5 +409,5 @@ module.exports.getGraphData = (_, res) => {
 // export for unit testing
 module.exports = {
     ...module.exports,
-    validateAddTransactionRequest, expectedCsvHeader, csv
+    validateAddTransactionRequest, expectedHeader, csv, md
 };

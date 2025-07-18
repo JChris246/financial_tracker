@@ -1,7 +1,7 @@
 const { describe, expect, test } = require("@jest/globals");
 
 const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision,
-    formatDate, pad, isValidString } = require("../../utils/utils");
+    formatDate, pad, isValidString, padRight } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
@@ -188,6 +188,24 @@ describe("utils", () => {
 
         test.each(testCases)("should pad string with zeros until length reaches n: '%s'", ({ input, n, expected }) => {
             expect(pad(input, n)).toBe(expected);
+        });
+    });
+
+    describe("padRight", () => {
+        const testCases = [
+            { input: 123, n: 2, c: "-", expected: "123" },
+            { input: 1, n: 3, c: "-", expected: "1--" },
+            { input: "abcde", n: 2, c: " ", expected: "abcde" },
+            { input: "1234", n: 5, c: " ", expected: "1234 " },
+            { input: " 1", n: 2, c: " ", expected: " 1" },
+            { input: "1 ", n: 2, c: " ", expected: "1 " },
+            { input: "1 ", n: 3, c: " ", expected: "1  " },
+            { input: "1", n: 2, c: " ", expected: "1 " },
+            { input: "1", n: 3, c: "-", expected: "1--" },
+        ];
+
+        test.each(testCases)("should pad string on the right with desired character until length reaches n: '%s'", ({ input, n, c, expected }) => {
+            expect(padRight(input, n, c)).toBe(expected);
         });
     });
 

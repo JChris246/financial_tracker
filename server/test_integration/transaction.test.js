@@ -347,6 +347,110 @@ describe("transaction endpoints", () => {
         });
     });
 
+    describe("processMd", () => {
+        test.each([
+            { payload: "", msg: "payload cannot be empty" },
+            { payload: " ", msg: "payload cannot be empty" },
+            { payload: null, msg: "You need to provide a valid markdown table" },
+            { payload: undefined, msg: "You need to provide a valid markdown table" },
+            { payload: 23, msg: "payload must be a string" },
+            { payload: { amount: 23, name: "Test Transaction" }, msg: "payload must be a string" },
+            { payload: "| Name | Amount | Date |", msg: "invalid markdown format detected" }
+        ])("should return bad request when no data / invalid data is provided: %s", async ({ payload, msg }) => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md").send({ md: payload });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual(msg);
+        });
+
+        test("should return bad request when only the markdown table header is provided", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md")
+                .send({ md: "| Name | Amount | Date |\n| ---- | ----- | ----- |" });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("Expected at least one markdown table row along with the headers");
+        });
+
+        // TODO: update this test when I start to use AI
+        test("should return bad request when header is missing required fields", async () => {
+            // Arrange
+            const data = fs.readFileSync("./test/assets/missingHeaderFieldsTransactions.md", "utf-8");
+
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md").send({ md: data });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("Invalid markdown table header, missing fields: amount,currency");
+        });
+
+        test("should return bad request when transaction are missing required fields", async () => {
+            // Arrange
+            const data = fs.readFileSync("./test/assets/missingRequiredFieldsTransactions.md", "utf-8");
+
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md").send({ md: data });
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("Invalid markdown table");
+            expect(response.body.invalid).toEqual({
+                0: "You need to have a valid transaction asset type",
+                3: "You need to have the transaction amount",
+                5: "You need to have the transaction name",
+                6: "You need to have the transaction amount",
+            });
+        });
+
+        test("should return successful response with interpreted transactions when markdown table contains all expected fields", async () => {
+            // Arrange
+            const data = fs.readFileSync("./test/assets/fiveFullGoodTransactions.md", "utf-8");
+
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md").send({ md: data });
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.msg).toEqual("Markdown table processed successfully");
+            expect(response.body.transactions).toEqual([
+                { amount: 4, assetType: "stock", category: "Investment", currency: "NVDA",
+                    date: 1711929600000, name: "Test transaction", valid: true },
+                { amount: 760, assetType: "cash", category: "Side job", currency: "USD",
+                    date: 1743552000000, name: "Test transaction 2", valid: true },
+                { amount: 4, assetType: "crypto", category: "Smart contracts", currency: "ETH",
+                    date: 1711929600000, name: "Test transaction 3", valid: true },
+                { amount: 0.3, assetType: "crypto", category: "", currency: "BTC",
+                    date: 1714521600000, name: "Test transaction 4", valid: true },
+                { amount: 50, assetType: "crypto", category: "", currency: "ADA",
+                    date: 1722470400000, name: "Test transaction 5", valid: true }
+            ]);
+        });
+
+        test("should return successful response with interpreted transactions when table contains all expected fields (except category)",async () =>{
+            // Arrange
+            const data = fs.readFileSync("./test/assets/fiveGoodTransactions.md", "utf-8");
+
+            // Act
+            const response = await superTestRequest.post("/api/transaction/md").send({ md: data });
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.msg).toEqual("Markdown table processed successfully");
+            expect(response.body.transactions).toEqual([
+                { amount: 4, assetType: "stock", category: "other", currency: "NVDA", date: 1711929600000, name: "Test transaction", valid: true },
+                { amount: 760, assetType: "cash", category: "other", currency: "USD", date: 1743552000000, name: "Test transaction 2", valid: true },
+                { amount: 4, assetType: "crypto", category: "other", currency: "ETH", date: 1711929600000, name: "Test transaction 3", valid: true },
+                { amount: 0.3, assetType: "crypto", category: "other", currency: "BTC", date: 1714521600000,
+                    name: "Test transaction 4", valid: true },
+                { amount: 50, assetType: "crypto", category: "other", currency: "ADA", date: 1722470400000, name: "Test transaction 5", valid: true }
+            ]);
+        });
+    });
+
     describe("exportTransactions", () => {
         test("should return bad request when an invalid format is provided", async () => {
             // Act
@@ -357,7 +461,7 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toBe("Invalid export format");
         });
 
-        test("should return success response and all transactions as json when transactions added successfully", async () => {
+        test("should return success response and all transactions as json when transactions exist", async () => {
             // Arrange
             await superTestRequest.post("/api/transaction/all").send([
                 { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
@@ -373,7 +477,7 @@ describe("transaction endpoints", () => {
             expect(response.body.length).toBe(3);
         });
 
-        test("should return success response and all transactions as csv when transactions added successfully", async () => {
+        test("should return success response and all transactions as csv when transactions exist", async () => {
             // Arrange
             await superTestRequest.post("/api/transaction/all").send([
                 { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
@@ -387,6 +491,22 @@ describe("transaction endpoints", () => {
             // Assert
             expect(response.status).toBe(200);
             expect(response.body.csv.split("\n").length).toBe(4);
+        });
+
+        test("should return success response and all transactions as a markdown table when transactions exist", async () => {
+            // Arrange
+            await superTestRequest.post("/api/transaction/all").send([
+                { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
+                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "btc", date: "2023-01-01" },
+                { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL", category: "Investment", date: "2024-01-01" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.get("/api/transaction/export/md");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.md.split("\n").length).toBe(5);
         });
     });
 });

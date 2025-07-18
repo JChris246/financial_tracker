@@ -1,0 +1,7 @@
+| Name               | Date       | Category        | Asset Type |
+| ------------------ | ---------- | --------------- | ---------- |
+| Test transaction   | 2024-04-01 | Investment      | stock      |
+| Test transaction 2 | 2025-04-02 | Side job        | cash       |
+| Test transaction 3 | 2024-04-01 | Smart contracts | crypto     |
+| Test transaction 4 | 2024-05-01 |                 | crypto     |
+| Test transaction 5 | 2024-08-01 |                 | crypto     |

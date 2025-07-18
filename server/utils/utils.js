@@ -69,6 +69,22 @@ const pad = (v, n = 2) => {
     return v;
 };
 
+// TODO: write tests
+const padRight = (v, n, c) => {
+    v = v + ""; // convert to string
+    if (v.length >= n) {
+        return v;
+    }
+
+    for (let i = 0; i < n; i++) {
+        v = v + c;
+        if (v.length >= n) {
+            break;
+        }
+    }
+    return v;
+}
+
 const formatDate = (d) => {
     if (typeof d === "string") {
         d = d.trim();
@@ -154,4 +170,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
 };
 
 module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray,
-    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString };
+    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString, padRight };
