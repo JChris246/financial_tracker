@@ -1,7 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, isDefined, isValidArray, formatDate } = require("../utils/utils");
+const { isNumber, isDefined, isValidArray, formatDate, padRight } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
@@ -81,7 +81,7 @@ module.exports.addTransaction = (req , res) => {
         return res.status(400).send({ msg: result.msg });
     }
 
-    const { name, date, amount, type, category, assetType, currency } = result;
+    const { name, date, amount, category, assetType, currency } = result;
     getDatabase().createTransaction(
         { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
         transaction => {
@@ -240,6 +240,7 @@ module.exports.processCSV = (req, res) => {
 };
 
 const csv = transactions => {
+    // TODO: format money amount?
     return "Name,Amount,Date,Category,Asset Type,Currency\n" +
     transactions.map(transaction =>
         transaction.name + "," + transaction.amount + "," + formatDate(transaction.date) + "," + transaction.category + "," +
@@ -247,9 +248,47 @@ const csv = transactions => {
     ).join("\n");
 };
 
+const md = transactions => {
+    if (transactions.length < 1) {
+        return (
+            `| Name | Amount | Date | Category | Asset Type | Currency |
+             | ---- | ------ | ---- | -------- | ---------- | -------- |`
+        );
+    }
+
+    const lengths = { name: 6, amount: 8, date: 6, category: 10, assetType: 12, currency: 10 };
+    for (let i = 0; i < transactions.length; i++) {
+        Object.keys(lengths).forEach(key => {
+            const currentLength = key === "date" ? formatDate(transactions[i][key]).length : String(transactions[i][key]).length;
+            lengths[key] = lengths[key] < currentLength + 2 ? currentLength + 2 : lengths[key];
+        })
+    }
+
+    // TODO: format money amount?
+    const header = "|" + [
+        padRight(" Name", lengths.name, " "), padRight(" Amount", lengths.amount, " "), padRight(" Date", lengths.date, " "),
+        padRight(" Category", lengths.category, " "), padRight(" Asset Type", lengths.assetType, " "), padRight(" Currency", lengths.currency, " ")
+    ].join("|") + "|";
+    const headerSeparator = "|" + [
+        padRight(" ", lengths.name-1, "-") + " ", padRight(" ", lengths.amount-1, "-") + " ", padRight(" ", lengths.date-1, "-") + " ",
+        padRight(" ", lengths.category-1, "-") + " ", padRight(" ", lengths.assetType-1, "-") + " ", padRight(" ", lengths.currency-1, "-") + " "
+    ].join("|") + "|";
+
+    let body = "";
+    for (let i = 0; i < transactions.length; i++) {
+        body += "|" + [
+            padRight(" " + transactions[i].name, lengths.name, " "), padRight(" " + transactions[i].amount, lengths.amount, " "),
+            padRight(" " + formatDate(transactions[i].date), lengths.date, " "), padRight(" " + transactions[i].category, lengths.category, " "),
+            padRight(" " + transactions[i].assetType, lengths.assetType, " "), padRight(" " + transactions[i].currency, lengths.currency, " ")
+        ].join("|") + "|" + (i === transactions.length -1 ? "" : "\n");
+    }
+
+    return header + "\n" + headerSeparator + "\n" + body;
+};
+
 module.exports.exportTransactions = (req, res) => {
     const format = req.params.format;
-    if (format !== "csv" && format !== "json") {
+    if (format !== "csv" && format !== "json" && format !== "md") {
         logger.warn("User tried to export transactions with invalid format: " + format);
         return res.status(400).send({ msg: "Invalid export format" });
     }
@@ -258,8 +297,10 @@ module.exports.exportTransactions = (req, res) => {
         transactions => {
             if (format === "csv") {
                 res.status(200).send({ csv: csv(transactions) });
+            } else if (format == "md") {
+                res.status(200).send({ md: md(transactions) });
             } else {
-                res.status(200).send(transactions); // this really just the same as get transactions endpoint
+                res.status(200).send(transactions); // this is really just the same as get transactions endpoint
             }
         },
         err => {
@@ -296,5 +337,5 @@ module.exports.getGraphData = (_, res) => {
 // export for unit testing
 module.exports = {
     ...module.exports,
-    validateAddTransactionRequest, expectedCsvHeader, csv
+    validateAddTransactionRequest, expectedCsvHeader, csv, md
 };

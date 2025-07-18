@@ -1,5 +1,5 @@
 const { describe, expect, test } = require("@jest/globals");
-const { validateAddTransactionRequest, expectedCsvHeader, csv } = require("../../controllers/Transactions");
+const { validateAddTransactionRequest, expectedCsvHeader, csv, md } = require("../../controllers/Transactions");
 const { isNumber } = require("../../utils/utils");
 
 describe("Transactions", () => {
@@ -94,6 +94,18 @@ describe("Transactions", () => {
             const expected = /Name,Amount,Date,Category,Asset Type,Currency\nTest,50,\d{4}-\d{2}-\d{2} \d{2}:\d{2},Groceries,cash,USD/;
 
             expect(csv(input)).toMatch(expected);
+        });
+    });
+
+    describe("md", () => {
+        test("should return markdown table for provided json transactions", () => {
+            const input = [{ name: "Test", amount: 50, type: true, date: 1640995200000, category: "Groceries", assetType: "cash", currency: "USD" }];
+            const header = "| Name | Amount | Date             | Category  | Asset Type | Currency |";
+            const headerSeparator = "| ---- | ------ | ---------------- | --------- | ---------- | -------- |";
+            const body = "| Test | 50     | \d{4}-\d{2}-\d{2} \d{2}:\d{2} | Groceries | cash       | USD      |"
+            const expected = new RegExp(header + "\n" + headerSeparator + "\n" + body);
+
+            expect(md(input)).toMatch(expected);
         });
     });
 });

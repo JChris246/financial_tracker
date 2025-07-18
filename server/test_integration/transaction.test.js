@@ -357,7 +357,7 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toBe("Invalid export format");
         });
 
-        test("should return success response and all transactions as json when transactions added successfully", async () => {
+        test("should return success response and all transactions as json when transactions exist", async () => {
             // Arrange
             await superTestRequest.post("/api/transaction/all").send([
                 { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
@@ -373,7 +373,7 @@ describe("transaction endpoints", () => {
             expect(response.body.length).toBe(3);
         });
 
-        test("should return success response and all transactions as csv when transactions added successfully", async () => {
+        test("should return success response and all transactions as csv when transactions exist", async () => {
             // Arrange
             await superTestRequest.post("/api/transaction/all").send([
                 { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
@@ -387,6 +387,22 @@ describe("transaction endpoints", () => {
             // Assert
             expect(response.status).toBe(200);
             expect(response.body.csv.split("\n").length).toBe(4);
+        });
+
+        test("should return success response and all transactions as a markdown table when transactions exist", async () => {
+            // Arrange
+            await superTestRequest.post("/api/transaction/all").send([
+                { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "usd", date: "2022-01-01", category: "Groceries" },
+                { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "btc", date: "2023-01-01" },
+                { name: "Test stock transaction", amount: 5.2, assetType: "stock", currency: "AAPL", category: "Investment", date: "2024-01-01" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.get("/api/transaction/export/md");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.md.split("\n").length).toBe(5);
         });
     });
 });
