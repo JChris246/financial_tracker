@@ -1,0 +1,7 @@
+| date       | name               |  currency | amount | assetType |
+| ---------- | ------------------ | --------- | ------ | --------- |
+| 2024-04-01 | Test transaction   | NVDA      | 4      | stock     |
+| 2025-04-02 | Test transaction 2 | USD       | 760    | cash      |
+| 2024-04-01 | Test transaction 3 | ETH       | 4      | crypto    |
+| 2024-05-01 | Test transaction 4 | BTC       | 0.3    | crypto    |
+| 2024-08-01 | Test transaction 5 | ADA       | 50     | crypto    |

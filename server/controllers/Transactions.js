@@ -151,10 +151,10 @@ module.exports.addTransactions = (req , res) => {
     return res.status(201).send({ msg: "Transactions added successfully", addedTransactions });
 };
 
-const expectedCsvHeader = (header) => {
+const expectedHeader = (header, separator) => {
     const map = { name: null, amount: null, date: null, category: null, assettype: null, currency: null };
 
-    const headerFields = header.split(",").map(x => x.toLowerCase().trim());
+    const headerFields = header.split(separator).map(x => x.toLowerCase().trim().replace(" ", ""));
     const expectedFields = Object.keys(map);
     for (let i = 0; i < headerFields.length; i++) {
         if (expectedFields.includes(headerFields[i])) {
@@ -173,7 +173,7 @@ const expectedCsvHeader = (header) => {
     }
 
     return { map, valid: true };
-}
+};
 
 module.exports.processCSV = (req, res) => {
     const { csv } = req.body;
@@ -199,7 +199,7 @@ module.exports.processCSV = (req, res) => {
         return res.status(400).send({ msg: "Expected at least one csv row along with the csv header" });
     }
 
-    const { map: csvStructMap, missingFields, valid } = expectedCsvHeader(header)
+    const { map: csvStructMap, missingFields, valid } = expectedHeader(header, ",");
 
     if (valid) {
         // should I check if each row has the same number of fields as the header?
@@ -239,6 +239,77 @@ module.exports.processCSV = (req, res) => {
     }
 };
 
+module.exports.processMd = (req, res) => {
+    const { md } = req.body;
+
+    if (!isDefined(md)) {
+        logger.warn("User tried to process markdown table without md data");
+        return res.status(400).send({ msg: "You need to provide a valid markdown table" });
+    }
+
+    if (typeof md !== "string") {
+        logger.warn("User tried to process markdown table with invalid data");
+        return res.status(400).send({ msg: "payload must be a string" });
+    }
+
+    if (md.trim() === "") {
+        logger.warn("User tried to process markdown table without data");
+        return res.status(400).send({ msg: "payload cannot be empty" });
+    }
+
+    if (md.trim().split("\n").length < 2) {
+        logger.warn("User tried to process a string that may not be a valid markdown table")
+        return res.status(400).send({ msg: "invalid markdown format detected" });
+    }
+
+    const [header, separator, ...rows] = md.trim().split("\n");
+    if (rows.length === 0) {
+        logger.warn("User tried to process markdown table without at least one row");
+        return res.status(400).send({ msg: "Expected at least one markdown table row along with the headers" });
+    }
+
+    // TODO: probably should validate the "separator" is actually the markdown table header separator
+
+    const { map: mdStructMap, missingFields, valid } = expectedHeader(header, "|")
+
+    if (valid) {
+        // should I check if each row has the same number of fields as the header?
+        // it will likely still fail, but fail for the wrong reason
+        const transactions = rows.map(row => {
+            const fields = row.split("|");
+            return {
+                name: fields[mdStructMap.name]?.trim(),
+                amount: fields[mdStructMap.amount]?.trim(),
+                date: fields[mdStructMap.date]?.trim(),
+                category: mdStructMap.category ? fields[mdStructMap.category].trim() : "other",
+                assetType: fields[mdStructMap.assettype]?.trim(),
+                currency: fields[mdStructMap.currency]?.trim()
+            }
+        });
+
+        const invalid = {};
+        for (let i = 0; i < transactions.length; i++) {
+            const result = validateAddTransactionRequest(transactions[i]);
+            if (!result.valid) {
+                invalid[i] = result.msg;
+            } else {
+                transactions[i] = result;
+            }
+        }
+
+        // return how the transactions were interpreted and which ones were invalid
+        if (Object.keys(invalid).length > 0) {
+            return res.status(400).send({ msg: "Invalid markdown table", invalid, transactions });
+        }
+
+        // return the ui to allow to user to verify that the transactions were interpreted correctly
+        return res.status(200).send({ msg: "Markdown table processed successfully", transactions });
+    } else {
+        // TODO: use AI to determine what the header fields correspond to, if possible
+        return res.status(400).send({ msg: "Invalid markdown table header, missing fields: " + missingFields.join(",") });
+    }
+};
+
 const csv = transactions => {
     // TODO: format money amount?
     return "Name,Amount,Date,Category,Asset Type,Currency\n" +
@@ -251,8 +322,7 @@ const csv = transactions => {
 const md = transactions => {
     if (transactions.length < 1) {
         return (
-            `| Name | Amount | Date | Category | Asset Type | Currency |
-             | ---- | ------ | ---- | -------- | ---------- | -------- |`
+            `| Name | Amount | Date | Category | Asset Type | Currency |\n| ---- | ------ | ---- | -------- | ---------- | -------- |`
         );
     }
 
@@ -337,5 +407,5 @@ module.exports.getGraphData = (_, res) => {
 // export for unit testing
 module.exports = {
     ...module.exports,
-    validateAddTransactionRequest, expectedCsvHeader, csv, md
+    validateAddTransactionRequest, expectedHeader, csv, md
 };

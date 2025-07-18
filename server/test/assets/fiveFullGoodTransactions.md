@@ -1,0 +1,7 @@
+| name               | amount | date       | category        | assetType | currency |
+| ------------------ | ------ | ---------- | --------------- | --------- | -------- |
+| Test transaction   | 4      | 2024-04-01 | Investment      | stock     | NVDA     |
+| Test transaction 2 | 760    | 2025-04-02 | Side job        | cash      | USD      |
+| Test transaction 3 | 4      | 2024-04-01 | Smart contracts | crypto    | ETH      |
+| Test transaction 4 | .3     | 2024-05-01 |                 | crypto    | BTC      |
+| Test transaction 5 | 50     | 2024-08-01 |                 | crypto    | ADA      |
