@@ -72,7 +72,9 @@ const validateAddTransactionRequest = (reqBody) => {
         return { valid: false, msg: "Asset currency not supported" };
     }
 
-    return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() };
+    // TODO: Please Please make the currencies a common case
+    return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(),
+        currency: assetType === ASSET_TYPE.CASH ? currency : currency.toUpperCase() };
 }
 
 module.exports.addTransaction = (req , res) => {
