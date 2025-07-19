@@ -224,7 +224,6 @@ describe("utils", () => {
     });
 
     describe("parseDate", () => {
-        // some of these may fail in the pipeline
         test.each([
             { input: "2022-01-01", expected: "2022-01-01 00:00:00" },
             { input: "2024-04-12", expected: "2024-04-12 00:00:00" },

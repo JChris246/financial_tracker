@@ -11,6 +11,7 @@ on:
 
 env:
   CI: True
+  TZ: 'America/Barbados'
 
 jobs:
   client-unit-test:
