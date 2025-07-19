@@ -1,7 +1,7 @@
 const { describe, expect, test } = require("@jest/globals");
 
 const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision,
-    formatDate, pad, isValidString, padRight } = require("../../utils/utils");
+    formatDate, pad, isValidString, padRight, parseDate } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
@@ -211,7 +211,7 @@ describe("utils", () => {
 
     describe("formatDate", () => {
         test.each([
-            new Date(), new Date().getTime(), new Date().toISOString(), new Date("2023-01-07"), 1749348549650,
+            new Date(), new Date().getTime(), new Date().toISOString(), new Date("2023", "01", "07"), 1749348549650, new Date("2023-01-07")
         ])("should format date to string as YYYY-MM-DDThh:mm for '%s'", input => {
             expect(formatDate(input)).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
         });
@@ -220,6 +220,53 @@ describe("utils", () => {
             null, undefined, "", " ", "date", {}, [], false, true
         ])("should return blank string if provided date is falsy (or not valid input): '%s'", input => {
             expect(formatDate(input)).toBe("");
+        });
+    });
+
+    describe("parseDate", () => {
+        // some of these may fail in the pipeline
+        test.each([
+            { input: "2022-01-01", expected: "2022-01-01 00:00:00" },
+            { input: "2024-04-12", expected: "2024-04-12 00:00:00" },
+            { input: "2024-04-12 12:00", expected: "2024-04-12 12:00:00" },
+            { input: "2024-04-12 12:00:05", expected: "2024-04-12 12:00:05" },
+            { input: "2024-04-12 06:00:05", expected: "2024-04-12 06:00:05" },
+            { input: "2024-04-12 6:00:05", expected: "2024-04-12 06:00:05" },
+            { input: "2024/04/12", expected: "2024-04-12 00:00:00" },
+            { input: "2024/04/12 12:00", expected: "2024-04-12 12:00:00" },
+            { input: "2024/04/12 12:00:05", expected: "2024-04-12 12:00:05" },
+            { input: "2024/04/12 12_00", expected: "2024-04-12 12:00:00" },
+            { input: "2024/04/12 12_00_05", expected: "2024-04-12 12:00:05" },
+            { input: "2024-04-12 12_00", expected: "2024-04-12 12:00:00" },
+            { input: "2024-04-12 12_00_05", expected: "2024-04-12 12:00:05" },
+            { input: "2024-04-12 06_00_05", expected: "2024-04-12 06:00:05" },
+            { input: "2024-04-12 6_00_05", expected: "2024-04-12 06:00:05" },
+            { input: "12-04-2024", expected: "2024-04-12 00:00:00" },
+            { input: "12-04-2024 12:00", expected: "2024-04-12 12:00:00" },
+            { input: "12-04-2024 12:00:05", expected: "2024-04-12 12:00:05" },
+            { input: "12-04-2024 06:00:05", expected: "2024-04-12 06:00:05" },
+            { input: "12-04-2024 6:00:05", expected: "2024-04-12 06:00:05" },
+            { input: "12/04/2024", expected: "2024-04-12 00:00:00" },
+            { input: "12/04/2024 12:00", expected: "2024-04-12 12:00:00" },
+            { input: "12/04/2024 12:00:05", expected: "2024-04-12 12:00:05" },
+            { input: "12/04/2024 12_00", expected: "2024-04-12 12:00:00" },
+            { input: "12/04/2024 12_00_05", expected: "2024-04-12 12:00:05" },
+            { input: "12-04-2024 12_00", expected: "2024-04-12 12:00:00" },
+            { input: "12-04-2024 12_00_05", expected: "2024-04-12 12:00:05" },
+            { input: "12-04-2024 06_00_05", expected: "2024-04-12 06:00:05" },
+            { input: "12-04-2024 6_00_05", expected: "2024-04-12 06:00:05" },
+            { input: "December 17, 1995 03:24:00", expected: "1995-12-17 03:24:00" },
+            { input: 1749348549650, expected: "2025-06-07 22:09:09" },
+            { input: "1995-12-17T03:24:00", expected: "1995-12-17 03:24:00" },
+            { input: "1995-12-17T03:24:00Z", expected: "1995-12-16 23:24:00" },
+            { input: new Date(1749348549650), expected: "2025-06-07 22:09:09" },
+        ])("should parse date correctly and return date object '%s'",
+            ({ input, expected }) => {
+                const parsedDate = parseDate(input);
+                expect(parsedDate instanceof Date).toBeTruthy();
+                const date = parsedDate.getFullYear() + "-" + pad(parsedDate.getMonth() + 1) + "-" + pad(parsedDate.getDate());
+                const time = pad(parsedDate.getHours()) + ":" + pad(parsedDate.getMinutes()) + ":" + pad(parsedDate.getSeconds());
+                expect(date + " " + time).toBe(expected);
         });
     });
 

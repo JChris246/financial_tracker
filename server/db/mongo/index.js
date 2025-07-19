@@ -76,6 +76,17 @@ const createTransaction = (transaction, successCallback, errorCallback) => {
     });
 };
 
+const createTransactions = async (transactions) => {
+    let savedTransactions = await Transaction.insertMany([ ...transactions ]);
+
+    if (savedTransactions.length !== transactions.length) {
+        logger.error("Failed to add transactions");
+        return false;
+    }
+
+    return { success: true, savedTransactions };
+};
+
 const getAllTransactions = (successCallback, errorCallback) => {
     Transaction.find({}, (err, transactions) => {
         if (err) {
@@ -131,6 +142,6 @@ const saveCache = (cache) => {
     saveCacheJson(cache);
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts,
+module.exports = { init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions, getAllTransactionAmounts,
     getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };
 

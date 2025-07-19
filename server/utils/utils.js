@@ -119,6 +119,57 @@ const format = (str, args) => {
     });
 };
 
+const parseDate = d => {
+    if (typeof d === "string") {
+        d = d.trim();
+
+        const dateRegex = /^(?<year>\d{4})[-/](?<month>\d{2})[-/](?<day>\d{2})(?:\s+(?<hr>\d{1,2})[:_](?<min>\d{2})(?:[:_](?<sec>\d{2}))?)?$/;
+        const reverseDateRegex = /^(?<day>\d{2})[-/](?<month>\d{2})[-/](?<year>\d{4})(?:\s+(?<hr>\d{1,2})[:_](?<min>\d{2})(?:[:_](?<sec>\d{2}))?)?$/;
+        let match = d.match(dateRegex);
+
+        if (match) {
+            if (match.groups.sec) {
+                return new Date(Number(match[1]), match[2] - 1, Number(match[3]), Number(match[4]), Number(match[5]), Number(match[6]))
+            }
+
+            if (match.groups.min) {
+                return new Date(Number(match[1]), match[2] - 1, Number(match[3]), Number(match[4]), Number(match[5]))
+            }
+
+            if (match.groups.day) {
+                return new Date(Number(match[1]), match[2] - 1, Number(match[3]))
+            }
+        }
+
+        match = d.match(reverseDateRegex);
+        if (match) {
+            if (match.groups.sec) {
+                return new Date(Number(match[3]), match[2] - 1, Number(match[1]), Number(match[4]), Number(match[5]), Number(match[6]))
+            }
+
+            if (match.groups.min) {
+                return new Date(Number(match[3]), match[2] - 1, Number(match[1]), Number(match[4]), Number(match[5]))
+            }
+
+            if (match.groups.day) {
+                return new Date(Number(match[3]), match[2] - 1, Number(match[1]))
+            }
+        }
+    }
+
+    if (typeof d === "string" || typeof d === "number") {
+        d = new Date(d);
+    } else if (!(d instanceof Date)) {
+        return null;
+    }
+
+    if (d.toString() === "Invalid Date") {
+        return null;
+    }
+
+    return d;
+};
+
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -169,4 +220,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
 };
 
 module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray,
-    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString, padRight };
+    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString, padRight, parseDate };
