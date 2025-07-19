@@ -1,7 +1,7 @@
 const logger = require("../logger").setup();
 
 const { getDatabase } = require("../db/index");
-const { isNumber, isDefined, isValidArray, formatDate, padRight, isValidString } = require("../utils/utils");
+const { isNumber, isDefined, isValidArray, formatDate, padRight, isValidString, parseDate } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
 module.exports.getTransactions = (req, res) => {
@@ -14,18 +14,18 @@ module.exports.getTransactions = (req, res) => {
     }
 
     getDatabase().getAllTransactions(
-        transactions => res.status(200).send(transactions),
+        transactions => res.status(200).send(
+            transactions.map(({ name, date, amount, category, assetType, currency }) => ({ name, date, amount, category, assetType, currency }))
+        ),
         err => res.status(500).send({ msg: err })
     );
 };
-
-const parseDate = d => (new Date(d).getTime());
 
 const validateAddTransactionRequest = (reqBody) => {
     const { name, date: userDate, amount: userAmount, category: userCategory, assetType, currency } = reqBody;
 
     // get the timestamp from user, if it doesn't exist use the current timestamp
-    const date = parseDate(userDate) || Date.now(); // if the date was not parsed correctly, current timestamp will be used
+    const date = parseDate(userDate) || new Date(); // if the date was not parsed correctly, current timestamp will be used
 
     const uAmount = isValidString(userAmount) ? userAmount.replaceAll(",", "") : userAmount;
     if (!isNumber(uAmount)) {
@@ -74,7 +74,7 @@ const validateAddTransactionRequest = (reqBody) => {
     }
 
     // TODO: Please Please make the currencies a common case
-    return { valid: true, name, date, amount, category, assetType: assetType.toLowerCase(),
+    return { valid: true, name, date: date.getTime(), amount, category, assetType: assetType.toLowerCase(),
         currency: assetType === ASSET_TYPE.CASH ? currency.toLowerCase() : currency.toUpperCase() };
 }
 
@@ -103,7 +103,7 @@ module.exports.addTransaction = (req , res) => {
     );
 };
 
-module.exports.addTransactions = (req , res) => {
+module.exports.addTransactions = async (req , res) => {
     const userTransactions = req.body;
     if (!isValidArray(userTransactions)) {
         logger.warn("User tried to add transactions without a valid array");
@@ -127,31 +127,17 @@ module.exports.addTransactions = (req , res) => {
         return res.status(400).send({ msg: "You have " + invalid + " invalid transactions" });
     }
 
-    const addedTransactions = [];
-    for (let i = 0; i < transaction.length; i++) {
-        const { name, date, amount, category, assetType, currency } = transaction[i];
-        // I'm almost pretty sure there's a better way than inserting 1 by 1
-        getDatabase().createTransaction(
-            { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
-            transaction => {
-                addedTransactions.push({
-                    amount: transaction.amount,
-                    name: transaction.name,
-                    date: transaction.date,
-                    category: transaction.category,
-                    assetType: transaction.assetType.toLowerCase(),
-                    currency: transaction.currency.toUpperCase()
-                });
-            },
-            () => logger.error("Failed to add transaction: " + transaction[i].name)
-        );
+    const transactions = transaction.map(({ name, date, amount, category, assetType, currency }) =>
+        ({ name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }))
+
+    const { success, savedTransactions } = await getDatabase().createTransactions(transactions);
+    if (!success) {
+        return res.status(500).send({ msg: "Failed to add transactions all transactions" });
     }
 
-    if (addedTransactions.length !== transaction.length) {
-        return res.status(500).send({ msg: "Failed to add transactions all transactions", addedTransactions });
-    }
-
-    return res.status(201).send({ msg: "Transactions added successfully", addedTransactions });
+    const addedTransactions = savedTransactions.map(({ amount, name, date, category, assetType, currency }) =>
+        ({ amount, name, date, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }));
+    res.status(201).send({ msg: "Transactions added successfully", addedTransactions });
 };
 
 const expectedHeader = (header, separator) => {
@@ -388,7 +374,11 @@ module.exports.exportTransactions = (req, res) => {
             } else if (format == "md") {
                 res.status(200).send({ md: md(transactions) });
             } else {
-                res.status(200).send(transactions); // this is really just the same as get transactions endpoint
+                // this is really just the same as get transactions endpoint
+                res.status(200).send(
+                    transactions.map(({ name, date, amount, category, assetType, currency }) =>
+                        ({ name, date, amount, category, assetType, currency }))
+                );
             }
         },
         err => {

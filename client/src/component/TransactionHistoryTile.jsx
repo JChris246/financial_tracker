@@ -17,14 +17,13 @@ const TransactionHistoryTile = ({ item, index }) => {
             }
 
             <div className="flex flex-col flex-grow ml-4">
-                {/*<span className="text-xl font-bold">${item.amount}</span>*/}
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                         <span className="pl-1 text-white font-semibold">{item.name}</span>
                         <span className="text-gray-400 text-sm">{formatDate(item.date, DATE_TYPE.DISPLAY_DATE)}</span>
                     </div>
                     <span id={"transaction-history-amount-" + index}
-                        className={"font-semibold" + (item.amount > 0 ? " text-green-600" : " text-red-600")}>
+                        className={"font-semibold text-nowrap " + (item.amount > 0 ? "text-green-600" : "text-red-600")}>
                         {item.amount > 0 ? "+" : "-"} {symbol[item.assetType ?? "CASH"]}{formatMoney(Math.abs(item.amount))}</span>
                 </div>
             </div>

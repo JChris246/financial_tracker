@@ -213,10 +213,6 @@ test.describe("import transactions", () => {
     test("should allow user to add transactions from csv with blank rows", async ({ page }) => {
         await pageSetup({ page });
 
-        // since I need to set the file on the input itself in testing, I don't think I need to click the import button
-        const importTransactionsButton = page.locator("#add-transactions-button");
-        await importTransactionsButton.click();
-
         const fileInput = page.locator("#transactions-file-input");
         await fileInput.setInputFiles("./transactionsWithBlankRecords.csv");
 
@@ -287,10 +283,6 @@ test.describe("import transactions", () => {
 
     test("should allow user to add transactions from md with blank rows", async ({ page }) => {
         await pageSetup({ page });
-
-        // since I need to set the file on the input itself in testing, I don't think I need to click the import button
-        const importTransactionsButton = page.locator("#add-transactions-button");
-        await importTransactionsButton.click();
 
         const fileInput = page.locator("#transactions-file-input");
         await fileInput.setInputFiles("./transactionsWithBlankRecords.md");

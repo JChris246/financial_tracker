@@ -90,11 +90,12 @@ npm run test:e2e
 ## 📓 Future Plans
 
 - [ ] ~~import transactions from csv~~ use AI to determine how to parse csv and md columns (when not mapped 1 to 1)?
-- [ ] add delete button for each transaction in the transaction history table
+- [ ] add edit/delete button for each transaction in the transaction history table
 - [ ] display balance for individual assets (stocks, crypto and cash)
 - [ ] create mcp server endpoints
 - [ ] dockerize the app
 - [ ] implement sqlite db option
+- [ ] add UI to allow downloading transactions as csv or md table
 
 ## ⛓️‍💥 Known Limitations
 

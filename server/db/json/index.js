@@ -130,6 +130,15 @@ const createTransaction = (transaction, successCallback) => {
     successCallback(transaction);
 };
 
+const createTransactions = transactions => {
+    const db = getItems(DB_TYPE.TRANSACTIONS, "create transactions");
+
+    db.push(...transactions);
+    saveItems(DB_TYPE.TRANSACTIONS, db, "create transactions");
+
+    return { success: true, savedTransactions: transactions };
+};
+
 const getAllTransactions = (successCallback) => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "get all transactions");
 
@@ -191,5 +200,5 @@ const saveCache = (cache) => {
     saveItems(DB_TYPE.CACHE, cache)
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, getAllTransactions, getAllTransactionAmounts,
+module.exports = { init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions, getAllTransactionAmounts,
     getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };
