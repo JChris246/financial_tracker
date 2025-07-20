@@ -28,9 +28,18 @@ server.registerTool(
         title: "Get Transactions",
         description: "Returns all the user's transactions",
     },
-    async () => ({
-        content: [{ type: "text", text: JSON.stringify(await getTransactions(), null, 4) }]
-    })
+    async () => {
+        const { success, transactions } = await getTransactions();
+        if (success) {
+            return {
+                content: [{ type: "text", text: JSON.stringify(transactions) }]
+            }
+        } else {
+            return {
+                content: [{ type: "text", text: "Unable to get transactions" }]
+            }
+        }
+    }
 );
 
 server.registerTool(
@@ -39,9 +48,19 @@ server.registerTool(
         title: "Get Balances",
         description: "Returns balances of all a user's assets",
     },
-    async () => ({
-        content: [{ type: "text", text: JSON.stringify(await getBalance(), null, 4) }]
-    })
+    async () => {
+        const { success, response } = await getBalance();
+        if (success) {
+            return {
+                content: [{ type: "text", text: JSON.stringify(response) }]
+            }
+        }
+        else {
+            return {
+                content: [{ type: "text", text: "An error occurred while getting balances" }]
+            }
+        }
+    }
 );
 
 module.exports.server = server;
