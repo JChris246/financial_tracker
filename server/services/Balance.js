@@ -3,7 +3,7 @@ const { getDatabase } = require("../db/index");
 const { ASSET_TYPE } = require("../utils/constants");
 const { sleep, positiveNumberOrZero, toPrecision } = require("../utils/utils");
 
-module.exports.getBalance = async (_, res) => {
+module.exports.getBalance = async () => {
     const db = getDatabase();
     const transactions = await db.getAllTransactions();
     if (transactions) {
@@ -13,7 +13,7 @@ module.exports.getBalance = async (_, res) => {
             crypto: {}, cash: {}, stock: {} // individual balances
         };
         if (transactions.length < 1) {
-            res.status(200).send(response);
+            return { success: true, response };
         } else {
             if (!global.cache) {
                 while (!global.cacheCreated) {
@@ -73,11 +73,11 @@ module.exports.getBalance = async (_, res) => {
             });
 
             global.cache = null;
-            res.status(200).send(response);
+            return { success: true, response };
         }
     } else {
         logger.error("getBalance - An error occurred while getting balance: " + err);
-        res.status(500).send({ msg: "An error occurred while getting balance" });
+        return { success: false };
     }
 };
 

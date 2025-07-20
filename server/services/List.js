@@ -4,25 +4,25 @@ const { getDatabase } = require("../db/index");
 const { ASSET_TYPE, ASSET_CURRENCIES, DEFAULT_CATEGORIES } = require("../utils/constants");
 const { isDefined } = require("../utils/utils");
 
-module.exports.getAssetTypes = (_, res) => res.status(200).send(Object.values(ASSET_TYPE));
+module.exports.getAssetTypes = () => Object.values(ASSET_TYPE);
 
-module.exports.getCurrencies = (req, res) => {
-    if (isDefined(req.params.assetType)) {
-        const currencies = ASSET_CURRENCIES[req.params.assetType.toLowerCase()];
+module.exports.getCurrencies = (assetType) => {
+    if (isDefined(assetType)) {
+        const currencies = ASSET_CURRENCIES[assetType.toLowerCase()];
         if (isDefined(currencies)) {
-            res.status(200).send(currencies);
+            return { success: true, currencies };
         } else {
-            logger.warn("User tried to get currencies for an invalid asset type: " + req.params.assetType);
-            res.status(400).send({ msg: "Invalid asset type" });
+            logger.warn("User tried to get currencies for an invalid asset type: " + assetType);
+            return { success: false };
         }
     } else {
-        res.status(200).send(ASSET_CURRENCIES);
+        return { success: true, currencies: ASSET_CURRENCIES };
     }
 };
 
-module.exports.getTransactionCategories = async (_, res) => {
+module.exports.getTransactionCategories = async () => {
     const userCategories = await getDatabase().getAllTransactionCategories();
     const returnCategories = [...new Set([...DEFAULT_CATEGORIES, ...userCategories])].sort();
 
-    res.status(200).send(returnCategories);
+    return returnCategories
 };

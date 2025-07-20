@@ -1,16 +1,83 @@
 const express = require("express");
 const router = express.Router();
 const service = require("../services/Transactions");
+const { isDefined } = require("../utils/utils");
 
 router
-    .get("/:type?", service.getTransactions) // TODO: update filtering logic
-    .post("/", service.addTransaction)
-    .post("/all", service.addTransactions)
-    .post("/csv", service.processCSV)
-    .post("/md", service.processMd)
-    .get("/export/:format", service.exportTransactions)
-    .get("/all/graph", service.getGraphData);
+    .get("/:type?", async (req, res) => {
+        // TODO: update filtering logic
+        const { success, transactions } = await service.getTransactions(req.params.type);
 
-// routes POST /, POST /md and POST /csv could probably be consolidated to POST /:format?
+        if (success) {
+            res.status(200).send(transactions);
+        } else {
+            res.status(500).send({ msg: "An error occurred fetching transactions" });
+        }
+    })
+    .post("/:format?", async (req, res) => {
+        const { format } = req.params;
+
+        // formally "POST /"
+        if (!isDefined(format)) {
+            const { success, msg, code, transaction } = await service.addTransaction(req.body);
+
+            if (success) {
+                return res.status(201).send(transaction);
+            } else {
+                return res.status(code).send({ msg });
+            }
+        }
+
+        // POST /csv
+        if (format === "csv") {
+            const { success, response } = service.processCSV(req.body);
+
+            if (success) {
+                return res.status(200).send(response);
+            } else {
+                return res.status(400).send(response);
+            }
+        }
+
+        // POST /md
+        if (format === "md") {
+            const { success, response } = service.processMd(req.body);
+
+            if (success) {
+                return res.status(200).send(response);
+            } else {
+                return res.status(400).send(response);
+            }
+        }
+
+        // POST /all OR POST /json
+        if (format === "all" || format === "json") {
+            const { success, addedTransactions, code, msg } = await service.addTransactions(req.body);
+            if (success) {
+                return res.status(201).send({ msg: "Transactions added successfully", addedTransactions });
+            } else {
+                return res.status(code).send({ msg });
+            }
+        }
+
+        res.status(400).send({ msg: "Unsupported format: " + format });
+    })
+    .get("/export/:format", async (req, res) => {
+        const { success, code, msg, response } = await service.exportTransactions(req.params);
+
+        if (success) {
+            res.status(200).send(response);
+        } else {
+            res.status(code).send({ msg });
+        }
+    })
+    .get("/all/graph", async (_, res) => {
+        const { success, msg, response } = await service.getGraphData();
+        if (success) {
+            res.status(200).send(response);
+        } else {
+            res.status(500).send({ msg });
+        }
+    });
 
 module.exports = router;
