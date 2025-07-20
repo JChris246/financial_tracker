@@ -1,10 +1,10 @@
-var express = require("express");
-var router = express.Router();
-var controller = require("../controllers/List.js");
+const express = require("express");
+const router = express.Router();
+const service = require("../services/List.js");
 
 router
-    .get("/currency/:assetType?", controller.getCurrencies)
-    .get("/asset-type", controller.getAssetTypes)
-    .get("/category", controller.getTransactionCategories);
+    .get("/currency/:assetType?", service.getCurrencies)
+    .get("/asset-type", service.getAssetTypes)
+    .get("/category", service.getTransactionCategories);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const { describe, expect, test } = require("@jest/globals");
-const { validateAddTransactionRequest, expectedHeader, csv, md, isEmptyRow } = require("../../controllers/Transactions");
+const { validateAddTransactionRequest, expectedHeader, csv, md, isEmptyRow } = require("../../services/Transactions");
 const { isNumber } = require("../../utils/utils");
 
 describe("Transactions", () => {

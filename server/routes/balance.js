@@ -1,8 +1,8 @@
-var express = require("express");
-var router = express.Router();
-var controller = require("../controllers/Balance");
+const express = require("express");
+const router = express.Router();
+const service = require("../services/Balance");
 
 router
-    .get("/", controller.getBalance);
+    .get("/", service.getBalance);
 
 module.exports = router;

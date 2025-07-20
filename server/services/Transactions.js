@@ -4,7 +4,7 @@ const { getDatabase } = require("../db/index");
 const { isNumber, isDefined, isValidArray, formatDate, padRight, isValidString, parseDate } = require("../utils/utils");
 const { ASSET_TYPE, ASSET_CURRENCIES } = require("../utils/constants");
 
-module.exports.getTransactions = (req, res) => {
+module.exports.getTransactions = async (req, res) => {
     let options = {}; // get all transactions
 
     // TODO: update the filtering logic
@@ -13,12 +13,13 @@ module.exports.getTransactions = (req, res) => {
         // options = { "type": req.params.type === "income" };
     }
 
-    getDatabase().getAllTransactions(
-        transactions => res.status(200).send(
+    const transactions = await getDatabase().getAllTransactions();
+    if (transactions) {
+        return res.status(200).send(
             transactions.map(({ name, date, amount, category, assetType, currency }) => ({ name, date, amount, category, assetType, currency }))
-        ),
-        err => res.status(500).send({ msg: err })
-    );
+        )
+    }
+    res.status(500).send({ msg: "An error occurred fetching transactions" });
 };
 
 const validateAddTransactionRequest = (reqBody) => {
@@ -78,29 +79,31 @@ const validateAddTransactionRequest = (reqBody) => {
         currency: assetType === ASSET_TYPE.CASH ? currency.toLowerCase() : currency.toUpperCase() };
 }
 
-module.exports.addTransaction = (req , res) => {
+module.exports.addTransaction = async (req , res) => {
     const result = validateAddTransactionRequest(req.body);
     if (!result.valid) {
         return res.status(400).send({ msg: result.msg });
     }
 
     const { name, date, amount, category, assetType, currency } = result;
-    getDatabase().createTransaction(
-        { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() },
-        transaction => {
-            res.status(201).send({
-                // maybe I should separate the payload from the message ?
-                amount: transaction.amount,
-                name: transaction.name,
-                date: transaction.date,
-                category: transaction.category,
-                assetType: transaction.assetType.toLowerCase(),
-                currency: transaction.currency.toUpperCase(),
-                msg: "Transaction added successfully",
-            });
-        },
-        () => res.status(500).send({ msg: "Failed to add transaction" })
+    const transaction = await getDatabase().createTransaction(
+        { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }
     );
+
+    if (transaction) {
+        return res.status(201).send({
+            // maybe I should separate the payload from the message ?
+            amount: transaction.amount,
+            name: transaction.name,
+            date: transaction.date,
+            category: transaction.category,
+            assetType: transaction.assetType.toLowerCase(),
+            currency: transaction.currency.toUpperCase(),
+            msg: "Transaction added successfully",
+        });
+    }
+
+    return res.status(500).send({ msg: "Failed to add transaction" });
 };
 
 module.exports.addTransactions = async (req , res) => {
@@ -360,56 +363,50 @@ const md = transactions => {
     return header + "\n" + headerSeparator + "\n" + body;
 };
 
-module.exports.exportTransactions = (req, res) => {
+module.exports.exportTransactions = async (req, res) => {
     const format = req.params.format;
     if (format !== "csv" && format !== "json" && format !== "md") {
         logger.warn("User tried to export transactions with invalid format: " + format);
         return res.status(400).send({ msg: "Invalid export format" });
     }
 
-    getDatabase().getAllTransactions(
-        transactions => {
-            if (format === "csv") {
-                res.status(200).send({ csv: csv(transactions) });
-            } else if (format == "md") {
-                res.status(200).send({ md: md(transactions) });
-            } else {
-                // this is really just the same as get transactions endpoint
-                res.status(200).send(
-                    transactions.map(({ name, date, amount, category, assetType, currency }) =>
-                        ({ name, date, amount, category, assetType, currency }))
-                );
-            }
-        },
-        err => {
-            logger.error("An error occurred while exporting transactions: " + err);
-            res.status(500).send({ msg: "An error occurred while exporting transactions" });
+    const transactions = await getDatabase().getAllTransactions();
+    if (transactions) {
+        if (format === "csv") {
+            res.status(200).send({ csv: csv(transactions) });
+        } else if (format == "md") {
+            res.status(200).send({ md: md(transactions) });
+        } else {
+            // this is really just the same as get transactions endpoint
+            res.status(200).send(
+                transactions.map(({ name, date, amount, category, assetType, currency }) =>
+                    ({ name, date, amount, category, assetType, currency }))
+            );
         }
-    );
-}
+    } else {
+        logger.error("An error occurred while exporting transactions: " + err);
+        res.status(500).send({ msg: "An error occurred while exporting transactions" });
+    }
+};
 
-module.exports.getGraphData = (_, res) => {
-    getDatabase().getAllTransactions(
-        transactions => {
-            const graphData = {
-                spend: [0, 0, 0, 0, 0, 0, 0],
-                income: [0, 0, 0, 0, 0, 0, 0]
-            };
+module.exports.getGraphData = async (_, res) => {
+    const transactions = await getDatabase().getAllTransactions();
+    if (transactions) {
+        const graphData = {
+            spend: [0, 0, 0, 0, 0, 0, 0],
+            income: [0, 0, 0, 0, 0, 0, 0]
+        };
 
-            // Sunday - Saturday : 0 - 6
-            for (let i = 0; i < transactions.length; i++) {
-                if (transactions[i].amount < 0)
-                    graphData.spend[new Date(transactions[i].date).getDay()] += (transactions[i].amount * -1);
-                else graphData.income[new Date(transactions[i].date).getDay()] += transactions[i].amount;
-            }
-
-            res.status(200).send(graphData);
-        },
-        err => {
-            logger.error("An error occurred while getting graph data: " + err);
-            res.status(500).send({ msg: err });
+        // Sunday - Saturday : 0 - 6
+        for (let i = 0; i < transactions.length; i++) {
+            if (transactions[i].amount < 0)
+                graphData.spend[new Date(transactions[i].date).getDay()] += (transactions[i].amount * -1);
+            else graphData.income[new Date(transactions[i].date).getDay()] += transactions[i].amount;
         }
-    );
+
+        return res.status(200).send(graphData);
+    }
+    res.status(500).send({ msg: "getGraphData - An error occurred fetching transactions" });
 };
 
 // export for unit testing
