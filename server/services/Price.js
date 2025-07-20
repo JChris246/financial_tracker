@@ -4,12 +4,12 @@ const { isDefined, toPrecision } = require("../utils/utils");
 const { getDatabase } = require("../db/index");
 const { ASSET_TYPE, CRYPTO_CURRENCIES, DEFAULT_CURRENCIES, STOCK_CURRENCIES } = require("../utils/constants");
 
-module.exports.getCurrencyPrice = async (req, res) => {
-    const { assetType, currency } = req.params;
+module.exports.getCurrencyPrice = async (params) => {
+    const { assetType, currency } = params;
 
     if ([ASSET_TYPE.STOCK, ASSET_TYPE.CRYPTO].indexOf(assetType) === -1) {
         logger.warn("User tried to get price for an invalid asset type: " + assetType);
-        return res.status(400).send({ msg: "Asset type not supported" });
+        return { msg: "Asset type not supported", success: false };
     }
 
     const db = getDatabase();
@@ -19,18 +19,18 @@ module.exports.getCurrencyPrice = async (req, res) => {
         if (assetType === ASSET_TYPE.STOCK) {
             if (!STOCK_CURRENCIES.includes(currency.toUpperCase())) {
                 logger.warn("User tried to get price for an invalid stock: " + currency);
-                return res.status(400).send({ msg: "Stock not supported" });
+                return { msg: "Stock not supported", success: false };
             }
             // TODO: if we don't have a cached value, fetch it?
-            return res.status(200).send({ [currency]: toPrecision(cache.stockPrices[currency.toUpperCase()]) });
+            return { success: true, response: { [currency]: toPrecision(cache.stockPrices[currency.toUpperCase()]) } };
         }
         if (assetType === ASSET_TYPE.CRYPTO) {
             if (!CRYPTO_CURRENCIES.includes(currency.toUpperCase())) {
                 logger.warn("User tried to get price for an invalid crypto currency: " + currency);
-                return res.status(400).send({ msg: "Crypto currency not supported" });
+                return { msg: "Crypto currency not supported", success: false };
             }
             // TODO: if we don't have a cached value, fetch it?
-            return res.status(200).send({ [currency.toUpperCase()]: toPrecision(cache.cryptoConversions[currency.toUpperCase()]) });
+            return { success: true, response: { [currency.toUpperCase()]: toPrecision(cache.cryptoConversions[currency.toUpperCase()]) } };
         }
     }
 
@@ -49,5 +49,5 @@ module.exports.getCurrencyPrice = async (req, res) => {
     if (assetType === ASSET_TYPE.CRYPTO) {
         useCurrencies.crypto.forEach(k => map[k] = toPrecision(cache.cryptoConversions[k.toUpperCase()]));
     }
-    return res.status(200).send(map);
+    return { success: true, response: map };
 };

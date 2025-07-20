@@ -201,6 +201,31 @@ describe("transaction endpoints", () => {
             expect(response.body.msg).toEqual("You need to have at least one transaction");
         });
 
+        test("should return bad request when invalid format provided to add transactions", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction/xml").send([
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries" } // valid
+            ]);
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("Unsupported format: xml");
+        });
+
+        test("should return success response and transaction payload when transactions added successfully", async () => {
+            // Act
+            const response = await superTestRequest.post("/api/transaction/json").send([
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries", date: "2024-01-01" }
+            ]);
+
+            // Assert
+            expect(response.status).toBe(201);
+            expect(response.body.msg).toEqual("Transactions added successfully");
+            expect(response.body.addedTransactions).toEqual([
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1704081600000, category: "Groceries" },
+            ]);
+        });
+
         test("should return bad request when some invalid transactions are provided", async () => {
             // Act
             const response = await superTestRequest.post("/api/transaction/all").send([

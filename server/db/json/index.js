@@ -106,7 +106,7 @@ const saveItems = async (type, items, additionalTag) => {
     global.dbLock = false;
 };
 
-const getTransactions = (filter, successCallback) => {
+const getTransactions = filter => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "get transactions");
 
     const results = db.filter(t => {
@@ -118,16 +118,16 @@ const getTransactions = (filter, successCallback) => {
         return true;
     });
 
-    successCallback(results);
+    return results;
 };
 
-const createTransaction = (transaction, successCallback) => {
+const createTransaction = transaction => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "create transaction");
 
     db.push(transaction);
     saveItems(DB_TYPE.TRANSACTIONS, db, "create transaction");
 
-    successCallback(transaction);
+    return transaction;
 };
 
 const createTransactions = transactions => {
@@ -139,18 +139,10 @@ const createTransactions = transactions => {
     return { success: true, savedTransactions: transactions };
 };
 
-const getAllTransactions = (successCallback) => {
-    const db = getItems(DB_TYPE.TRANSACTIONS, "get all transactions");
+const getAllTransactions = () => {
+    const transactions = getItems(DB_TYPE.TRANSACTIONS, "get all transactions");
 
-    successCallback(db);
-};
-
-const getAllTransactionAmounts = (successCallback) => {
-    const db = getItems(DB_TYPE.TRANSACTIONS, "get all transaction amounts");
-
-    const results = db.map(t => t.amount);
-
-    successCallback(results);
+    return transactions;
 };
 
 const getAllTransactionCurrencies = () => {
@@ -200,5 +192,5 @@ const saveCache = (cache) => {
     saveItems(DB_TYPE.CACHE, cache)
 };
 
-module.exports = { init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions, getAllTransactionAmounts,
+module.exports = { init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions,
     getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };
