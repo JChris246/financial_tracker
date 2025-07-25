@@ -65,7 +65,7 @@ const init = async () => {
     }
 
     const fullDbPath = path.join(global.DB_PATH, "data/finance_tracker.db");
-    if (!fs.existsSync(global.DB_PATH)) {
+    if (!fs.existsSync(path.join(global.DB_PATH, "data"))) {
         logger.debug("Creating DB path: " + global.DB_PATH);
         fs.mkdirSync(global.DB_PATH, { recursive: true });
     }
