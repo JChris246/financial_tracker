@@ -11,6 +11,10 @@ const logger = require("./logger/index.js").setup();
 global.env = process.env.NODE_ENV || "development";
 global.MOCK_CONVERSIONS = process.env.MOCK_CONVERSIONS;
 global.DB_PATH = process.env.DB_PATH;
+// these global vars are pretty bad
+global.dbLock = global.dbLock || false; // json
+global.databaseConnected = global.databaseConnected || false; // mongo
+global.database = global.database || false; // sql - this one is especially terrible
 
 // TODO: add logic to make sure this value is at least a certain amount before assigning?
 const CACHE_REFRESH_INTERVAL = global.env === "test" ? 0 : (process.env.CACHE_REFRESH_INTERVAL || 1000 * 60 * 60 * 4); // 4 hours
@@ -39,8 +43,8 @@ app.use("/mcp", mcpRouter);
 
 if (global.env === "test") {
     const getDatabase = require("./db/index.js").getDatabase
-    app.use("/api/admin/wipeDb", (_, res) => {
-        getDatabase().init();
+    app.use("/api/admin/wipeDb", async (_, res) => {
+        await (await getDatabase()).init();
         res.status(200).send();
     });
     app.use("/", (_, res) => res.status(200).send({ msg: "Ok" })); // return 200 as health check for playwright
@@ -131,7 +135,8 @@ const runCacheWorker = async () => {
     const fs = require("fs");
 
     while(true) {
-        const db = getDatabase();
+        logger.info("Running cache worker...");
+        const db = await getDatabase();
         const cache = db.getCache();
 
         // wait for the cache to expire, on first run (if existed)

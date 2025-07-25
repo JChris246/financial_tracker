@@ -8,11 +8,11 @@ const { addTransaction } = require("./helpers");
 
 describe("balance endpoints", () => {
     beforeEach(async () => {
-        getDatabase().init(); // this is not awaited as we expect the test db to be the json implementation
+        await (await getDatabase()).init();
     });
 
     afterAll(async () => {
-        getDatabase().wipeDb();
+        await (await getDatabase()).wipeDb();
     });
 
     describe("Get Balance", () => {

@@ -3,14 +3,12 @@ const fs = require("fs");
 
 const logger = require("../../logger").setup();
 
-const { isValidString } = require("../../utils/utils");
+const { isValidString, generateId } = require("../../utils/utils");
 
 const fullDbPath = path.join(global.DB_PATH, "data");
 const DB = ["db-transactions.json", "db-cache.json"]
     .map(file => path.join(fullDbPath, file));
 const DB_TYPE = { TRANSACTIONS: 0, CACHE: 1 };
-
-global.dbLock = false;
 
 // TODO: should probably add error handling for this functions
 
@@ -33,7 +31,6 @@ const wipeDb = () => {
     }
 };
 
-// TODO: create this function for the other db types?
 const seedDb = () => {
     if (!fs.existsSync(fullDbPath)) {
         logger.debug("Creating DB path: " + fullDbPath);
@@ -106,6 +103,7 @@ const saveItems = async (type, items, additionalTag) => {
     global.dbLock = false;
 };
 
+// temp unused
 const getTransactions = filter => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "get transactions");
 
@@ -124,7 +122,7 @@ const getTransactions = filter => {
 const createTransaction = transaction => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "create transaction");
 
-    db.push(transaction);
+    db.push({ ...transaction, id: generateId() });
     saveItems(DB_TYPE.TRANSACTIONS, db, "create transaction");
 
     return transaction;
@@ -133,7 +131,7 @@ const createTransaction = transaction => {
 const createTransactions = transactions => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "create transactions");
 
-    db.push(...transactions);
+    db.push(...(transactions).map(t => ({ ...t, id: generateId() })));
     saveItems(DB_TYPE.TRANSACTIONS, db, "create transactions");
 
     return { success: true, savedTransactions: transactions };

@@ -170,6 +170,31 @@ const parseDate = d => {
     return d;
 };
 
+// adapted from
+// https://github.com/JabbR/JabbR/blob/eb5b4e2f1e5bdbb1ea91230f1884716170a6976d/JabbR/Chat.utility.js#L50
+const generateId = () => {
+    const S4 = () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4() + "-" + new Date().getTime());
+};
+
+// this is meant to run on an array of strings, but probably will work with other array elements types as well
+const distinctCaseIgnore = (arr) => {
+    if (!isValidArray(arr)) {
+        return arr;
+    }
+
+    const itemSet = new Set();
+
+    // sqlite doesn't seem to be great at ignoring case
+    for (let i = 0; i < arr.length; i++) {
+        const lowerInvariant = isValidString(arr[i]) ? arr[i].toLowerCase() : arr[i];
+        if (!itemSet.has(lowerInvariant)) {
+            itemSet.add(lowerInvariant);
+        }
+    }
+
+    return Array.from(itemSet);
+};
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -220,4 +245,4 @@ const request = ({ site, port, path, method="POST", body="", headers={} }) => {
 };
 
 module.exports = { isNumber, request, sleep, makeBool, isDefined, format, isValidArray,
-    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString, padRight, parseDate };
+    positiveNumberOrZero, toPrecision, formatDate, pad, isValidString, padRight, parseDate, generateId, distinctCaseIgnore };

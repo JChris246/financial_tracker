@@ -12,7 +12,7 @@ module.exports.getCurrencyPrice = async (params) => {
         return { msg: "Asset type not supported", success: false };
     }
 
-    const db = getDatabase();
+    const db = await getDatabase();
     const cache = db.getCache();
 
     if (isDefined(currency)) {

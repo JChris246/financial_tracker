@@ -4,7 +4,7 @@ const { ASSET_TYPE } = require("../utils/constants");
 const { sleep, positiveNumberOrZero, toPrecision } = require("../utils/utils");
 
 module.exports.getBalance = async () => {
-    const db = getDatabase();
+    const db = await getDatabase();
     const transactions = await db.getAllTransactions();
     if (transactions) {
         // totalIncome - cash, totalSpend - cash

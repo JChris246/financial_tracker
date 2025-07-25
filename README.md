@@ -36,7 +36,7 @@ The application stack consists of [React ⚛](https://reactjs.org/) (js) with [V
 1. Make a .env file in the server folder, with your values for the variables in the [.env.sample](server/.env.sample). DB_TYPE variable should have 1 of the accepted types: 
     - `mongo` - to connect to a mongo database (be sure provide the connection vars)
     - `json` - to use flat json files for storage
-    - `sqlite` - to use sqlite as the database (note: not yet implement)
+    - `sql` - to use sqlite as the database
 
 2. Navigate to the server directory in a terminal and run the server with: `npm start`
 3. Navigate to the client directory (preferably in a new terminal) and start the client dev server with `npm run dev`
@@ -52,7 +52,7 @@ TODO: add instructions (first I need to dockerize the app ofc 😅)
 
 ![Desktop add transaction](previews/desktop_add_transaction.png)
 
-![Mobile add transaction](previews/mobile_add_transaction.png)
+![Import transactions](previews/import_transaction.png)
 
 ## 🧪 Testing
 
@@ -94,7 +94,7 @@ npm run test:e2e
 - [ ] display balance for individual assets (stocks, crypto and cash)
 - [ ] create mcp server endpoints
 - [ ] dockerize the app
-- [ ] implement sqlite db option
+- [x] implement sqlite db option
 - [ ] add UI to allow downloading transactions as csv or md table
 
 ## ⛓️‍💥 Known Limitations
