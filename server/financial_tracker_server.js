@@ -3,7 +3,7 @@ const express = require("express");
 // environment variables configuration
 require("dotenv").config();
 
-global.VERSION = "0.2.0";
+global.VERSION = "0.2.0"; // TODO: use git hash as version
 global.LOG_DIR = __dirname + "/logs";
 const morganLogger = require("./logger/morganLogger");
 const logger = require("./logger/index.js").setup();
@@ -20,6 +20,7 @@ const balanceRouter = require("./routes/balance.js");
 const transactionRouter = require("./routes/transaction.js");
 const listRouter = require("./routes/list.js");
 const priceRouter = require("./routes/price.js");
+const mcpRouter = require("./routes/mcp.js");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/api/list", listRouter);
 app.use("/api/price", priceRouter);
+app.use("/mcp", mcpRouter);
 
 if (global.env === "test") {
     const getDatabase = require("./db/index.js").getDatabase
@@ -46,7 +48,7 @@ if (global.env === "test") {
 
 // catch 404
 app.use((req, res, next) => {
-    res.status(404).send({ msg: "Not Found" });
+    res.status(404).send({ msg: "Not Found" }); // update to use UI error page, when built
 });
 
 /**
