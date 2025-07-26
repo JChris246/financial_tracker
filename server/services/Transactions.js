@@ -321,8 +321,8 @@ const csv = transactions => {
     // TODO: format money amount?
     return "Name,Amount,Date,Category,Asset Type,Currency\n" +
     transactions.map(transaction =>
-        transaction.name + "," + transaction.amount + "," + formatDate(transaction.date) + "," + transaction.category + "," +
-        transaction.assetType + "," + transaction.currency
+        transaction.name.replaceAll(",", "") + "," + transaction.amount + "," + formatDate(transaction.date) + "," +
+        transaction.category.replaceAll(",", "") + "," + transaction.assetType + "," + transaction.currency
     ).join("\n");
 };
 
