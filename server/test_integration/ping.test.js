@@ -7,7 +7,7 @@ const { getDatabase } = require("../db/index");
 
 describe("ping", () => {
     afterAll(async () => {
-        getDatabase().wipeDb();
+        await (await getDatabase()).wipeDb();
     });
 
     test("ping", async () => {

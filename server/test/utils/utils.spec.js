@@ -1,7 +1,7 @@
 const { describe, expect, test } = require("@jest/globals");
 
 const { isNumber, makeBool, isDefined, isValidArray, positiveNumberOrZero, toPrecision,
-    formatDate, pad, isValidString, padRight, parseDate } = require("../../utils/utils");
+    formatDate, pad, isValidString, padRight, parseDate, generateId, distinctCaseIgnore } = require("../../utils/utils");
 
 describe("utils", () => {
     describe("isNumber", () => {
@@ -266,6 +266,36 @@ describe("utils", () => {
                 const date = parsedDate.getFullYear() + "-" + pad(parsedDate.getMonth() + 1) + "-" + pad(parsedDate.getDate());
                 const time = pad(parsedDate.getHours()) + ":" + pad(parsedDate.getMinutes()) + ":" + pad(parsedDate.getSeconds());
                 expect(date + " " + time).toBe(expected);
+        });
+    });
+
+    describe("generateId", () => {
+        test("should generate a unique id in the expected format", () => {
+            const format = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-[0-9]{13}$/;
+
+            const id1 = generateId();
+            const id2 = generateId();
+
+            expect(id1).toMatch(format);
+            expect(id2).toMatch(format);
+            expect(id1 !== id2).toBeTruthy();
+        });
+    });
+
+    describe("distinctCaseIgnore", () => {
+        test.each([
+            { expected: undefined },
+            { input: [], expected: [] },
+            { input: null, expected: null },
+            { input: undefined, expected: undefined },
+            { input: ["tools", "Tools"], expected: ["tools"] },
+            { input: ["tools", "other"], expected: ["tools", "other"] },
+            { input: ["tools", "other", "mostly", "Tools", "mostly"], expected: ["tools", "other", "mostly"] },
+            { input: ["tools", 1, "other", "mostly", "Tools", "mostly"], expected: ["tools", 1, "other", "mostly"] },
+        ])("should return an array with distinct items from the original array, ignoring case %s", ({ input, expected }) => {
+            const result = distinctCaseIgnore(input);
+
+            expect(result).toEqual(expected);
         });
     });
 

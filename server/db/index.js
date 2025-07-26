@@ -1,3 +1,5 @@
+const { sleep } = require("../utils/utils");
+
 // for mongoose this does not need to return handle...will it need to for sql?
 const setupDatabase = async (type) => {
     if (!type) {
@@ -10,7 +12,7 @@ const setupDatabase = async (type) => {
             successful = await require("./mongo").init();
             break;
         case "sql":
-            successful = require("./sql").init();
+            successful = await require("./sql").init();
             break;
         case "json":
             successful = require("./json").init();
@@ -22,7 +24,15 @@ const setupDatabase = async (type) => {
     return successful;
 };
 
-const getDatabase = () => {
+const getDatabase = async () => {
+    if (!global.ACTIVE_DB_TYPE) {
+        let tries = 20;
+        while (!global.ACTIVE_DB_TYPE && tries > 0) {
+            await sleep(100);
+            tries--;
+        }
+    }
+
     if (!global.ACTIVE_DB_TYPE) {
         throw new Error("Database not setup");
     }

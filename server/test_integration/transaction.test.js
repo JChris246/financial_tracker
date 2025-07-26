@@ -5,16 +5,17 @@ const superTestRequest = supertest(server);
 
 const { getDatabase } = require("../db/index");
 const { addTransaction } = require("./helpers");
+const { isValidString, isNumber } = require("../utils/utils");
 
 const fs = require("fs");
 
 describe("transaction endpoints", () => {
     beforeEach(async () => {
-        getDatabase().init(); // this is not awaited as we expect the test db to be the json implementation
+        await (await getDatabase()).init();
     });
 
     afterAll(async () => {
-        getDatabase().wipeDb();
+        await (await getDatabase()).wipeDb();
     });
 
     describe("Add Transaction", () => {
@@ -188,6 +189,30 @@ describe("transaction endpoints", () => {
                 expect(response.status).toBe(200);
                 expect(response.body.length).toEqual(cases[i].expected);
             }
+        });
+
+        test("should return the transactions with expected fields", async () => {
+            // Arrange
+            await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2022-01-01" });
+
+            // Act
+            const response = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body.length).toBe(1);
+            expect(isValidString(response.body[0].id) || isNumber(response.body[0].id)).toBe(true);
+            response.body[0].id = undefined;
+            expect(response.body).toEqual([
+                {
+                    name: "Test Transaction 1",
+                    amount: 10,
+                    date: 1641009600000,
+                    assetType: "cash",
+                    currency: "USD",
+                    category: "Groceries"
+                }
+            ]);
         });
     });
 

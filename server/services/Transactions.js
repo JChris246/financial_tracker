@@ -13,12 +13,12 @@ module.exports.getTransactions = async (type) => {
         // options = { "type": req.params.type === "income" };
     }
 
-    const transactions = await getDatabase().getAllTransactions();
+    const transactions = await (await getDatabase()).getAllTransactions();
     if (transactions) {
         return ({
             success: true,
-            transactions: transactions.map(({ name, date, amount, category, assetType, currency }) =>
-                ({ name, date, amount, category, assetType, currency }))
+            transactions: transactions.map(({ name, date, amount, category, assetType, currency, id }) =>
+                ({ name, date, amount, category, assetType, currency, id }))
         })
     }
     return { success: false };
@@ -88,7 +88,7 @@ module.exports.addTransaction = async (reqBody) => {
     }
 
     const { name, date, amount, category, assetType, currency } = result;
-    const transaction = await getDatabase().createTransaction(
+    const transaction = await (await getDatabase()).createTransaction(
         { name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }
     );
 
@@ -137,7 +137,7 @@ module.exports.addTransactions = async (userTransactions) => {
     const transactions = transaction.map(({ name, date, amount, category, assetType, currency }) =>
         ({ name, date, amount, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }))
 
-    const { success, savedTransactions } = await getDatabase().createTransactions(transactions);
+    const { success, savedTransactions } = await (await getDatabase()).createTransactions(transactions);
     if (!success) {
         return { success: false, code: 500, msg: "Failed to add transactions all transactions" };
     }
@@ -370,7 +370,7 @@ module.exports.exportTransactions = async (params) => {
         return { success: false, code: 400, msg: "Invalid export format" };
     }
 
-    const transactions = await getDatabase().getAllTransactions();
+    const transactions = await (await getDatabase()).getAllTransactions();
     if (transactions) {
         if (format === "csv") {
             return { success: true, response: { csv: csv(transactions) } };
@@ -391,7 +391,7 @@ module.exports.exportTransactions = async (params) => {
 };
 
 module.exports.getGraphData = async () => {
-    const transactions = await getDatabase().getAllTransactions();
+    const transactions = await (await getDatabase()).getAllTransactions();
     if (transactions) {
         const graphData = {
             spend: [0, 0, 0, 0, 0, 0, 0],

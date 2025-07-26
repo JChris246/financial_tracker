@@ -49,11 +49,13 @@ const init = async () => {
     }
 };
 
+// temp unused
 // this pattern may not work for all db types...but using it for now
 // I also don't particularly like the callback pattern
 const getTransactions = async (filter) => {
     try {
         const transactions = await Transaction.find(filter, { name: 1, amount: 1, date: 1 });
+        transactions.forEach(transaction => transaction.id = transaction._id);
         return transactions;
     } catch (err) {
         if (err) {
@@ -81,8 +83,8 @@ const createTransactions = async (transactions) => {
     let savedTransactions = await Transaction.insertMany([ ...transactions ]);
 
     if (savedTransactions.length !== transactions.length) {
-        logger.error("Failed to add transactions");
-        return false;
+        logger.error("Failed to add all transactions");
+        return { success: false };
     }
 
     return { success: true, savedTransactions };
@@ -91,6 +93,7 @@ const createTransactions = async (transactions) => {
 const getAllTransactions = async () => {
     try {
         const transactions = await Transaction.find({});
+        transactions.forEach(transaction => transaction.id = transaction._id);
         return transactions;
     } catch (err) {
         if (err) {

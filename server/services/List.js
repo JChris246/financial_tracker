@@ -21,7 +21,7 @@ module.exports.getCurrencies = (assetType) => {
 };
 
 module.exports.getTransactionCategories = async () => {
-    const userCategories = await getDatabase().getAllTransactionCategories();
+    const userCategories = await (await getDatabase()).getAllTransactionCategories();
     const returnCategories = [...new Set([...DEFAULT_CATEGORIES, ...userCategories])].sort();
 
     return returnCategories
