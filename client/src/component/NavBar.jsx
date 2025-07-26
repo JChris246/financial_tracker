@@ -22,7 +22,7 @@ export const NavBar = () => {
         {
             id: 4,
             name: "Add Transaction",
-            route: "#add-transaction"
+            route: "/#add-transaction"
         }
     ];
     return (

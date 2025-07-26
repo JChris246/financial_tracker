@@ -2,6 +2,7 @@
 import { test, expect } from "@playwright/test";
 
 import { pageSetup } from "./setup";
+import * as fs from "fs";
 
 test.afterEach(async () => {
     // TODO: if this were running as an "integration" test, we'd need to not run this (or mock it)
@@ -15,7 +16,7 @@ test("has title", async ({ page }) => {
 });
 
 // TODO: extract to helper?
-const addTransaction = async (page, value, assetType="cash", currency="eur", date, name="Test Transaction",) => {
+const addTransaction = async (page, value, assetType="cash", currency="eur", date, name="Test Transaction") => {
     const addTransactionButton = page.locator("#add-transaction-button");
 
     await addTransactionButton.click();
@@ -99,5 +100,97 @@ test.describe("transaction history", () => {
         dateFilter.fill("2025");
 
         await expect(page.locator("tr")).toHaveCount(3);
+    });
+
+    test.describe("export", () => {
+        test("should allow exporting transactions as csv", async ({ page }) => {
+            await pageSetup({ page });
+
+            await addTransaction(page, "10", "crypto", "BTC", "2022-01-07T23:43:09");
+            await addTransaction(page, "-50", "crypto", "ETH", "2023-01-07T23:43:09");
+            await addTransaction(page, "-20", "crypto", "ADA", "2024-01-08T23:43:09");
+
+            await pageSetup({ page, pathname:"/history" });
+
+            const exportButton = page.locator("#export-btn");
+            await exportButton.click();
+
+            const downloadPromise = page.waitForEvent("download");
+            const exportCsvButton = page.locator("button[name=\"csv\"]");
+            await exportCsvButton.click();
+
+            const download = await downloadPromise;
+            const savedFileName = "./downloaded/" + download.suggestedFilename();
+            await download.saveAs(savedFileName);
+
+            expect(fs.existsSync(savedFileName)).toBe(true);
+            const contents = fs.readFileSync(savedFileName).toString();
+            expect(contents).toEqual("Name,Amount,Date,Category,Asset Type,Currency\n" +
+                                     "Test Transaction,10,2022-01-07 23:43,other,crypto,BTC\n" +
+                                     "Test Transaction,-50,2023-01-07 23:43,other,crypto,ETH\n" +
+                                     "Test Transaction,-20,2024-01-08 23:43,other,crypto,ADA");
+            fs.unlinkSync(savedFileName);
+        })
+
+        test("should allow exporting transactions as md", async ({ page }) => {
+            await pageSetup({ page });
+
+            await addTransaction(page, "10", "crypto", "BTC", "2022-01-07T23:43:09");
+            await addTransaction(page, "-50", "crypto", "ETH", "2023-01-07T23:43:09");
+            await addTransaction(page, "-20", "crypto", "ADA", "2024-01-08T23:43:09");
+
+            await pageSetup({ page, pathname:"/history" });
+
+            const exportButton = page.locator("#export-btn");
+            await exportButton.click();
+
+            const downloadPromise = page.waitForEvent("download");
+            const exportCsvButton = page.locator("button[name=\"md\"]");
+            await exportCsvButton.click();
+
+            const download = await downloadPromise;
+            const savedFileName = "./downloaded/" + download.suggestedFilename();
+            await download.saveAs(savedFileName);
+
+            expect(fs.existsSync(savedFileName)).toBe(true);
+            const contents = fs.readFileSync(savedFileName).toString();
+            expect(contents).toEqual("| Name             | Amount | Date             | Category | Asset Type | Currency |\n" +
+                                     "| ---------------- | ------ | ---------------- | -------- | ---------- | -------- |\n" +
+                                     "| Test Transaction | 10     | 2022-01-07 23:43 | other    | crypto     | BTC      |\n" +
+                                     "| Test Transaction | -50    | 2023-01-07 23:43 | other    | crypto     | ETH      |\n" +
+                                     "| Test Transaction | -20    | 2024-01-08 23:43 | other    | crypto     | ADA      |");
+            fs.unlinkSync(savedFileName);
+        })
+
+        test("should allow exporting transactions as json", async ({ page }) => {
+            await pageSetup({ page });
+
+            await addTransaction(page, "10", "crypto", "BTC", "2022-01-07T23:43:09");
+            await addTransaction(page, "-50", "crypto", "ETH", "2023-01-07T23:43:09");
+            await addTransaction(page, "-20", "crypto", "ADA", "2024-01-08T23:43:09");
+
+            await pageSetup({ page, pathname:"/history" });
+
+            const exportButton = page.locator("#export-btn");
+            await exportButton.click();
+
+            const downloadPromise = page.waitForEvent("download");
+            const exportCsvButton = page.locator("button[name=\"json\"]");
+            await exportCsvButton.click();
+
+            const download = await downloadPromise;
+            const savedFileName = "./downloaded/" + download.suggestedFilename();
+            await download.saveAs(savedFileName);
+
+            expect(fs.existsSync(savedFileName)).toBe(true);
+            // @ts-ignore
+            const contents = JSON.parse(fs.readFileSync(savedFileName));
+            expect(contents).toEqual([
+                {"name":"Test Transaction","date":1641613389000,"amount":10,"category":"other","assetType":"crypto","currency":"BTC"},
+                {"name":"Test Transaction","date":1673149389000,"amount":-50,"category":"other","assetType":"crypto","currency":"ETH"},
+                {"name":"Test Transaction","date":1704771789000,"amount":-20,"category":"other","assetType":"crypto","currency":"ADA"}
+            ]);
+            fs.unlinkSync(savedFileName);
+        })
     });
 });
