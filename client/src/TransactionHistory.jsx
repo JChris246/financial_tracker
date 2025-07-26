@@ -74,6 +74,7 @@ function TransactionHistory() {
             callback: ({ msg, success, json }) => {
                 if (success) {
                     download(name, json[name] ?? JSON.stringify(json));
+                    setTimeout(() => setIsExportModalOpen(false), 500);
                 } else {
                     displayNotification({ message: "An error occurred trying to export transactions: " + msg, type: NotificationType.Error });
                 }
