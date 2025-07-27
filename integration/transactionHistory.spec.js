@@ -193,4 +193,29 @@ test.describe("transaction history", () => {
             fs.unlinkSync(savedFileName);
         })
     });
+
+    test.describe("delete transactions", () => {
+        test("should allow deleting transactions from the list", async ({ page }) => {
+            await pageSetup({ page });
+
+            await addTransaction(page, "10", "crypto", "BTC", "2022-01-07T23:43:09");
+            await addTransaction(page, "-50", "crypto", "ETH", "2023-01-07T23:43:09");
+            await addTransaction(page, "-20", "crypto", "ADA", "2024-01-08T23:43:09");
+
+            await pageSetup({ page, pathname:"/history" });
+
+            const trs = page.locator("tr");
+            await expect(trs).toHaveCount(5); // 3 transactions + 2 header rows
+
+            const deleteModal = page.locator("#deleteTransactionModal");
+            await expect(deleteModal).toBeHidden();
+            await trs.last().locator("button[name=\"delete-transaction\"]").click();
+            await expect(deleteModal).toBeVisible();
+
+            await page.locator("#confirm-delete-transaction").click();
+            await expect(deleteModal).toBeHidden();
+
+            await expect(trs).toHaveCount(4); // 2 transactions + 2 header rows
+        })
+    });
 });

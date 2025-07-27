@@ -7,7 +7,9 @@ const requestSync = async ({ url, method="GET", token, body }) => {
     try {
         const res = await fetch(url, { method, headers, body });
 
-        const json = await res.json();
+        const isResponseJson = res.headers.get("Content-Type")?.includes("application/json");
+        const json = isResponseJson ? await res.json() : undefined;
+
         if (!(res.status >= 200 && res.status < 300)) {
             return {
                 status: res.status,
@@ -37,10 +39,21 @@ const request = ({ url, method="GET", token, body, callback }) => {
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
     fetch(url, { method, headers, body }).then(res => {
+        const isResponseJson = res.headers.get("Content-Type")?.includes("application/json");
         if (!(res.status >= 200 && res.status < 300)) {
-            res.json().then(json => callback({ status: res.status, msg: json.msg, success: false, json }))
-                .catch(e => callback({ msg: "Failed to load json: "+e, success: false }));
-        } else res.json().then(json => callback({ json, success: true, msg: json.msg }));
+            if (isResponseJson) {
+                res.json().then(json => callback({ status: res.status, msg: json.msg, success: false, json }))
+                    .catch(e => callback({ msg: "Failed to load json: "+e, success: false }));
+            } else {
+                callback({ status: res.status, success: false });
+            }
+        } else {
+            if (isResponseJson) {
+                res.json().then(json => callback({ json, success: true, msg: json.msg }));
+            } else {
+                callback({ success: true });
+            }
+        }
     });
 };
 
