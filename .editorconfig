@@ -31,3 +31,6 @@ trim_trailing_whitespace = false
 
 [Notification.jsx]
 max_line_length = off
+
+[transactionHistory.spec.js]
+indent_size = off

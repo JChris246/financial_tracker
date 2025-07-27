@@ -95,7 +95,7 @@ npm run test:e2e
 - [ ] create mcp server endpoints
 - [ ] dockerize the app
 - [x] implement sqlite db option
-- [ ] add UI to allow downloading transactions as csv or md table
+- [x] add UI to allow downloading transactions as csv or md table
 
 ## ⛓️‍💥 Known Limitations
 
