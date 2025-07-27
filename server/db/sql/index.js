@@ -64,10 +64,11 @@ const init = async () => {
         return true;
     }
 
-    const fullDbPath = path.join(global.DB_PATH, "data/finance_tracker.db");
-    if (!fs.existsSync(path.join(global.DB_PATH, "data"))) {
+    const fullDbFolder = path.join(global.DB_PATH, "data");
+    const fullDbPath = path.join(fullDbFolder, "finance_tracker.db");
+    if (!fs.existsSync(fullDbFolder)) {
         logger.debug("Creating DB path: " + global.DB_PATH);
-        fs.mkdirSync(global.DB_PATH, { recursive: true });
+        fs.mkdirSync(fullDbFolder, { recursive: true });
     }
 
     if (!fs.existsSync(fullDbPath)) {

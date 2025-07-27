@@ -1,0 +1,25 @@
+version: '3.1'
+services:
+  financial_tracker_server:
+    networks:
+      - financial_tracker
+    image: 'financial_tracker'
+    build: .
+    restart: unless-stopped
+    ports:
+      - 3040:8080
+    env_file: ./server/.env
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+
+      LOG_DIR: /home/financial_tracker/logs
+      DB_TYPE: sql
+      DB_PATH: /home/financial_tracker
+
+    volumes:
+      - ./logs:/home/financial_tracker/logs
+      - ./data:/home/financial_tracker/data
+
+networks:
+  financial_tracker:
