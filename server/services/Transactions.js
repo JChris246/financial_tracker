@@ -97,6 +97,7 @@ module.exports.addTransaction = async (reqBody) => {
             success: true,
             transaction: {
                 // maybe I should separate the payload from the message ?
+                id: transaction.id,
                 amount: transaction.amount,
                 name: transaction.name,
                 date: transaction.date,
@@ -142,8 +143,8 @@ module.exports.addTransactions = async (userTransactions) => {
         return { success: false, code: 500, msg: "Failed to add transactions all transactions" };
     }
 
-    const addedTransactions = savedTransactions.map(({ amount, name, date, category, assetType, currency }) =>
-        ({ amount, name, date, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }));
+    const addedTransactions = savedTransactions.map(({ id, amount, name, date, category, assetType, currency }) =>
+        ({ id, amount, name, date, category, assetType: assetType.toLowerCase(), currency: currency.toUpperCase() }));
     return { success: true, msg: "Transactions added successfully", addedTransactions };
 };
 
@@ -178,7 +179,7 @@ const isEmptyRow = (fields) => {
         }
     }
 
-    // all row were either blank or only -'s, this must be an empty record
+    // all cols were either blank or only -'s, this must be an empty record
     return true;
 };
 
@@ -387,6 +388,45 @@ module.exports.exportTransactions = async (params) => {
     } else {
         logger.error("An error occurred while exporting transactions: " + err);
         return { success: false, code: 500, msg: "An error occurred while exporting transactions" };
+    }
+};
+
+module.exports.deleteTransaction = async (id) => {
+    try {
+        const db = await getDatabase();
+        const result = await db.deleteTransaction(id);
+        // for now if this didn't throw an error we are assuming the failure was because of 404
+        return { success: result, code: result ? 204 : 404, msg: result ? "Successfully deleted transaction" : "Transaction not found" };
+    } catch (e) {
+        logger.error(e);
+        return { success: false, code: 500, msg: "An error occurred trying to delete transaction" };
+    }
+};
+
+module.exports.updateTransaction = async (id, payload) => {
+    const fullObject = ["name", "amount", "date", "category", "assetType", "currency"].every(f => isDefined(payload[f]));
+
+    // this is put request (not patch), you need to provide all values
+    if (!fullObject) {
+        return { success: false, code: 400, msg: "update request missing fields" };
+    }
+
+    const validationResult = validateAddTransactionRequest(payload);
+    if (!validationResult.valid) {
+        return { success: false, code: 400, msg: validationResult.msg };
+    }
+
+    try {
+        const db = await getDatabase();
+        const result = await db.updateTransaction(id, { ...validationResult, valid: undefined });
+        // for now if this didn't throw an error we are assuming the failure was because of 404
+        return { success: result, code: result ? 200 : 404,
+            msg: result ? "Successfully updated transaction" : "Transaction not found",
+            transaction: result ? result: undefined
+        };
+    } catch (e) {
+        logger.error(e);
+        return { success: false, code: 500, msg: "An error occurred trying to update transaction" };
     }
 };
 

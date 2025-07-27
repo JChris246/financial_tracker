@@ -246,6 +246,8 @@ describe("transaction endpoints", () => {
             // Assert
             expect(response.status).toBe(201);
             expect(response.body.msg).toEqual("Transactions added successfully");
+            expect(response.body.addedTransactions.every(({ id }) => isValidString(id) || isNumber(id))).toBe(true);
+            response.body.addedTransactions.map(t => { t.id = undefined; return t });
             expect(response.body.addedTransactions).toEqual([
                 { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1704081600000, category: "Groceries" },
             ]);
@@ -282,6 +284,8 @@ describe("transaction endpoints", () => {
             // Assert
             expect(response.status).toBe(201);
             expect(response.body.msg).toEqual("Transactions added successfully");
+            expect(response.body.addedTransactions.every(({ id }) => isValidString(id) || isNumber(id))).toBe(true);
+            response.body.addedTransactions.map(t => { t.id = undefined; return t });
             expect(response.body.addedTransactions).toEqual([
                 { name: "Test cash transaction", amount: 100, assetType: "cash", currency: "USD", date: 1641009600000, category: "Groceries" },
                 { name: "Test crypto transaction", amount: -1, assetType: "crypto", currency: "BTC", date: 1672545600000, category: "other" },
@@ -610,6 +614,163 @@ describe("transaction endpoints", () => {
             // Assert
             expect(response.status).toBe(200);
             expect(response.body.md.split("\n").length).toBe(5);
+        });
+    });
+
+    describe("Update transaction", () => {
+        test.each([
+            { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries" },
+            { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", date: "2023-05-12" },
+            { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd" },
+            { amount: -100, assetType: "cash", currency: "usd", category: "Groceries", date: "2023-05-12" },
+            { name: "Test Transaction", amount: -100, category: "Groceries", date: "2023-05-12" },
+            {}
+        ])
+        ("should return bad request if all transaction fields not specified", async (payload) => {
+            // Act
+            const response = await superTestRequest.put("/api/transaction/68840d10473e26e9961d50fc").send(payload);
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual("update request missing fields");
+        });
+
+        test("should return not found if no transactions exist", async () => {
+            // Act
+            const response = await superTestRequest.put("/api/transaction/68840d10473e26e9961d50fc")
+                .send({ name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries", date: "2023-05-12" });
+            const getResponse = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(404);
+            expect(getResponse.status).toBe(200);
+            expect(getResponse.body.length).toEqual(0);
+        });
+
+        test("should return not found if transaction update target does not exist", async () => {
+            // Arrange
+            await superTestRequest.post("/api/transaction/all").send([
+                { name: "Test Transaction", amount: 100, assetType: "cash", currency: "usd", category: "other", date: "2023-05-12" },
+                { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries", date: "2023-05-12" },
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries", date: "2023-05-12" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.put("/api/transaction/68840d10473e26e9961d50fc")
+                .send({ name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries", date: "2025-06-12" });
+            const getResponse = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(404);
+            expect(getResponse.status).toBe(200);
+            expect(getResponse.body.length).toEqual(3);
+        });
+
+        test("should update transaction when it exist", async () => {
+            // Arrange
+            const { body: { addedTransactions: transactions } } = await superTestRequest.post("/api/transaction/all").send([
+                { name: "transaction to update", amount: 100, assetType: "cash", currency: "usd", date: "2023-05-12", category: "other" },
+                { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries", date: "2024-05-12" },
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries", date: "2025-06-15" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.put("/api/transaction/" + transactions[0].id)
+                .send({ name: "updated transaction", amount: 500, assetType: "cash", currency: "cad", category: "Groceries", date: "2026-06-03" });
+            const getResponse = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(getResponse.status).toBe(200);
+            expect(getResponse.body.length).toEqual(3);
+            expect(isValidString(response.body.transaction.id) || isNumber(response.body.transaction.id)).toBe(true);
+            response.body.transaction.id = undefined;
+            expect(response.body.transaction).toEqual({
+                amount: 500,
+                assetType: "cash",
+                category: "Groceries",
+                currency: "cad",
+                date: 1780459200000,
+                name: "updated transaction"
+            })
+            expect(getResponse.body.every(({ id }) => isValidString(id) || isNumber(id))).toBe(true);
+            getResponse.body.map(t => { t.id = undefined; return t });
+            expect(getResponse.body).toEqual([
+                {
+                    amount: 500,
+                    assetType: "cash",
+                    category: "Groceries",
+                    currency: "cad",
+                    date: 1780459200000,
+                    name: "updated transaction"
+                },
+                {
+                    amount: -100,
+                    assetType: "cash",
+                    category: "Groceries",
+                    currency: "USD",
+                    date: 1715486400000,
+                    name: "Test Transaction"
+                },
+                {
+                    amount: -1,
+                    assetType: "crypto",
+                    category: "Groceries",
+                    currency: "BTC",
+                    date: 1749960000000,
+                    name: "Test Transaction"
+                }
+            ]);
+        });
+    });
+
+    describe("Delete transaction", () => {
+        test("should return not found if no transactions exist", async () => {
+            // Act
+            const response = await superTestRequest.delete("/api/transaction/68840d10473e26e9961d50fc");
+            const getResponse = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(404);
+            expect(getResponse.status).toBe(200);
+            expect(getResponse.body.length).toEqual(0);
+        });
+
+        test("should return not found if transaction delete target does not exist", async () => {
+            // Arrange
+            await superTestRequest.post("/api/transaction/all").send([
+                { name: "Test Transaction", amount: 100, assetType: "cash", currency: "usd" },
+                { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries" },
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.delete("/api/transaction/68840d10473e26e9961d50fc");
+            const getResponse = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(404);
+            expect(getResponse.status).toBe(200);
+            expect(getResponse.body.length).toEqual(3);
+        });
+
+        test("should delete transaction when it exist", async () => {
+            // Arrange
+            const { body: { addedTransactions: transactions } } = await superTestRequest.post("/api/transaction/all").send([
+                { name: "transaction to delete", amount: 100, assetType: "cash", currency: "usd" },
+                { name: "Test Transaction", amount: -100, assetType: "cash", currency: "usd", category: "Groceries" },
+                { name: "Test Transaction", amount: -1, assetType: "crypto", currency: "btc", category: "Groceries" }
+            ]);
+
+            // Act
+            const response = await superTestRequest.delete("/api/transaction/" + transactions[0].id);
+            const getResponse = await superTestRequest.get("/api/transaction");
+
+            // Assert
+            expect(response.status).toBe(204);
+            expect(getResponse.status).toBe(200);
+            expect(getResponse.body.length).toEqual(2);
+            expect(getResponse.body.filter(t => t.name === "transaction to delete").length).toBe(0);
         });
     });
 });

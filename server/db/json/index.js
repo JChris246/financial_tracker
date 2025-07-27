@@ -122,19 +122,21 @@ const getTransactions = filter => {
 const createTransaction = transaction => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "create transaction");
 
-    db.push({ ...transaction, id: generateId() });
+    const newTransaction = { ...transaction, id: generateId() };
+    db.push(newTransaction);
     saveItems(DB_TYPE.TRANSACTIONS, db, "create transaction");
 
-    return transaction;
+    return newTransaction;
 };
 
 const createTransactions = transactions => {
     const db = getItems(DB_TYPE.TRANSACTIONS, "create transactions");
 
-    db.push(...(transactions).map(t => ({ ...t, id: generateId() })));
+    const newTransactions = transactions.map(t => ({ ...t, id: generateId() }));
+    db.push(...newTransactions);
     saveItems(DB_TYPE.TRANSACTIONS, db, "create transactions");
 
-    return { success: true, savedTransactions: transactions };
+    return { success: true, savedTransactions: newTransactions };
 };
 
 const getAllTransactions = () => {
@@ -178,6 +180,41 @@ const getAllTransactionCategories = () => {
     return [...categoriesSet.keys()];
 };
 
+const deleteTransaction = id => {
+    const db = getItems(DB_TYPE.TRANSACTIONS, "delete transaction " + id);
+
+    const updated = db.filter(t => t.id !== id);
+
+    if (updated.length === db.length) {
+        logger.warn("After filtering to delete, length remained the same");
+        return false;
+    }
+
+    saveItems(DB_TYPE.TRANSACTIONS, updated, "saving updated after deleting " + id)
+    return true;
+};
+
+const updateTransaction = async (id, transaction) => {
+    const db = getItems(DB_TYPE.TRANSACTIONS, "update transaction " + id);
+
+    let updated = false;
+    for (let i = 0; i < db.length; i++) {
+        if (db[i].id == id) {
+            db[i] = { ...transaction, id };
+            updated = true;
+            break;
+        }
+    }
+
+    if (updated) {
+        saveItems(DB_TYPE.TRANSACTIONS, db, "saving after updating " + id)
+        logger.info("Updated transaction " + id);
+        return { ...transaction, id };
+    } else {
+        logger.warn("Didn't find the transaction to update");
+        return false;
+    }
+};
 
 // should this maybe be a redis cache?
 
@@ -191,4 +228,4 @@ const saveCache = (cache) => {
 };
 
 module.exports = { init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions,
-    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };
+    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories, deleteTransaction, updateTransaction };
