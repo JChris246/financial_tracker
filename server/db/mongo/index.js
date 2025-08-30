@@ -72,7 +72,7 @@ const createTransaction = async (transaction) => {
     // if savedTransaction returned is the same as newTransaction then saved successfully
     if (savedTransaction === newTransaction) {
         logger.info("Transaction added successfully");
-        return savedTransaction;
+        return { ...savedTransaction._doc, id: savedTransaction._id };
     } else {
         logger.error("Failed to add transaction");
         return null;
@@ -87,7 +87,13 @@ const createTransactions = async (transactions) => {
         return { success: false };
     }
 
-    return { success: true, savedTransactions };
+    return {
+        success: true,
+        savedTransactions: savedTransactions.map(t => {
+            t.id = t._id;
+            return t;
+        })
+    };
 };
 
 const getAllTransactions = async () => {
@@ -123,6 +129,28 @@ const getAllTransactionCategories = async () => {
     return results.filter(c => isValidString(c)).map(c => c.toLowerCase());
 };
 
+const deleteTransaction = async id => {
+    const result = await Transaction.deleteOne({ "_id": id });
+    if (result.deletedCount === 0) {
+        logger.warn("Transaction does not exist to delete " + id);
+        return false;
+    }
+
+    logger.info("Transaction " + id + " removed");
+    return true;
+};
+
+const updateTransaction = async (id, transaction) => {
+    const updated = await Transaction.findByIdAndUpdate(id, transaction, { new: true, upsert: false });
+
+    if (!updated) {
+        logger.warn("The transaction didn't exist to update");
+        return false;
+    }
+
+    return { ...updated._doc, id: updated._id, _id: undefined, __v: undefined };
+};
+
 // because I'm lazy, and don't think the cache record should be a whole collection (also should this be redis?)
 const getCache = () => {
     const cache = getCacheJson();
@@ -137,5 +165,5 @@ const saveCache = (cache) => {
 };
 
 module.exports = { init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions,
-    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories };
+    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories, deleteTransaction, updateTransaction };
 

@@ -1,6 +1,6 @@
 const logger = require("../../logger").setup();
 const { getCache: getCacheJson, saveCache: saveCacheJson } = require("../json");
-const { distinctCaseIgnore } = require("../../utils/utils");
+const { distinctCaseIgnore, isValidArray } = require("../../utils/utils");
 
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
@@ -106,12 +106,12 @@ const createTransaction = transaction => {
         global.database.run(
             `INSERT INTO transactions (name, amount, category, date, assetType, currency) VALUES (?,?,?,?,?,?)`,
             [transaction.name, transaction.amount, transaction.category, transaction.date, transaction.assetType, transaction.currency],
-            (err) => {
+            function (err) {
                 if (err) {
                     logger.error("An error occurred while creating a transaction: " + err.message);
                     reject(null);
                 } else {
-                    resolve(transaction);
+                    resolve({ ...transaction, id: this.lastID });
                 }
             }
         );
@@ -125,7 +125,7 @@ const createTransactions = async transactions => {
     for (let i = 0; i < transactions.length; i++) {
         const result = await createTransaction(transactions[i]);
         if (result) {
-            savedTransactions.push(transactions[i]);
+            savedTransactions.push(result);
         } else {
             logger.error("Failed to add all transactions");
             return { success: false };
@@ -195,6 +195,68 @@ const getAllTransactionCategories = async () => {
     return distinctCaseIgnore(rows);
 };
 
+const getTransactionById = (id) => {
+    return new Promise((resolve, reject) => {
+        global.database.all(
+            `SELECT * FROM transactions WHERE id = ?`, [id],
+            function (err, rows) {
+                if (err) {
+                    logger.error("An error occurred while getting transactions: " + err.message);
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            }
+        );
+    });
+};
+
+const deleteTransaction = async id => {
+    try {
+        const found = await getTransactionById(id);
+        if (!isValidArray(found)) return false;
+    } catch (e) {
+        logger.error("Error querying the transaction before deleting");
+        throw e;
+    }
+
+    return new Promise((resolve, reject) => {
+        global.database.run(`DELETE FROM transactions WHERE id = ?`, [id], (err) => {
+            if (err) {
+                logger.error("An occurred when deleting transaction " + id + ": " + err.message);
+                reject(false);
+            }
+            logger.info("Transaction " + id + " deleted");
+            resolve(true);
+        });
+    });
+};
+
+const updateTransaction = async (id, transaction) => {
+    try {
+        const found = await getTransactionById(id);
+        if (!isValidArray(found)) return false;
+    } catch (e) {
+        logger.error("Error querying the transaction before updating");
+        throw e;
+    }
+
+    return new Promise((resolve, reject) => {
+        global.database.run(
+            `UPDATE transactions SET name = ?, amount = ?, category = ?, date = ?, assetType = ?, currency = ? WHERE id = ?`,
+            [transaction.name, transaction.amount, transaction.category, transaction.date, transaction.assetType, transaction.currency, id],
+            (err) => {
+                if (err) {
+                    logger.error("An occurred while updating transaction " + id + ": " + err.message);
+                    reject(false);
+                }
+                logger.info("Transaction " + id + " updated");
+                resolve({ ...transaction, id });
+            }
+        );
+    });
+};
+
 // because I'm lazy, and don't think the cache record should be a whole table (also should this be redis?)
 const getCache = () => {
     const cache = getCacheJson();
@@ -210,5 +272,5 @@ const saveCache = (cache) => {
 
 module.exports = {
     init, wipeDb, getTransactions, createTransaction, createTransactions, getAllTransactions,
-    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories
+    getCache, saveCache, getAllTransactionCurrencies, getAllTransactionCategories, deleteTransaction, updateTransaction
 };

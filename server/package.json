@@ -8,9 +8,9 @@
     "test:unit": "NODE_ENV=test jest --runTestsByPath test/**/*.spec.js",
     "test:integration": "NODE_ENV=test DB_TYPE=json DB_PATH=test_db RUN_SERVER=false MOCK_CONVERSIONS=true jest --runTestsByPath test_integration/** --runInBand",
     "test:integration:sql": "NODE_ENV=test DB_TYPE=sql DB_PATH=test_db RUN_SERVER=false MOCK_CONVERSIONS=true jest --runTestsByPath test_integration/** --runInBand",
-    "test:integration:mongo": "NODE_ENV=test DB_TYPE=mongo DB_NAME=finance_test_db RUN_SERVER=false MOCK_CONVERSIONS=true jest --runTestsByPath test_integration/** --runInBand",
+    "test:integration:mongo": "NODE_ENV=test DB_TYPE=mongo DB_PATH=test_db DB_NAME=finance_test_db RUN_SERVER=false MOCK_CONVERSIONS=true jest --runTestsByPath test_integration/** --runInBand",
     "test:server": "NODE_ENV=test DB_PATH=test_db DB_TYPE=json MOCK_CONVERSIONS=true node financial_tracker_server.js",
-    "test:server:mongo": "NODE_ENV=test DB_TYPE=mongo DB_NAME=finance_test_db MOCK_CONVERSIONS=true node financial_tracker_server.js",
+    "test:server:mongo": "NODE_ENV=test DB_TYPE=mongo DB_PATH=test_db DB_NAME=finance_test_db MOCK_CONVERSIONS=true node financial_tracker_server.js",
     "test:server:sql": "NODE_ENV=test DB_TYPE=sql DB_PATH=test_db MOCK_CONVERSIONS=true node financial_tracker_server.js"
   },
   "keywords": [

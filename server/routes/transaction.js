@@ -71,6 +71,16 @@ router
             res.status(code).send({ msg });
         }
     })
+    .delete("/:id", async (req, res) => {
+        const { code, msg } = await service.deleteTransaction(req.params.id);
+
+        res.status(code).send({ msg });
+    })
+    .put("/:id", async (req, res) => {
+        const { code, msg, transaction } = await service.updateTransaction(req.params.id, req.body);
+
+        res.status(code).send({ msg, transaction });
+    })
     .get("/all/graph", async (_, res) => {
         const { success, msg, response } = await service.getGraphData();
         if (success) {
