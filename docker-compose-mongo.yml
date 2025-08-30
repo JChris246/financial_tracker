@@ -1,0 +1,40 @@
+version: '3.1'
+services:
+  financial_tracker_server:
+    image: 'financial_tracker'
+    build: .
+    restart: unless-stopped
+    ports:
+      - 3040:8080
+    env_file: ./server/.env
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+
+      LOG_DIR: /home/financial_tracker/logs
+      DB_TYPE: mongo
+      DB_PATH: /home/financial_tracker
+
+      DB_NAME: $DB_NAME
+      DB_USER: $DB_USER 
+      DB_PASSWORD: $DB_PASSWORD
+      DB_HOST: $DB_HOST
+
+    volumes:
+      - ./logs:/home/financial_tracker/logs
+      - ./data:/home/financial_tracker/data
+    
+    depends_on:
+      - database
+
+  database:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $DB_USER
+      MONGO_INITDB_ROOT_PASSWORD: $DB_PASSWORD
+    ports:
+      - 27018:27017
+    env_file: ./server/.env
+    volumes:
+      - ./data:/data/db

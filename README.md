@@ -44,7 +44,16 @@ The application stack consists of [React ⚛](https://reactjs.org/) (js) with [V
 
 ### 🐋 Building with Docker
 
-TODO: add instructions (first I need to dockerize the app ofc 😅)
+To build the docker image yourself you can use `docker build -t financial_tracker:1.0.0 .` while in the root of the project. This will read and perform the actions described in the Dockerfile. 
+
+You can also (and the recommended way) use the docker compose files included at the root of the repo. docker-compose.yml is setup to use sqlite as the database and the `DB_TYPE` value can be swapped for `json` if you prefer.
+Simply run `docker-compose up --build -d` to launch (the build flag can be omitted if the image is already built).
+
+docker-compose-mongo.yml *should* be setup to use the app with a mongo database. Run `docker-compose -f docker-compose-mongo.yml up --build -d` to get up and running.
+
+*Ensure you have all the appropriate env vars set in all instances.*
+
+The app should then be accessible on port 3040 (you can change this in either compose file) [localhost:3040](http://localhost:3040).
 
 ## 👀 Preview
 
@@ -93,7 +102,7 @@ npm run test:e2e
 - [ ] add edit/delete button for each transaction in the transaction history table
 - [ ] display balance for individual assets (stocks, crypto and cash)
 - [ ] create mcp server endpoints
-- [ ] dockerize the app
+- [x] dockerize the app
 - [x] implement sqlite db option
 - [x] add UI to allow downloading transactions as csv or md table
 

@@ -3,7 +3,7 @@ const express = require("express");
 // environment variables configuration
 require("dotenv").config();
 
-global.VERSION = "0.2.0"; // TODO: use git hash as version
+global.VERSION = process.env.VERSION || "0.2.0";
 global.LOG_DIR = __dirname + "/logs";
 const morganLogger = require("./logger/morganLogger");
 const logger = require("./logger/index.js").setup();
@@ -30,7 +30,7 @@ const app = express();
 
 app.use(morganLogger);
 app.use(express.json());
-app.use(express.static("static"));
+app.use(["/history", "/"], express.static("static"));
 app.use("/assets/", express.static("assets"));
 app.use("/api/ping", (_, res) => res.status(200).send({ msg: "Pong", version: global.VERSION }));
 
