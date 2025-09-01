@@ -82,7 +82,7 @@ const CRYPTO_CURRENCY_NAMES = {
 };
 
 // sourced from https://gist.github.com/thor2/039f340e3482a1a319066e946dc71914#file-symbols-csv
-const STOCK_CURRENCIES = ["MMM", "ABT", "ABBV", "ABMD", "ACN", "ATVI", "ADBE", "AMD",  "AAP",  "AES",  "AFL",  "A",  "APD", "AKAM", "ALK", "ALB",
+const STOCK_CURRENCIES = ["MMM", "ARR", "ABT", "ABBV", "ABMD", "ACN", "ATVI", "ADBE", "AMD",  "AAP",  "AES",  "AFL",  "A",  "APD", "AKAM", "ALK", "ALB",
     "ARE", "ALXN", "ALGN", "ALLE", "AGN", "ADS", "LNT", "ALL", "GOOGL", "GOOG", "MO", "AMZN", "AMCR", "AEE", "AAL", "AEP", "AXP", "AIG", "AMT",
     "AWK", "AMP", "ABC", "AME", "AMGN",  "APH", "ADI", "ANSS", "ANTM", "AON", "AOS", "APA", "AIV", "AAPL", "AMAT", "APTV", "ADM", "ARNC", "ANET",
     "AJG", "AIZ", "ATO", "T", "ADSK", "ADP", "AZO", "AVB", "AVY", "BKR", "BLL", "BAC", "BK", "BAX", "BDX", "BRK.B", "BBY", "BIIB", "BLK", "BA",
@@ -123,5 +123,13 @@ const DEFAULT_CURRENCIES = {
     [ASSET_TYPE.CRYPTO]: ["BTC", "ETH", "LTC", "XRP", "ADA"]
 }
 
+const PAYMENT_FREQUENCY = {
+    MONTHLY: "monthly",
+    BIMONTHLY: "bi-monthly",
+    QUARTERLY: "quarterly",
+    SEMIANNUALLY: "semi-annually",
+    ANNUALLY: "annually"
+};
+
 module.exports = { ASSET_TYPE, FIAT_CURRENCIES, ASSET_CURRENCIES, STOCK_CURRENCIES, CRYPTO_CURRENCIES,
-    DEFAULT_CATEGORIES, CRYPTO_CURRENCY_NAMES, DEFAULT_CURRENCIES };
+    DEFAULT_CATEGORIES, CRYPTO_CURRENCY_NAMES, DEFAULT_CURRENCIES, PAYMENT_FREQUENCY };

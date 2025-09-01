@@ -24,6 +24,7 @@ const balanceRouter = require("./routes/balance.js");
 const transactionRouter = require("./routes/transaction.js");
 const listRouter = require("./routes/list.js");
 const priceRouter = require("./routes/price.js");
+const calculatorRouter = require("./routes/calculator.js");
 const mcpRouter = require("./routes/mcp.js");
 
 const app = express();
@@ -39,6 +40,7 @@ app.use("/api/transaction", transactionRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/api/list", listRouter);
 app.use("/api/price", priceRouter);
+app.use("/api/calculator", calculatorRouter);
 app.use("/mcp", mcpRouter);
 
 if (global.env === "test") {
