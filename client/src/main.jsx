@@ -9,6 +9,7 @@ import Error from "./Error";
 
 import { Notification, NotificationProvider } from "./component/Notification";
 import { AppProvider } from "./AppContext";
+import Calculators from "./Calculators.jsx";
 
 const router = createBrowserRouter([
     {
@@ -19,6 +20,11 @@ const router = createBrowserRouter([
     {
         path: "/history",
         element: <TransactionHistory />,
+        errorElement: <Error />,
+    },
+    {
+        path: "/calculators",
+        element: <Calculators />,
         errorElement: <Error />,
     }
 ]);

@@ -11,19 +11,19 @@ export const NavBar = () => {
         },
         {
             id: 2,
-            name: "Income/Expense",
-            route: "#incomeexpense"
-        },
-        {
-            id: 3,
             name: "History",
             route: "/history"
         },
         {
-            id: 4,
+            id: 3,
             name: "Add Transaction",
             route: "/#add-transaction"
-        }
+        },
+        {
+            id: 4,
+            name: "Calculators",
+            route: "/calculators"
+        },
     ];
     return (
         <div className="px-4 py-5 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8">
