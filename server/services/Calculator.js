@@ -25,7 +25,7 @@ const calculateCompound = ({ initial, interest, contribute, months, frequency })
 
     if (initial === 0 && contribute === 0) {
         logger.info("User provided no investment or contribution value, returning 0 values");
-        return { success: true, code: 200, profit: 0, balance: 0, totalContrib: 0 };
+        return { success: true, code: 200, profit: 0, balance: 0, totalContrib: 0, history: [] };
     }
 
     if (!Object.values(PAYMENT_FREQUENCY).includes(frequency)) {
@@ -43,6 +43,8 @@ const calculateCompound = ({ initial, interest, contribute, months, frequency })
         return { success: false, code: 400, msg: "Invalid interest rate" };
     }
 
+    const history = [];
+
     let balance = initial;
     let totalContrib = 0;
     for (let i = 0; i < months; i+=frequencyJump[frequency]) {
@@ -50,14 +52,23 @@ const calculateCompound = ({ initial, interest, contribute, months, frequency })
             balance += contribute;
             totalContrib += contribute;
         }
-        balance += balance * interest;
+        const stepEarned = balance * interest;
+        balance += stepEarned;
+        history.push({
+            startBalance: toPrecision(balance - (i == 0 ? 0 : contribute) - stepEarned, 2),
+            balance: toPrecision(balance, 2),
+            totalContrib: toPrecision(totalContrib, 2),
+            profit: toPrecision(balance - totalContrib - initial, 2),
+            stepEarned: toPrecision(stepEarned, 2)
+        });
     }
 
     return {
         success: true, code: 200,
         balance: toPrecision(balance, 2),
         profit: toPrecision(balance - totalContrib - initial, 2),
-        totalContrib: toPrecision(totalContrib, 2)
+        totalContrib: toPrecision(totalContrib, 2),
+        history
     }
 };
 
