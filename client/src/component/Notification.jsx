@@ -55,7 +55,7 @@ const Notification = () => {
     ];
 
     return (
-        open ? <div ref={componentRef} className="max-w-xs border rounded-md shadow-lg bg-gray-800 border-gray-700 absolute bottom-2 left-2 z-20" role="alert">
+        open ? <div ref={componentRef} className="max-w-xs border rounded-md shadow-lg bg-gray-800 border-gray-700 fixed bottom-2 left-2 z-20" role="alert">
             <div className="flex p-4">
                 <div className="flex-shrink-0">
                     {icons[type]()}

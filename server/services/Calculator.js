@@ -12,6 +12,8 @@ const frequencyJump = {
     [PAYMENT_FREQUENCY.ANNUALLY]: 12,
 };
 
+// TODO: test value of the history property in the response?
+
 const calculateCompound = ({ initial, interest, contribute, months, frequency }) => {
     if (!isNumber(initial)) {
         logger.warn("User provided a bad investment value: " + initial);
@@ -68,7 +70,7 @@ const calculateCompound = ({ initial, interest, contribute, months, frequency })
         balance: toPrecision(balance, 2),
         profit: toPrecision(balance - totalContrib - initial, 2),
         totalContrib: toPrecision(totalContrib, 2),
-        history
+        history, initial
     }
 };
 

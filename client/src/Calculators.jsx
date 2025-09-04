@@ -51,10 +51,21 @@ const getOptions = title => (
 function Calculators() {
     const [interestCalculatorData, setInterestCalculatorData] = useState({
         initial: 0, incremental: 0, period: 1, rate: 1, frequency: "monthly", // user values
-        balance: 0, profit: 0, contributed: 0, history: [] // server response from calculation
+        balance: 0, profit: 0, contributed: 0, responseInitial: 0, history: [] // server response from calculation
+    });
+    const [stockCalculatorData, setStockCalculatorData] = useState({
+        initial: "", shares: "", symbol: "", price: "", incremental: 0, divAmount: .5, period: 1, frequency: "monthly", // user values
+        balance: 0, profit: 0, contributed: 0, responseInitial: 0, history: [] // server response from calculation
     });
 
     const [compoundInterestPie, setCompoundInterestPie] = useState({
+        labels: ["Initial Deposit", "Total Contributions", "Interest"],
+        datasets: [{
+            data: [1, 0, 0],
+            backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"],
+        }]
+    });
+    const [stockDividendPie, setStockDividendPie] = useState({
         labels: ["Initial Deposit", "Total Contributions", "Interest"],
         datasets: [{
             data: [1, 0, 0],
@@ -80,8 +91,27 @@ function Calculators() {
             }
         ]
     });
+    const [stockDividendLine, setStockDividendLine] = useState({
+        labels: ["0"],
+        datasets: [
+            {
+                data: [0],
+                label: "contributions",
+                backgroundColor: "#ffdf20"
+            }, {
+                data: [0],
+                label: "interest",
+                backgroundColor: "#1447e6"
+            }, {
+                data: [0],
+                label: "balance",
+                backgroundColor: "#9ae600"
+            }
+        ]
+    });
 
     const [interestCalcActiveTab, setInterestCalcActiveTab] = useState("1");
+    const [dividendCalcActiveTab, setDividendCalcActiveTab] = useState("1");
 
     const { display: displayNotification } = useNotificationContext();
 
@@ -108,10 +138,6 @@ function Calculators() {
             return;
         }
 
-        if (interestCalculatorData.rate === 0) {
-            displayNotification({ message: "Rate is 0, expect erroneous results", type: NotificationType.Warning });
-        }
-
         request({
             url: "/api/calculator/compound-interest",
             method: "POST",
@@ -129,7 +155,8 @@ function Calculators() {
                         balance: json.balance,
                         profit: json.profit,
                         contributed: json.totalContrib,
-                        history: json.history
+                        history: json.history,
+                        responseInitial: json.initial
                     });
                     setCompoundInterestPie({
                         datasets: [{
@@ -162,7 +189,95 @@ function Calculators() {
                         ]
                     });
                 } else {
-                    displayNotification({ message: "Unable to add transaction: " + msg, type: NotificationType.Error });
+                    displayNotification({ message: "Unable to calculate compound interest: " + msg, type: NotificationType.Error });
+                }
+            }
+        });
+    };
+
+    const calculateStockDividend = e => {
+        e.preventDefault();
+
+        if (!stockCalculatorData.initial && !stockCalculatorData.shares) {
+            displayNotification({ message: "Missing initial deposit (shares or usd)", type: NotificationType.Error });
+            return;
+        }
+
+        if (stockCalculatorData.incremental < 0) {
+            displayNotification({ message: "Contribution cannot be less 0", type: NotificationType.Error });
+            return;
+        }
+
+        if (stockCalculatorData.period < 1) {
+            displayNotification({ message: "Number of months cannot be less 1", type: NotificationType.Error });
+            return;
+        }
+
+        if (stockCalculatorData.divAmount < 0) {
+            displayNotification({ message: "Rate cannot be less than 0", type: NotificationType.Error });
+            return;
+        }
+
+        if (!stockCalculatorData.symbol && !stockCalculatorData.price) {
+            displayNotification({ message: "Must either have the stock price or symbol", type: NotificationType.Error });
+            return;
+        }
+
+        request({
+            url: "/api/calculator/compound-stock",
+            method: "POST",
+            body: JSON.stringify({
+                initial: stockCalculatorData.initial,
+                shares: stockCalculatorData.shares,
+                symbol: stockCalculatorData.symbol,
+                price: stockCalculatorData.price,
+                divAmount: stockCalculatorData.divAmount,
+                contribute: stockCalculatorData.incremental,
+                months: stockCalculatorData.period,
+                frequency: stockCalculatorData.frequency
+            }),
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    setStockCalculatorData({
+                        ...stockCalculatorData,
+                        balance: json.balance,
+                        profit: json.profit,
+                        contributed: json.totalContrib,
+                        history: json.history,
+                        responseInitial: json.initial
+                    });
+                    setStockDividendPie({
+                        datasets: [{
+                            data: [json.initial, json.totalContrib, json.profit],
+                            backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"]
+                        }],
+                        // These labels appear in the legend and in the tooltips when hovering different arcs
+                        labels: ["Initial Deposit", "Total Contributions", "Interest"]
+                    });
+
+                    setStockDividendLine({
+                        labels: json.history.map((_, i) => "Period " + (i + 1)),
+                        datasets: [
+                            {
+                                data: json.history.map(h => h.totalContrib),
+                                label: "contributions",
+                                backgroundColor: "#ffdf20",
+                                borderColor: "#ffdf20"
+                            }, {
+                                data: json.history.map(h => h.profit),
+                                label: "interest",
+                                backgroundColor: "#1447e6",
+                                borderColor: "#1447e6"
+                            }, {
+                                data: json.history.map(h => h.balance),
+                                label: "balance",
+                                backgroundColor: "#9ae600",
+                                borderColor: "#9ae600"
+                            }
+                        ]
+                    });
+                } else {
+                    displayNotification({ message: "Unable to calculate stock dividend: " + msg, type: NotificationType.Error });
                 }
             }
         });
@@ -176,9 +291,17 @@ function Calculators() {
         setInterestCalculatorData(newObject);
     };
 
-    const HistoryTable = ({ historyData }) =>
+    const enterStockCalculatorData = e => {
+        const { value } = e.target;
+        let newObject = {
+            ...stockCalculatorData,
+            [e.target.name]: e.target.type === "number" && value ? Number(value) : value };
+        setStockCalculatorData(newObject);
+    };
+
+    const HistoryTable = ({ historyData, calculator }) =>
         <div className="overflow-y-scroll overflow-x-scroll w-full mt-8">
-            <table className="text-left table-auto w-full text-lg border-2 border-slate-800 mb-2">
+            <table className="text-left table-auto w-full text-lg border-2 border-slate-800 mb-2" id={calculator + "-table"}>
                 <thead>
                     <tr className="bg-slate-800">
                         <th className="px-4 py-2">Period</th>
@@ -206,11 +329,11 @@ function Calculators() {
             </table>
         </div>;
 
-    const DetailTabs = () =>
+    const DetailTabs = ({ calculator, toggler, activeTab }) =>
         <div className="flex flex-row">
-            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => setInterestCalcActiveTab("0")}>
+            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("0")} id={calculator + "-line-tab"}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                    stroke={interestCalcActiveTab === "0" ? "#1447e6" : "white"} className="size-12">
+                    stroke={activeTab === "0" ? "#1447e6" : "white"} className="size-12">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125
                     1.125v6.75C7.5 20.496 6.996 21 6.374 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621
                     0 1.125.504 1.125 1.125v11.25c0 .621-.502 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5
@@ -219,17 +342,17 @@ function Calculators() {
                 </svg>
             </button>
 
-            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => setInterestCalcActiveTab("1")}>
+            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("1")} id={calculator + "-pie-tab"}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                    stroke={interestCalcActiveTab === "1" ? "#1447e6" : "white"} className="size-12">
+                    stroke={activeTab === "1" ? "#1447e6" : "white"} className="size-12">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
                 </svg>
             </button>
 
-            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => setInterestCalcActiveTab("2")}>
+            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("2")} id={calculator + "-table-tab"}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
-                    stroke={interestCalcActiveTab === "2" ? "#1447e6" : "white"} className="size-12">
+                    stroke={activeTab === "2" ? "#1447e6" : "white"} className="size-12">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375
                         19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0
                         12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.622-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1
@@ -247,9 +370,10 @@ function Calculators() {
         </div>;
 
     return (
-        <div className="place-items-center bg-slate-900 min-h-screen text-gray-300 md:px-4 w-full">
+        <div className="place-items-center bg-slate-900 min-h-screen text-gray-300 md:px-4 w-full pb-8 lg:pb-16">
             <NavBar/>
 
+            {/* Compound Interest Calculator */}
             <div className="w-3/4 mx-auto">
                 <h2 className="text-2xl text-slate-100 font-bold mb-12">Compound Interest Calculator</h2>
                 <section className="flex flex-col lg:flex-row">
@@ -306,8 +430,7 @@ function Calculators() {
                         <div className="mb-4 w-full md:w-3/4 mx-auto">
                             <label for="payment-frequency">Expected rate of return (per cycle)</label>
                             <select value={interestCalculatorData.frequency} onChange={enterInterestCalculatorData}
-                                name="frequency" required title="payment frequency"
-                                id="payment-frequency"
+                                name="frequency" required title="payment frequency" id="payment-frequency"
                                 className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
                                     focus:border-blue-500 focus:outline-none focus:ring mt-2 w-full">
                                 <option value="monthly">Monthly</option>
@@ -334,7 +457,7 @@ function Calculators() {
                                     <h3 className="text-lg mb-1">Estimated Future Balance</h3>
                                     <span className="text-4xl font-bold">{"$" + formatMoney(interestCalculatorData.balance)}</span>
                                 </div>
-                                <DetailTabs/>
+                                <DetailTabs calculator={"compound-interest"} toggler={setInterestCalcActiveTab} activeTab={interestCalcActiveTab} />
                             </div>
                             <hr className="text-slate-700 my-6"/>
                             <div className="flex flex-row justify-between mb-2">
@@ -347,15 +470,165 @@ function Calculators() {
                             </div>
                             <div className="flex flex-row justify-between">
                                 <span>Initial Deposit</span>
-                                <span className="font-bold">{"$" + formatMoney(interestCalculatorData.initial)}</span>
+                                <span className="font-bold">{"$" + formatMoney(interestCalculatorData.responseInitial)}</span>
                             </div>
+                            {/* TODO: have the server return the stock price to display in this breakdown */}
                         </div>
 
                         { interestCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
                             <Doughnut options={getOptions("Savings breakdown")} data={compoundInterestPie}/>
                         </div> }
                         { interestCalcActiveTab === "0" && <Line options={getOptions("Growth chart")} data={compoundInterestLine}/> }
-                        { interestCalcActiveTab === "2" && <HistoryTable historyData={interestCalculatorData.history}/> }
+                        { interestCalcActiveTab === "2" &&
+                            <HistoryTable historyData={interestCalculatorData.history} calculator={"compound-interest"}/> }
+                    </div>
+                </section>
+            </div>
+
+            <hr className="text-slate-700 my-12 w-3/4 mx-auto"/>
+
+            {/* Stock Dividend Calculator */}
+            <div className="w-3/4 mx-auto">
+                <h2 className="text-2xl text-slate-100 font-bold mb-12">Stock Dividend Calculator</h2>
+                <section className="flex flex-col lg:flex-row">
+                    <form className="w-full lg:w-1/4 flex flex-col px-2 pb-6 mb-6 lg:pb-0 lg:mb-0 border-b-1 lg:border-b-0 lg:border-r-1 border-slate-700">
+                        <div className="mb-2 w-full md:w-3/4 mx-auto">
+                            <label for="initial-deposit-stock">Initial Deposit (in USD)</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={stockCalculatorData.initial} onChange={enterStockCalculatorData}
+                                    name="initial" id="initial-deposit-stock" step={50} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="initial deposit in usd" />
+                            </div>
+                        </div>
+
+                        <span className="block my-2 md:w-3/4 mx-auto font-bold">OR</span>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="initial-shares">Initial Shares</label>
+                            <input
+                                type="number" value={stockCalculatorData.shares} onChange={enterStockCalculatorData}
+                                name="shares" id="initial-shares" step={10} min={0}
+                                className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                    focus:border-blue-500 focus:outline-none focus:ring w-full mt-2"
+                                title="initial deposit in usd" />
+                        </div>
+
+                        <hr className="text-slate-700 my-8 w-3/4 mx-auto"/>
+
+                        {/* TODO: Make this a drop down select and auto populate the price? */}
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="stock-symbol">Stock Symbol (optional if you set price)</label>
+                            <input
+                                type="text" value={stockCalculatorData.symbol} onChange={enterStockCalculatorData}
+                                name="symbol" id="stock-symbol"
+                                className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                    focus:border-blue-500 focus:outline-none focus:ring w-full mt-2" title="stock symbol" />
+                        </div>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="stock-price">Stock Price (optional)</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={stockCalculatorData.price} onChange={enterStockCalculatorData}
+                                    name="price" id="stock-price" step={50} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="initial deposit in usd" />
+                            </div>
+                        </div>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="div-rate">Dividend payout per share</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={stockCalculatorData.divAmount} onChange={enterStockCalculatorData}
+                                    name="divAmount" id="div-rate" step={0.1} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="Dividend payout per share" />
+                            </div>
+                        </div>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="incremental-stock">Contribution Amount (per cycle in USD)</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={stockCalculatorData.incremental} onChange={enterStockCalculatorData}
+                                    name="incremental" id="incremental-stock-amount" step={50} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="extra amount contributed per cycle"/>
+                            </div>
+                        </div>
+
+                        <div className="mb-4 flex flex-col w-full md:w-3/4 mx-auto">
+                            <label for="period-stock">How many months will you save for?</label>
+                            <input
+                                type="number" value={stockCalculatorData.period} onChange={enterStockCalculatorData}
+                                name="period" id="period-stock" step={1} min={1}
+                                className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                    focus:border-blue-500 focus:outline-none focus:ring mt-2" title="total period"/>
+                        </div>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="dividend-frequency">Expected rate of return (per cycle)</label>
+                            <select value={stockCalculatorData.frequency} onChange={enterStockCalculatorData}
+                                name="frequency" required title="payment frequency" id="dividend-frequency"
+                                className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                    focus:border-blue-500 focus:outline-none focus:ring mt-2 w-full">
+                                <option value="monthly">Monthly</option>
+                                <option value="bi-monthly">Bi-Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="semi-annually">SemiAnnually</option>
+                                <option value="annually">Annually</option>
+                            </select>
+                        </div>
+
+                        <button
+                            className="px-4 py-2 text-sm font-bold tracking-wide text-white capitalize transition-colors duration-200
+                                transform bg-blue-700 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 hover:cursor-pointer
+                                w-full md:w-3/4 mx-auto"
+                            onClick={calculateStockDividend} id="calculate-compound-stock">
+                            Calculate
+                        </button>
+                    </form>
+
+                    <div className="w-full lg:w-2/3 mx-4 p-2 text-slate-100">
+                        <div>
+                            <div className="flex flex-row justify-between items-end">
+                                <div>
+                                    <h3 className="text-lg mb-1">Estimated Future Balance</h3>
+                                    <span className="text-4xl font-bold">{"$" + formatMoney(stockCalculatorData.balance)}</span>
+                                </div>
+                                <DetailTabs calculator="dividend" toggler={setDividendCalcActiveTab} activeTab={dividendCalcActiveTab} />
+                            </div>
+                            <hr className="text-slate-700 my-6"/>
+                            <div className="flex flex-row justify-between mb-2">
+                                <span>Total Contributions</span>
+                                <span className="font-bold">{"$" + formatMoney(stockCalculatorData.contributed)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between mb-2">
+                                <span>Dividends Earned</span>
+                                <span className="font-bold">{"$" + formatMoney(stockCalculatorData.profit)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between">
+                                <span>Initial Deposit</span>
+                                <span className="font-bold">{"$" + formatMoney(stockCalculatorData.responseInitial)}</span>
+                            </div>
+                        </div>
+
+                        { dividendCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
+                            <Doughnut options={getOptions("Savings breakdown")} data={stockDividendPie}/>
+                        </div> }
+                        { dividendCalcActiveTab === "0" && <Line options={getOptions("Growth chart")} data={stockDividendLine}/> }
+                        { dividendCalcActiveTab === "2" && <HistoryTable historyData={stockCalculatorData.history} calculator="dividend"/> }
                     </div>
                 </section>
             </div>
