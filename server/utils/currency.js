@@ -198,7 +198,7 @@ const getStockPriceGoogle = async (symbol, exchange=exchanges[0]) => {
 
     if (!exchangeMatch || !priceMatch) {
         // TODO: probably a better way to iterate exchanges
-        logger.error("getStockPriceGoogle - Stock price request with " + exchange + " did not return expected data, will try next exchange if available");
+        logger.error("getStockPriceGoogle - Price request with " + exchange + " did not return expected data, trying next exchange if available");
         if (exchange === exchanges.slice(-1)[0]) {
             logger.error("getStockPriceGoogle - Not available, giving up; Could not find stock price for: " + symbol);
             return null;

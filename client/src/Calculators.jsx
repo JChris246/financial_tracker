@@ -378,7 +378,8 @@ function Calculators() {
             <div className="w-3/4 mx-auto">
                 <h2 className="text-2xl text-slate-100 font-bold mb-12">Compound Interest Calculator</h2>
                 <section className="flex flex-col lg:flex-row">
-                    <form className="w-full lg:w-1/4 flex flex-col px-2 pb-6 mb-6 lg:pb-0 lg:mb-0 border-b-1 lg:border-b-0 lg:border-r-1 border-slate-700">
+                    <form className="w-full lg:w-1/4 flex flex-col px-2 pb-6 mb-6 lg:pb-0 lg:mb-0 border-b-1
+                        lg:border-b-0 lg:border-r-1 border-slate-700">
                         <div className="mb-4 w-full md:w-3/4 mx-auto">
                             <label for="initial">Initial Deposit</label>
                             <div className="relative mt-2">
@@ -491,7 +492,8 @@ function Calculators() {
             <div className="w-3/4 mx-auto">
                 <h2 className="text-2xl text-slate-100 font-bold mb-12">Stock Dividend Calculator</h2>
                 <section className="flex flex-col lg:flex-row">
-                    <form className="w-full lg:w-1/4 flex flex-col px-2 pb-6 mb-6 lg:pb-0 lg:mb-0 border-b-1 lg:border-b-0 lg:border-r-1 border-slate-700">
+                    <form className="w-full lg:w-1/4 flex flex-col px-2 pb-6 mb-6 lg:pb-0 lg:mb-0 border-b-1
+                        lg:border-b-0 lg:border-r-1 border-slate-700">
                         <div className="mb-2 w-full md:w-3/4 mx-auto">
                             <label for="initial-deposit-stock">Initial Deposit (in USD)</label>
                             <div className="relative mt-2">
