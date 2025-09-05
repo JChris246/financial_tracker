@@ -55,7 +55,7 @@ function Calculators() {
     });
     const [stockCalculatorData, setStockCalculatorData] = useState({
         initial: "", shares: "", symbol: "", price: "", incremental: 0, divAmount: .5, period: 1, frequency: "monthly", // user values
-        balance: 0, profit: 0, contributed: 0, responseInitial: 0, history: [] // server response from calculation
+        balance: 0, profit: 0, contributed: 0, responseInitial: 0, responsePrice: 0, history: [] // server response from calculation
     });
 
     const [compoundInterestPie, setCompoundInterestPie] = useState({
@@ -244,7 +244,8 @@ function Calculators() {
                         profit: json.profit,
                         contributed: json.totalContrib,
                         history: json.history,
-                        responseInitial: json.initial
+                        responseInitial: json.initial,
+                        responsePrice: json.price
                     });
                     setStockDividendPie({
                         datasets: [{
@@ -330,8 +331,8 @@ function Calculators() {
         </div>;
 
     const DetailTabs = ({ calculator, toggler, activeTab }) =>
-        <div className="flex flex-row">
-            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("0")} id={calculator + "-line-tab"}>
+        <div className="flex flex-row w-fit">
+            <button className="rounded-lg md:px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("0")} id={calculator + "-line-tab"}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
                     stroke={activeTab === "0" ? "#1447e6" : "white"} className="size-12">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125
@@ -350,7 +351,7 @@ function Calculators() {
                 </svg>
             </button>
 
-            <button className="rounded-lg px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("2")} id={calculator + "-table-tab"}>
+            <button className="rounded-lg md:px-4 flex w-full md:w-fit cursor-pointer" onClick={() => toggler("2")} id={calculator + "-table-tab"}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}
                     stroke={activeTab === "2" ? "#1447e6" : "white"} className="size-12">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375
@@ -452,8 +453,8 @@ function Calculators() {
 
                     <div className="w-full lg:w-2/3 mx-4 p-2 text-slate-100">
                         <div>
-                            <div className="flex flex-row justify-between items-end">
-                                <div>
+                            <div className="flex flex-col md:flex-row justify-between md:items-end">
+                                <div className="mb-8 md:mb-0">
                                     <h3 className="text-lg mb-1">Estimated Future Balance</h3>
                                     <span className="text-4xl font-bold">{"$" + formatMoney(interestCalculatorData.balance)}</span>
                                 </div>
@@ -472,7 +473,6 @@ function Calculators() {
                                 <span>Initial Deposit</span>
                                 <span className="font-bold">{"$" + formatMoney(interestCalculatorData.responseInitial)}</span>
                             </div>
-                            {/* TODO: have the server return the stock price to display in this breakdown */}
                         </div>
 
                         { interestCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
@@ -602,8 +602,8 @@ function Calculators() {
 
                     <div className="w-full lg:w-2/3 mx-4 p-2 text-slate-100">
                         <div>
-                            <div className="flex flex-row justify-between items-end">
-                                <div>
+                            <div className="flex flex-col md:flex-row justify-between md:items-end">
+                                <div className="mb-8 md:mb-0">
                                     <h3 className="text-lg mb-1">Estimated Future Balance</h3>
                                     <span className="text-4xl font-bold">{"$" + formatMoney(stockCalculatorData.balance)}</span>
                                 </div>
@@ -618,9 +618,13 @@ function Calculators() {
                                 <span>Dividends Earned</span>
                                 <span className="font-bold">{"$" + formatMoney(stockCalculatorData.profit)}</span>
                             </div>
-                            <div className="flex flex-row justify-between">
+                            <div className="flex flex-row justify-between mb-2">
                                 <span>Initial Deposit</span>
                                 <span className="font-bold">{"$" + formatMoney(stockCalculatorData.responseInitial)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between">
+                                <span>Stock Price</span>
+                                <span className="font-bold">{"$" + formatMoney(stockCalculatorData.responsePrice)}</span>
                             </div>
                         </div>
 

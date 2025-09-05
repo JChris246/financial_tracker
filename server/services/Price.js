@@ -3,6 +3,9 @@ const { isDefined, toPrecision } = require("../utils/utils");
 
 const { getDatabase } = require("../db/index");
 const { ASSET_TYPE, CRYPTO_CURRENCIES, DEFAULT_CURRENCIES, STOCK_CURRENCIES } = require("../utils/constants");
+const { getStockPriceGoogle, getConversionCoinGecko } = require("../utils/currency");
+
+const FIAT_BASE = "USD"; // TODO: this should have been user configured
 
 module.exports.getCurrencyPrice = async (params) => {
     const { assetType, currency } = params;
@@ -21,7 +24,15 @@ module.exports.getCurrencyPrice = async (params) => {
                 logger.warn("User tried to get price for an invalid stock: " + currency);
                 return { msg: "Stock not supported", success: false };
             }
-            // TODO: if we don't have a cached value, fetch it?
+
+            // if we don't have a cached value, fetch it and update cache
+            if (!isDefined(cache.stockPrices[currency.toUpperCase()])) {
+                logger.info("Cache miss for stock price - " + currency.toUpperCase());
+                cache.stockPrices[currency.toUpperCase()] = await getStockPriceGoogle(currency.toUpperCase());
+                db.saveCache(cache);
+                logger.info("Updated cache for stock price " + currency.toUpperCase());
+            }
+
             return { success: true, response: { [currency]: toPrecision(cache.stockPrices[currency.toUpperCase()]) } };
         }
         if (assetType === ASSET_TYPE.CRYPTO) {
@@ -29,7 +40,16 @@ module.exports.getCurrencyPrice = async (params) => {
                 logger.warn("User tried to get price for an invalid crypto currency: " + currency);
                 return { msg: "Crypto currency not supported", success: false };
             }
-            // TODO: if we don't have a cached value, fetch it?
+
+            // if we don't have a cached value, fetch it and update cache
+            if (!isDefined(cache.cryptoConversions[currency.toUpperCase()])) {
+                logger.info("Cache miss for crypto price - " + currency.toUpperCase());
+                const result = await getConversionCoinGecko(currency.toUpperCase(), [FIAT_BASE]);
+                cache.cryptoConversions[currency.toUpperCase()] = result[currency.toUpperCase()][FIAT_BASE.toLowerCase()];
+                db.saveCache(cache);
+                logger.info("Updated cache for crypto price " + currency.toUpperCase());
+            }
+
             return { success: true, response: { [currency.toUpperCase()]: toPrecision(cache.cryptoConversions[currency.toUpperCase()]) } };
         }
     }

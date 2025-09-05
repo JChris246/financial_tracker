@@ -161,6 +161,7 @@ describe("currency", () => {
             expect(result.balance).toBe(output.balance);
             expect(result.profit).toBe(output.profit);
             expect(result.totalContrib).toBe(output.totalContrib);
+            expect(result.price).toBeGreaterThan(0);
         });
 
         test.each(badCases)("should return failure value with appropriate message for bad cases: %s", async ({ input, expectedMsg }) => {

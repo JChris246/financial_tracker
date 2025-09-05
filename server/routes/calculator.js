@@ -12,9 +12,9 @@ router
         }
     })
     .post("/compound-stock", async (req, res) =>  {
-        const { success, code, balance, profit, totalContrib, history, initial, msg } = await service.calculateStockCompound(req.body);
+        const { success, code, balance, profit, totalContrib, history, initial, price, msg } = await service.calculateStockCompound(req.body);
         if (success) {
-            res.status(200).send({ balance, profit, totalContrib, initial, history });
+            res.status(200).send({ balance, profit, totalContrib, initial, price, history });
         } else {
             res.status(code).send({ msg });
         }

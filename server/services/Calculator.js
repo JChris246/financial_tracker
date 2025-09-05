@@ -94,7 +94,7 @@ module.exports.calculateStockCompound = async ({ shares, initial, symbol, price,
 
     if (!isNumber(price)) {
         logger.info("Getting stock price for " + symbol);
-        const result = await getCurrencyPrice({ assetType: ASSET_TYPE.STOCK, currency: symbol }); // TODO: update function to search price if not in cache
+        const result = await getCurrencyPrice({ assetType: ASSET_TYPE.STOCK, currency: symbol });
         if (!result.success) {
             logger.error("An error occurred getting stock price to do compound calculation: " + result.msg);
             return { success: false, code: 500, msg: result.msg };
@@ -119,5 +119,8 @@ module.exports.calculateStockCompound = async ({ shares, initial, symbol, price,
         logger.info("Using stock value")
     }
 
-    return calculateCompound({ initial, contribute, interest: divAmount / price, months, frequency });
+    return {
+        price,
+        ...calculateCompound({ initial, contribute, interest: divAmount / price, months, frequency })
+    };
 };
