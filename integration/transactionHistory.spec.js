@@ -10,7 +10,7 @@ test.afterEach(async () => {
 });
 
 test("has title", async ({ page }) => {
-    await pageSetup({ page });
+    await pageSetup({ page, pathname: "/history" });
 
     await expect(page.locator("[data-test-id=\"header-title\"]")).toHaveText(/Finance Tracker/);
 });

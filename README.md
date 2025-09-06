@@ -14,6 +14,7 @@ Today the features include:
 - 👀 At a glance prices for Stocks and Cryptocurrencies
 - ⚖️ Tracking asset balances
 - 📊 Charts illustrating asset allocation
+- 🧮 Calculators for various estimates
 
 *🚧 This project is still under active development; breaking changes are not unlikely 🚧*
 
@@ -63,6 +64,8 @@ The app should then be accessible on port 3040 (you can change this in either co
 
 ![Import transactions](previews/import_transaction.png)
 
+![Calculators](previews/desktop_calculators.png)
+
 ## 🧪 Testing
 
 Currently, automated testing is bit of a mess 🫣, but the existing setup should be able to cover some of the main scenarios:
@@ -105,6 +108,8 @@ npm run test:e2e
 - [x] dockerize the app
 - [x] implement sqlite db option
 - [x] add UI to allow downloading transactions as csv or md table
+- [ ] allow exporting calculator results to pdf
+- [ ] add more calculators for mortgages and car loans
 
 ## ⛓️‍💥 Known Limitations
 

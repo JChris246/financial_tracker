@@ -3,9 +3,11 @@ const { FIAT_CURRENCIES, CRYPTO_CURRENCY_NAMES, STOCK_CURRENCIES } = require("./
 
 const logger = require("../logger").setup();
 
+const exchanges = ["NASDAQ", "NYSE"];
+
 const GOOGLE_URL = "https://www.google.com";
 const GOOGLE_FINANCE_URL_PATH = "/finance/quote/{0}-{1}"; // this can work for fiat and crypto
-const GOOGLE_STOCK_URL_PATH = "/finance/quote/{0}:NASDAQ";
+const GOOGLE_STOCK_URL_PATH = "/finance/quote/{0}:{1}";
 const COIN_GECKO_URL = "https://api.coingecko.com"
 const COIN_GECKO_API_PATH = "/api/v3/simple/price?ids={0}&vs_currencies={1}"
 const YAHOO_FINANCE_URL = "https://finance.yahoo.com"
@@ -173,31 +175,36 @@ const getYahooFinanceInfo = async (symbol, retry=0) => {
     };
 }
 
-const getStockPriceGoogle = async (symbol, retry=3) => {
+const getStockPriceGoogle = async (symbol, exchange=exchanges[0]) => {
     // this doubles as ssrf protection
     if (!STOCK_CURRENCIES.includes(symbol.toUpperCase())) {
         logger.error("getStockPriceGoogle - Invalid stock symbol: " + symbol);
         return null;
     }
 
-    const { data, statusCode } = await request({ site: GOOGLE_URL, path: format(GOOGLE_STOCK_URL_PATH, [symbol]), method: "GET" });
-
+    let { data, statusCode } = await request({ site: GOOGLE_URL, path: format(GOOGLE_STOCK_URL_PATH, [symbol, exchange]), method: "GET" });
     if (statusCode !== 200) {
-        logger.error("getStockPriceGoogle - Stock price request failed with status code: " + statusCode);
-        return null;
+        logger.error("getStockPriceGoogle - Stock price request with " + exchange + " failed with status code: " + statusCode);
+
+        // TODO: probably a better way to iterate exchanges
+        if (exchange === exchanges.slice(-1)[0]) {
+            return null;
+        }
+        return getStockPriceGoogle(symbol, exchanges[1]);
     }
 
     // should I validate for this?: data-exchange="NASDAQ"
     const [exchangeMatch, priceMatch] = [data.match(/data-exchange="([a-zA-Z]+)"/), data.match(/data-last-price="([0-9.]+)"/)];
 
     if (!exchangeMatch || !priceMatch) {
-        if (retry > 0) {
-            logger.warn("getStockPriceGoogle - Could not find stock price for: " + symbol + " - retrying");
-            await sleep(2000);
-            return getStockPriceGoogle(symbol, retry - 1);
+        // TODO: probably a better way to iterate exchanges
+        logger.error("getStockPriceGoogle - Price request with " + exchange + " did not return expected data, trying next exchange if available");
+        if (exchange === exchanges.slice(-1)[0]) {
+            logger.error("getStockPriceGoogle - Not available, giving up; Could not find stock price for: " + symbol);
+            return null;
         }
-        logger.error("getStockPriceGoogle - Could not find stock price for: " + symbol);
-        return null;
+
+        return getStockPriceGoogle(symbol, exchanges[1]);
     }
 
     if (exchangeMatch.length < 2 || priceMatch.length < 2) {
