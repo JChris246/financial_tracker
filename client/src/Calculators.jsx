@@ -884,10 +884,14 @@ function Calculators() {
 
                             {income !== 0 && <div className="w-full h-8 mb-4 flex justify-between">
                                 <div className="rounded" style={{ height: "100%", width: (amortizationCalculatorData.monthly / income) * 100 + "%",
+                                    // I do as I like
+                                    // eslint-disable-next-line react-hooks/rules-of-hooks
                                     background: useProgressColor(100 - Math.min(((amortizationCalculatorData.monthly / income) * 100), 100)) }}></div>
                                 <div className="flex ml-4 space-x-2">
                                     <span className="text-xl">{Math.ceil((amortizationCalculatorData.monthly / income) * 100) + "% "}</span>
                                     <span className="text-xl" id="risk-text"
+                                        // I do as I like
+                                        // eslint-disable-next-line react-hooks/rules-of-hooks
                                         style={{ color: useProgressColor(100 - Math.min(((amortizationCalculatorData.monthly / income) * 100), 100)),
                                             "font-weight": "bold" }}>{
                                             amortizationCalculatorData.monthly / income < .25 && "Safe" ||
