@@ -2,6 +2,7 @@
 import { test, expect } from "@playwright/test";
 
 import { pageSetup } from "./setup";
+import { addTransaction } from "./helpers";
 
 test.afterEach(async () => {
     // TODO: if this were running as an "integration" test, we'd need to not run this (or mock it)
@@ -20,21 +21,6 @@ test("has title", async ({ page }) => {
 
     await expect(page.locator("[data-test-id=\"header-title\"]")).toHaveText(/Finance Tracker/);
 });
-
-const addTransaction = async (page, value, assetType="cash", currency="eur", date) => {
-    const addTransactionButton = page.locator("#add-transaction-button");
-
-    await addTransactionButton.click();
-    await page.locator("#transaction-name").fill("Test Transaction"); // Increment a count for this?
-    await page.locator("#transaction-amount").fill(value);
-    await page.locator("#transaction-category").selectOption({ value: "other" });
-    await page.locator("#transaction-asset-type").selectOption({ value: assetType });
-    await page.locator("#transaction-currency").selectOption({ value: currency });
-    if (date) {
-        await page.locator("#transaction-date").fill(date);
-    }
-    await page.locator("#submit-transaction").click();
-};
 
 test.describe("add transaction", () => {
     test("should allow user to add a transaction with a custom category", async ({ page }) => {

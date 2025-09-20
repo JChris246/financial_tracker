@@ -19,5 +19,13 @@ router
             res.status(code).send({ msg });
         }
     })
+    .post("/amortization", async (req, res) =>  {
+        const { success, code, interestPaid, loanAmount, monthly, totalPaid, history, msg } = service.calculateAmortization(req.body);
+        if (success) {
+            res.status(200).send({ interestPaid, loanAmount, monthly, totalPaid, history });
+        } else {
+            res.status(code).send({ msg });
+        }
+    })
 
 module.exports = router;

@@ -121,7 +121,7 @@ describe("currency", () => {
 
         test("should return null for invalid symbol", async () => {
             // act
-            const result = await getStockPriceGoogle("DEFINITELYNOTASYMBOL", 1);
+            const result = await getStockPriceGoogle("DEFINITELYNOTASYMBOL");
 
             // assert
             expect(result).toBeNull();
