@@ -104,12 +104,12 @@ npm run test:e2e
 - [ ] ~~import transactions from csv~~ use AI to determine how to parse csv and md columns (when not mapped 1 to 1)?
 - [ ] add edit/delete button for each transaction in the transaction history table
 - [ ] display balance for individual assets (stocks, crypto and cash)
-- [ ] create mcp server endpoints
+- [ ] add more mcp server endpoints
 - [x] dockerize the app
 - [x] implement sqlite db option
 - [x] add UI to allow downloading transactions as csv or md table
 - [ ] allow exporting calculator results to pdf
-- [ ] add more calculators for mortgages and car loans
+- [x] add more calculators for mortgages and car loans
 
 ## ⛓️‍💥 Known Limitations
 
