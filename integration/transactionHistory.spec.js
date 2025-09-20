@@ -2,6 +2,7 @@
 import { test, expect } from "@playwright/test";
 
 import { pageSetup } from "./setup";
+import { addTransaction } from "./helpers";
 import * as fs from "fs";
 
 test.afterEach(async () => {
@@ -14,22 +15,6 @@ test("has title", async ({ page }) => {
 
     await expect(page.locator("[data-test-id=\"header-title\"]")).toHaveText(/Finance Tracker/);
 });
-
-// TODO: extract to helper?
-const addTransaction = async (page, value, assetType="cash", currency="eur", date, name="Test Transaction") => {
-    const addTransactionButton = page.locator("#add-transaction-button");
-
-    await addTransactionButton.click();
-    await page.locator("#transaction-name").fill(name);
-    await page.locator("#transaction-amount").fill(value);
-    await page.locator("#transaction-category").selectOption({ value: "other" });
-    await page.locator("#transaction-asset-type").selectOption({ value: assetType });
-    await page.locator("#transaction-currency").selectOption({ value: currency });
-    if (date) {
-        await page.locator("#transaction-date").fill(date);
-    }
-    await page.locator("#submit-transaction").click();
-};
 
 test.describe("transaction history", () => {
     test("transaction history page should contain no items if no transactions", async ({ page }) => {

@@ -1,7 +1,9 @@
 const logger = require("../logger").setup();
 const { getDatabase } = require("../db/index");
 const { ASSET_TYPE } = require("../utils/constants");
-const { sleep, positiveNumberOrZero, toPrecision } = require("../utils/utils");
+const { sleep, positiveNumberOrZero, toPrecision, parseDate } = require("../utils/utils");
+
+const DAY = 1000 * 60 * 60 * 24; // TODO: candidate for the constants file
 
 module.exports.getBalance = async () => {
     const db = await getDatabase();
@@ -108,3 +110,58 @@ const calculateCryptoAmount = (transaction) => {
     // convert to base fiat currency
     return transaction.amount * rate;
 }
+
+module.exports.getBalanceProgress = async (from, to) => {
+    const toDate = parseDate(to) || new Date(); // if "to date" not passed, use "up to now"
+    const fromDate = parseDate(from);
+
+    if (!fromDate) {
+        logger.warn("User passed an invalid start date: " + from);
+        return { success: false, msg: "Start date invalid", code: 400 };
+    }
+
+    const toTime = toDate.getTime();
+    const fromTime = fromDate.getTime();
+    if (toTime < fromTime) {
+        return { success: false, msg: "Start date cannot be after end date", code: 400 }
+    }
+
+    const db = await getDatabase();
+    const transactions = await db.getAllTransactions();
+
+    // TODO: starting with only cash balances ... update to calculator for stock and crypto
+
+    if (!transactions) {
+        logger.error("getBalanceProgress - An error occurred while getting balance progress: " + err);
+        return { success: false, msg: "An error occurred fetching transactions to summarize balance progress", code: 500 };
+    }
+
+    // TODO: update to set correct balance based on the period
+    // TODO: group by month to return total spend/income per month
+    const response = {
+        // balance: 0,
+        totalIncome: 0, totalSpend: 0, avgMonthlySpend: 0, avgMonthlyIncome: 0
+    };
+    if (transactions.length < 1) {
+        return { success: true, response, code: 200 };
+    }
+
+    for (let i = 0; i < transactions.length; i++) {
+        if (transactions[i].date >= fromTime && transactions[i].date <= toTime) {
+            if (transactions[i].assetType === ASSET_TYPE.CASH) {
+                const value = toPrecision(calculateCashAmount(transactions[i]), 4);
+                if (transactions[i].amount > 0) {
+                    response.totalIncome += value;
+                } else {
+                    response.totalSpend += value;
+                }
+            }
+        }
+    }
+
+    const duration = Math.ceil((toTime - fromTime) / DAY);
+    response.avgMonthlySpend = toPrecision((response.totalSpend / duration) * 30, 4);
+    response.avgMonthlyIncome = toPrecision((response.totalIncome / duration) * 30, 4);
+
+    return { success: true, response, code: 200 };
+};

@@ -111,4 +111,53 @@ describe("balance endpoints", () => {
             });
         });
     });
+
+    describe("Get Balance Progress", () => {
+        test("should return bad request if provided start time in the future of end date", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/balance/progress/2025-04-01/2024-09-01");
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toBe("Start date cannot be after end date");
+        });
+
+        test("should return bad request if provided start time is invalid", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/balance/progress/2025-04-01:10");
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toBe("Start date invalid");
+        });
+
+        test("should return correct balance when no transactions have occurred", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/balance/progress/2025-04-01/2025-06-30");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                totalIncome: 0, totalSpend: 0, avgMonthlySpend: 0, avgMonthlyIncome: 0
+            });
+        });
+
+        test("should return correct balance when no transactions have occurred", async () => {
+            // Arrange
+            await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2025-04-01" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: -10, date: "2025-04-02" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 3", amount: -10, date: "2025-05-03" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 4", amount: 60, date: "2025-05-04" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 5", amount: 20, date: "2025-06-07" });
+
+            // Act
+            const response = await superTestRequest.get("/api/balance/progress/2025-04-01/2025-06-30");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                totalIncome: 90, totalSpend: -20, avgMonthlySpend: -6.6667, avgMonthlyIncome: 30
+            });
+        });
+    });
 });

@@ -6,7 +6,8 @@ import { NavBar } from "./component/NavBar";
 
 import { NotificationType, useNotificationContext } from "./component/Notification";
 import { request } from "./utils/Fetch";
-import { formatMoney } from "./utils/utils";
+import { formatDate, formatMoney, DATE_TYPE } from "./utils/utils";
+import { useProgressColor } from "./utils/useProgressColor";
 
 import {
     Chart as ChartJS,
@@ -57,6 +58,11 @@ function Calculators() {
         initial: "", shares: "", symbol: "", price: "", incremental: 0, divAmount: .5, period: 1, frequency: "monthly", // user values
         balance: 0, profit: 0, contributed: 0, responseInitial: 0, responsePrice: 0, history: [] // server response from calculation
     });
+    const [amortizationCalculatorData, setAmortizationCalculatorData] = useState({
+        deposit: 0, price: 0, rate: 0, period: 0, // user values
+        interestPaid: 0, loanAmount: 0, monthly: 0, totalPaid: 0, history: [], // server response from calculation
+    });
+    const [income, setIncome] = useState(0);
 
     const [compoundInterestPie, setCompoundInterestPie] = useState({
         labels: ["Initial Deposit", "Total Contributions", "Interest"],
@@ -70,6 +76,13 @@ function Calculators() {
         datasets: [{
             data: [1, 0, 0],
             backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"],
+        }]
+    });
+    const [amortizationPie, setAmortizationPie] = useState({
+        labels: ["Loan Amount", "Interest", "Deposit"],
+        datasets: [{
+            data: [1, 0, 0, 0],
+            backgroundColor: ["#9ae600", "#1447e6", "#ffdf20"],
         }]
     });
 
@@ -109,9 +122,28 @@ function Calculators() {
             }
         ]
     });
+    const [amortizationLine, setAmortizationLine] = useState({
+        labels: ["0"],
+        datasets: [
+            {
+                data: [0],
+                label: "principal paid",
+                backgroundColor: "#ffdf20"
+            }, {
+                data: [0],
+                label: "interest paid",
+                backgroundColor: "#1447e6"
+            }, {
+                data: [0],
+                label: "loan balance",
+                backgroundColor: "#9ae600"
+            }
+        ]
+    });
 
     const [interestCalcActiveTab, setInterestCalcActiveTab] = useState("1");
     const [dividendCalcActiveTab, setDividendCalcActiveTab] = useState("1");
+    const [amortizationCalcActiveTab, setAmortizationCalcActiveTab] = useState("1");
 
     const { display: displayNotification } = useNotificationContext();
 
@@ -284,6 +316,100 @@ function Calculators() {
         });
     };
 
+    const calculateAmortization = e => {
+        e.preventDefault();
+
+        if (amortizationCalculatorData.deposit < 0) {
+            displayNotification({ message: "Deposit cannot be less 0", type: NotificationType.Error });
+            return;
+        }
+
+        if (amortizationCalculatorData.price < 0) {
+            displayNotification({ message: "Price cannot be less 0", type: NotificationType.Error });
+            return;
+        }
+
+        if (amortizationCalculatorData.period < 1) {
+            displayNotification({ message: "Number of months cannot be less 1", type: NotificationType.Error });
+            return;
+        }
+
+        if (amortizationCalculatorData.rate < 0) {
+            displayNotification({ message: "Interest rate cannot be less than 0", type: NotificationType.Error });
+            return;
+        }
+
+        request({
+            url: "/api/calculator/amortization",
+            method: "POST",
+            body: JSON.stringify({
+                down: amortizationCalculatorData.deposit,
+                interest: amortizationCalculatorData.rate / 100,
+                price: amortizationCalculatorData.price,
+                months: amortizationCalculatorData.period,
+            }),
+            callback: ({ msg, success, json }) => {
+                if (success) {
+                    setAmortizationCalculatorData({
+                        ...amortizationCalculatorData,
+                        interestPaid: json.interestPaid,
+                        history: json.history,
+                        loanAmount: json.loanAmount,
+                        monthly: json.monthly,
+                        totalPaid: json.totalPaid
+                    });
+                    setAmortizationPie({
+                        datasets: [{
+                            data: [json.loanAmount, json.interestPaid, amortizationCalculatorData.deposit],
+                            backgroundColor: ["#9ae600", "#1447e6", "#ffdf20"]
+                        }],
+                        // These labels appear in the legend and in the tooltips when hovering different arcs
+                        labels: ["Loan Amount", "Interest Paid", "Deposit"]
+                    });
+
+                    setAmortizationLine({
+                        labels: json.history.map((_, i) => "Period " + (i + 1)),
+                        datasets: [
+                            {
+                                data: json.history.map(h => h.principalPaid),
+                                label: "principal paid",
+                                backgroundColor: "#ffdf20",
+                                borderColor: "#ffdf20"
+                            }, {
+                                data: json.history.map(h => h.interestPaid),
+                                label: "interest paid",
+                                backgroundColor: "#1447e6",
+                                borderColor: "#1447e6"
+                            }, {
+                                data: json.history.map(h => h.loanBalance),
+                                label: "loan balance",
+                                backgroundColor: "#9ae600",
+                                borderColor: "#9ae600"
+                            }
+                        ]
+                    });
+                } else {
+                    displayNotification({ message: "Unable to calculate amortization schedule: " + msg, type: NotificationType.Error });
+                }
+            }
+        });
+
+        const sixMonths = 1000 * 60 * 60 * 24 * 30 * 6;
+        const from = formatDate(new Date(new Date().getTime() - sixMonths), DATE_TYPE.DISPLAY_DATE);
+        const to = formatDate(new Date(), DATE_TYPE.DISPLAY_DATE);
+        request({
+            url: `/api/balance/progress/${from}/${to}`,
+            method: "GET",
+            callback: ({ msg, success, json }) => {
+                if (!success) {
+                    displayNotification({ message: "Unable to determine recent income value: " + msg, type: NotificationType.Warning });
+                } else {
+                    setIncome(json.avgMonthlyIncome);
+                }
+            }
+        });
+    };
+
     const enterInterestCalculatorData = e => {
         const { value } = e.target;
         let newObject = {
@@ -298,6 +424,14 @@ function Calculators() {
             ...stockCalculatorData,
             [e.target.name]: e.target.type === "number" && value ? Number(value) : value };
         setStockCalculatorData(newObject);
+    };
+
+    const enterAmortizationCalculatorData = e => {
+        const { value } = e.target;
+        let newObject = {
+            ...amortizationCalculatorData,
+            [e.target.name]: e.target.type === "number" && value ? Number(value) : value };
+        setAmortizationCalculatorData(newObject);
     };
 
     const HistoryTable = ({ historyData, calculator }) =>
@@ -323,6 +457,36 @@ function Calculators() {
                                 <td className="px-4 py-2">{formatMoney(item.stepEarned)}</td>
                                 <td className="px-4 py-2">{formatMoney(item.profit)}</td>
                                 <td className="px-4 py-2">{formatMoney(item.balance)}</td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+        </div>;
+
+    const AmortizationTable = ({ historyData }) =>
+        <div className="overflow-y-scroll overflow-x-scroll w-full mt-8">
+            <table className="text-left table-auto w-full text-lg border-2 border-slate-800 mb-2" id="amortization-table">
+                <thead>
+                    <tr className="bg-slate-800">
+                        <th className="px-4 py-2">Period</th>
+                        <th className="px-4 py-2">Principal Paid</th>
+                        <th className="px-4 py-2">Interest Paid</th>
+                        <th className="px-4 py-2">Cumulative Principal</th>
+                        <th className="px-4 py-2">Cumulative Interest</th>
+                        <th className="px-4 py-2">Remaining Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    { historyData
+                        .map((item, i) => (
+                            <tr key={i} className={"hover:bg-slate-700" + (i % 2 === 1 ? " bg-gray-800" : "")}>
+                                <td className="pl-4 font-thin">{i+1}</td>
+                                <td className="px-4 py-2">{formatMoney(item.currentPrincipalPaid)}</td>
+                                <td className="px-4 py-2">{formatMoney(item.currentInterest)}</td>
+                                <td className="px-4 py-2">{formatMoney(item.principalPaid)}</td>
+                                <td className="px-4 py-2">{formatMoney(item.interestPaid)}</td>
+                                <td className="px-4 py-2">{formatMoney(item.loanBalance)}</td>
                             </tr>
                         ))
                     }
@@ -635,6 +799,144 @@ function Calculators() {
                         </div> }
                         { dividendCalcActiveTab === "0" && <Line options={getOptions("Growth chart")} data={stockDividendLine}/> }
                         { dividendCalcActiveTab === "2" && <HistoryTable historyData={stockCalculatorData.history} calculator="dividend"/> }
+                    </div>
+                </section>
+            </div>
+
+            <hr className="text-slate-700 my-12 w-3/4 mx-auto"/>
+
+            {/* Amortization Calculator */}
+            <div className="w-3/4 mx-auto">
+                <h2 className="text-2xl text-slate-100 font-bold mb-12">Amortization Calculator</h2>
+                <section className="flex flex-col lg:flex-row">
+                    <form className="w-full lg:w-1/4 flex flex-col px-2 pb-6 mb-6 lg:pb-0 lg:mb-0 border-b-1
+                        lg:border-b-0 lg:border-r-1 border-slate-700">
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="amortization-price">Price</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={amortizationCalculatorData.price} onChange={enterAmortizationCalculatorData}
+                                    name="price" id="amortization-price" step={50} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="total cost of the house/car"/>
+                            </div>
+                        </div>
+
+                        {/* TODO: add a input to allow user to add their real monthly income */}
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="amortization-deposit">Deposit</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={amortizationCalculatorData.deposit} onChange={enterAmortizationCalculatorData}
+                                    name="deposit" id="amortization-deposit" step={50} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="amortization deposit" />
+                            </div>
+                        </div>
+
+                        <div className="mb-4 flex flex-col w-full md:w-3/4 mx-auto">
+                            <label for="amortization-period">How many months for the loan period?</label>
+                            <input
+                                type="number" value={amortizationCalculatorData.period} onChange={enterAmortizationCalculatorData}
+                                name="period" id="amortization-period" step={1} min={1}
+                                className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                    focus:border-blue-500 focus:outline-none focus:ring mt-2"
+                                title="total period"/>
+                        </div>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="amortization-rate">Interest Rate</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 right-12">%</label>
+                                <input
+                                    type="number" value={amortizationCalculatorData.rate} onChange={enterAmortizationCalculatorData}
+                                    name="rate" id="amortization-rate" step={0.1} min={0} required
+                                    className="px-2 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="rate of return"/>
+                            </div>
+                        </div>
+
+                        <button
+                            className="px-4 py-2 text-sm font-bold tracking-wide text-white capitalize transition-colors duration-200
+                                transform bg-blue-700 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600 hover:cursor-pointer
+                                w-full md:w-3/4 mx-auto"
+                            onClick={calculateAmortization} id="calculate-amortization">
+                            Calculate
+                        </button>
+                    </form>
+
+                    <div className="w-full lg:w-2/3 mx-4 p-2 text-slate-100">
+                        <div>
+                            <div className="flex flex-col md:flex-row justify-between md:items-end">
+                                <div className="mb-8 md:mb-0">
+                                    <h3 className="text-lg mb-1">Estimated Monthly Payment</h3>
+                                    <span className="text-4xl font-bold">{"$" + formatMoney(amortizationCalculatorData.monthly)}</span>
+                                </div>
+                                <DetailTabs calculator={"amortization"} toggler={setAmortizationCalcActiveTab}
+                                    activeTab={amortizationCalcActiveTab} />
+                            </div>
+                            <hr className="text-slate-700 my-6"/>
+
+                            {income !== 0 && <div className="w-full h-8 mb-4 flex justify-between">
+                                <div className="rounded" style={{ height: "100%", width: (amortizationCalculatorData.monthly / income) * 100 + "%",
+                                    // I do as I like
+                                    // eslint-disable-next-line react-hooks/rules-of-hooks
+                                    background: useProgressColor(100 - Math.min(((amortizationCalculatorData.monthly / income) * 100), 100)) }}></div>
+                                <div className="flex ml-4 space-x-2">
+                                    <span className="text-xl">{Math.ceil((amortizationCalculatorData.monthly / income) * 100) + "% "}</span>
+                                    <span className="text-xl" id="risk-text"
+                                        // I do as I like
+                                        // eslint-disable-next-line react-hooks/rules-of-hooks
+                                        style={{ color: useProgressColor(100 - Math.min(((amortizationCalculatorData.monthly / income) * 100), 100)),
+                                            "font-weight": "bold" }}>{
+                                            amortizationCalculatorData.monthly / income < .25 && "Safe" ||
+                                            amortizationCalculatorData.monthly / income < .3 && "Comfortable" ||
+                                            amortizationCalculatorData.monthly / income < .4 && "Stretch" || "Aggressive"
+                                        }
+                                    </span>
+                                </div>
+                            </div>}
+
+                            {income !== 0 &&
+                                <div className="flex flex-row justify-between mb-2">
+                                    <span>Avg Monthly Income</span>
+                                    <span className="font-bold">{"$" + formatMoney(income)}</span>
+                                </div>
+                            }
+                            <div className="flex flex-row justify-between mb-2">
+                                <span>Price</span>
+                                <span className="font-bold">{"$" + formatMoney(amortizationCalculatorData.price)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between mb-2">
+                                <span>Loan Amount</span>
+                                <span className="font-bold">{"$" + formatMoney(amortizationCalculatorData.loanAmount)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between mb-2">
+                                <span>Total Interest Paid</span>
+                                <span className="font-bold">{"$" + formatMoney(amortizationCalculatorData.interestPaid)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between mb-2">
+                                <span>Total Paid (without deposit)</span>
+                                <span className="font-bold">{"$" + formatMoney(amortizationCalculatorData.totalPaid)}</span>
+                            </div>
+                            <div className="flex flex-row justify-between">
+                                <span>Total Paid (with deposit)</span>
+                                <span className="font-bold" id="total-total-paid">
+                                    {"$" + formatMoney(amortizationCalculatorData.totalPaid + amortizationCalculatorData.deposit)}</span>
+                            </div>
+                        </div>
+
+                        { amortizationCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
+                            <Doughnut options={getOptions("amortization breakdown")} data={amortizationPie}/>
+                        </div> }
+                        { amortizationCalcActiveTab === "0" && <Line options={getOptions("Payment chart")} data={amortizationLine}/> }
+                        { amortizationCalcActiveTab === "2" &&
+                            <AmortizationTable historyData={amortizationCalculatorData.history}/> }
                     </div>
                 </section>
             </div>

@@ -1,10 +1,10 @@
 const { describe, expect, test } = require("@jest/globals");
 const fs = require("fs");
 
-const { calculateCompound, calculateStockCompound } = require("../../services/Calculator");
+const { calculateCompound, calculateStockCompound, calculateAmortization } = require("../../services/Calculator");
 const { PAYMENT_FREQUENCY } = require("../../utils/constants");
 
-describe("currency", () => {
+describe("calculator", () => {
     describe("calculateCompound", () => {
         const goodCases = [
             {
@@ -168,6 +168,73 @@ describe("currency", () => {
             const { initial, price, contribute, divAmount, months, frequency, symbol, shares } = input;
 
             const result = await calculateStockCompound({ initial, price, divAmount, contribute, months, frequency, symbol, shares });
+            expect(result.success).toEqual(false);
+            expect(result.msg).toBe(expectedMsg);
+        });
+    });
+
+    describe("calculateAmortization", () => {
+        const goodCases = [
+            {
+                input: { price: 435_000, down: 90_000, months: 180, interest: 6.667 / 100 },
+                output: { loanAmount: 345_000, interestPaid: 201_675.11, monthly: 3037.08, totalPaid: 546_675.11 }
+            },
+            {
+                input: { price: 35_000, down: 0, months: 36, interest: 6.667 / 100 },
+                output: { loanAmount: 35_000, interestPaid: 3713.59, monthly: 1075.38, totalPaid: 38_713.59 }
+            }
+        ];
+
+        const badCases = [
+            {
+                input: { down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Invalid price value"
+            },
+            {
+                input: { price: 35_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Invalid deposit value"
+            },
+            {
+                input: { price: 35_000, down: 10_000, interest: 6.667 / 100 },
+                expectedMsg: "Invalid period"
+            },
+            {
+                input: { price: 35_000, down: 10_000, months: 20 },
+                expectedMsg: "Invalid interest rate"
+            },
+            {
+                input: { price: 35_000, down: 10_000, interest: 0, months: 20 },
+                expectedMsg: "Invalid interest rate"
+            },
+            {
+                input: { price: 0, down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Price value should be more than 0"
+            },
+            {
+                input: { price: -4000, down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Price value should be more than 0"
+            },
+            {
+                input: { price: 4000, down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Deposit should not exceed price"
+            }
+        ];
+
+        test.each(goodCases)("should return success value with correct paid interest and monthly payment for good cases:%s", ({ input, output }) => {
+            const { price, down, months, interest } = input;
+
+            const result = calculateAmortization({ price, down, months, interest });
+            expect(result.success).toEqual(true);
+            expect(result.loanAmount).toBe(output.loanAmount);
+            expect(result.interestPaid).toBe(output.interestPaid);
+            expect(result.monthly).toBe(output.monthly);
+            expect(result.totalPaid).toBe(output.totalPaid);
+        });
+
+        test.each(badCases)("should return failure value with appropriate message for bad cases: %s", ({ input, expectedMsg }) => {
+            const { price, down, months, interest } = input;
+
+            const result = calculateAmortization({ price, down, months, interest });
             expect(result.success).toEqual(false);
             expect(result.msg).toBe(expectedMsg);
         });

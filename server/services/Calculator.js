@@ -124,3 +124,86 @@ module.exports.calculateStockCompound = async ({ shares, initial, symbol, price,
         ...calculateCompound({ initial, contribute, interest: divAmount / price, months, frequency })
     };
 };
+
+// price - total price (before deposit)
+// down - loan deposit
+// months - loan term
+// interest - interest rate (yearly)
+const calculateMonthly = ({ price, down, months, interest }) => {
+    // TODO: this does not factor in PMI
+    const principal = price - down;
+    const rate = interest / 12;
+    const top = rate * ((1 + rate) ** months);
+    const bottom = ((1 + rate) ** months) - 1;
+    const monthlyPayment = principal * (top / bottom);
+
+    return monthlyPayment;
+};
+
+// loanAmount - total loan amount after deposit
+// months - loan term
+// monthly - monthly payment
+// interest - interest rate (yearly)
+const calculateAmortization = ({ loanAmount, months, monthly, interest }) => {
+    let loanBalance = loanAmount + 0;
+    let interestPaid = 0;
+    let principalPaid = 0;
+    const history = [];
+
+    for (let i = 0; i < months; i++) {
+        const currentInterest = loanBalance * interest / 12;
+        const currentPrincipalPaid = monthly - currentInterest;
+        interestPaid += currentInterest;
+        principalPaid += currentPrincipalPaid;
+        loanBalance -= currentPrincipalPaid;
+
+        history.push({
+            currentInterest: toPrecision(currentInterest, 2),
+            currentPrincipalPaid: toPrecision(currentPrincipalPaid, 2),
+            interestPaid: toPrecision(interestPaid, 2),
+            principalPaid: toPrecision(principalPaid, 2),
+            loanBalance: toPrecision(loanBalance, 2),
+        });
+    }
+
+    return {
+        success: true, code: 200,
+        interestPaid: toPrecision(interestPaid, 2), loanAmount, monthly: toPrecision(monthly, 2),
+        totalPaid: toPrecision(loanAmount + interestPaid, 2), history // TODO: test totalPaid
+    };
+};
+
+module.exports.calculateAmortization = ({ price, down, months, interest }) => {
+    if (!isNumber(price)) {
+        logger.warn("User provided a bad price value: " + price);
+        return { success: false, code: 400, msg: "Invalid price value" };
+    }
+
+    if (!(Number(price) > 0)) {
+        logger.warn("User provided a non positive price value " + price);
+        return { success: false, code: 400, msg: "Price value should be more than 0" };
+    }
+
+    if (!isNumber(down)) {
+        logger.warn("User provided a deposit value: " + price);
+        return { success: false, code: 400, msg: "Invalid deposit value" };
+    }
+
+    if (Number(down) > Number(price)) {
+        logger.warn("User provided a deposit value higher than the price:" + down + " " + price);
+        return { success: false, code: 400, msg: "Deposit should not exceed price" };
+    }
+
+    if (!isNumber(months)) {
+        logger.warn("User provided a bad pay monthly period value: " + months);
+        return { success: false, code: 400, msg: "Invalid period" };
+    }
+
+    if (!isNumber(interest) || !(interest > 0)) {
+        logger.warn("User provided a bad interest rate: " + interest);
+        return { success: false, code: 400, msg: "Invalid interest rate" };
+    }
+
+    const monthly = calculateMonthly({ price, down, months, interest });
+    return calculateAmortization({ loanAmount: price - down, months, monthly, interest })
+};

@@ -110,4 +110,63 @@ describe("calculator endpoints", () => {
             expect(response.body.balance).toBeGreaterThan(0);
         });
     })
+
+    describe("calculateAmortization", () => {
+        const goodCases = [
+            { price: 435_000, down: 90_000, months: 180, interest: 6.667 / 100 },
+            { price: 35_000, down: 0, months: 36, interest: 6.667 / 100 }
+        ];
+
+        const badCases = [
+            {
+                input: { down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Invalid price value"
+            },
+            {
+                input: { price: 35_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Invalid deposit value"
+            },
+            {
+                input: { price: 35_000, down: 10_000, interest: 6.667 / 100 },
+                expectedMsg: "Invalid period"
+            },
+            {
+                input: { price: 35_000, down: 10_000, months: 20 },
+                expectedMsg: "Invalid interest rate"
+            },
+            {
+                input: { price: 0, down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Price value should be more than 0"
+            },
+            {
+                input: { price: -4000, down: 10_000, months: 20, interest: 6.667 / 100 },
+                expectedMsg: "Price value should be more than 0"
+            },
+        ];
+
+        test.each(badCases)("should return bad request when request body is invalid", async ({ input, expectedMsg }) => {
+            // Act
+            const response = await superTestRequest.post("/api/calculator/amortization").send(input);
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toEqual(expectedMsg);
+        });
+
+        test.each(goodCases)("should return ok when request body is valid", async (input) => {
+            // Act
+            const response = await superTestRequest.post("/api/calculator/amortization").send(input);
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(isNumber(response.body.loanAmount)).toEqual(true);
+            expect(response.body.loanAmount).toBeGreaterThan(0);
+            expect(isNumber(response.body.interestPaid)).toEqual(true);
+            expect(response.body.interestPaid).toBeGreaterThan(0);
+            expect(isNumber(response.body.monthly)).toEqual(true);
+            expect(response.body.monthly).toBeGreaterThan(0);
+            expect(isNumber(response.body.totalPaid)).toEqual(true);
+            expect(response.body.totalPaid).toBeGreaterThan(0);
+        });
+    })
 });
