@@ -364,4 +364,28 @@ test.describe("amortization calculator", () => {
         await expect(historyTable.locator("tr").nth(1).locator("td").last()).toHaveText("44,387.56");
         await expect(historyTable.locator("tr").last().locator("td").last()).toHaveText("0.00");
     });
+
+    test("should allow calculating amortization with a deposit and monthly income", async ({ page }) => {
+        await pageSetup({ page, pathname: "/calculators" });
+
+        await page.locator("#amortization-price").fill("40000");
+        await page.locator("#amortization-deposit").fill("15000");
+        await page.locator("#amortization-monthly-income").fill("6434.49");
+        await page.locator("#amortization-period").fill("36");
+        await page.locator("#amortization-rate").fill("8");
+
+        await page.locator("#calculate-amortization").click();
+
+        await expect(page.locator("#risk-text")).toBeVisible();
+        await expect(page.locator("#risk-text")).toHaveText("Safe");
+        await expect(page.locator("#total-total-paid")).toHaveText("$43,202.73");
+
+        await page.locator("#amortization-table-tab").click();
+        const historyTable = page.locator("#amortization-table");
+        await expect(historyTable).toBeVisible();
+
+        await expect(historyTable.locator("tr")).toHaveCount(37);
+        await expect(historyTable.locator("tr").nth(1).locator("td").last()).toHaveText("24,383.26");
+        await expect(historyTable.locator("tr").last().locator("td").last()).toHaveText("0.00");
+    });
 });

@@ -346,7 +346,7 @@ function Calculators() {
                 down: amortizationCalculatorData.deposit,
                 interest: amortizationCalculatorData.rate / 100,
                 price: amortizationCalculatorData.price,
-                months: amortizationCalculatorData.period,
+                months: amortizationCalculatorData.period
             }),
             callback: ({ msg, success, json }) => {
                 if (success) {
@@ -356,7 +356,7 @@ function Calculators() {
                         history: json.history,
                         loanAmount: json.loanAmount,
                         monthly: json.monthly,
-                        totalPaid: json.totalPaid
+                        totalPaid: json.totalPaid,
                     });
                     setAmortizationPie({
                         datasets: [{
@@ -393,6 +393,11 @@ function Calculators() {
                 }
             }
         });
+
+        if (amortizationCalculatorData.monthlyIncome && amortizationCalculatorData.monthlyIncome !== 0) {
+            setIncome(amortizationCalculatorData.monthlyIncome);
+            return;
+        }
 
         const sixMonths = 1000 * 60 * 60 * 24 * 30 * 6;
         const from = formatDate(new Date(new Date().getTime() - sixMonths), DATE_TYPE.DISPLAY_DATE);
@@ -824,7 +829,6 @@ function Calculators() {
                             </div>
                         </div>
 
-                        {/* TODO: add a input to allow user to add their real monthly income */}
                         <div className="mb-4 w-full md:w-3/4 mx-auto">
                             <label for="amortization-deposit">Deposit</label>
                             <div className="relative mt-2">
@@ -835,6 +839,19 @@ function Calculators() {
                                     className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
                                         focus:border-blue-500 focus:outline-none focus:ring w-full"
                                     title="amortization deposit" />
+                            </div>
+                        </div>
+
+                        <div className="mb-4 w-full md:w-3/4 mx-auto">
+                            <label for="amortization-monthly-income">Monthly Income (Optional)</label>
+                            <div className="relative mt-2">
+                                <label className="absolute top-2 left-2">$</label>
+                                <input
+                                    type="number" value={amortizationCalculatorData.monthlyIncome} onChange={enterAmortizationCalculatorData}
+                                    name="monthlyIncome" id="amortization-monthly-income" step={50} min={0}
+                                    className="pl-5 pr-4 py-2 border rounded-md bg-gray-800 text-gray-300 border-gray-600
+                                        focus:border-blue-500 focus:outline-none focus:ring w-full"
+                                    title="monthly income" />
                             </div>
                         </div>
 
