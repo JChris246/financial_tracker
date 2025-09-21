@@ -153,13 +153,19 @@ const runCacheWorker = async () => {
             }
         }
 
-        // merge user currencies with default currencies
+        // merge user currencies with default currencies (and existing)
         // TODO: store these currencies in cache (and update when new transaction comes in) ?
         const userCurrencies = await db.getAllTransactionCurrencies();
         const useCurrencies = {
-            stock: [...new Set([...userCurrencies.stock, ...DEFAULT_CURRENCIES[ASSET_TYPE.STOCK]]).values()],
-            crypto: [...new Set([...userCurrencies.crypto, ...DEFAULT_CURRENCIES[ASSET_TYPE.CRYPTO]]).values()],
-            cash: [...new Set([...userCurrencies.cash, ...DEFAULT_CURRENCIES[ASSET_TYPE.CASH]]).values()]
+            stock: [...new Set([
+                    ...userCurrencies.stock, ...DEFAULT_CURRENCIES[ASSET_TYPE.STOCK], ...Object.keys(cache.stockPrices ?? {})
+                ]).values()],
+            crypto: [...new Set([
+                    ...userCurrencies.crypto, ...DEFAULT_CURRENCIES[ASSET_TYPE.CRYPTO], ...Object.keys(cache.cryptoConversions ?? {})
+                ]).values()],
+            cash: [...new Set([
+                    ...userCurrencies.cash, ...DEFAULT_CURRENCIES[ASSET_TYPE.CASH], ...Object.keys(cache.fiatConversions ?? {})
+                ]).values()]
         };
 
         //  might need to maintain values from previous runs, so merge values
