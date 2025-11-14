@@ -174,7 +174,8 @@ test.describe("at a glance prices", () => {
         }
     })
 
-    test("at a glance prices should be displayed when switching asset type; there should be 5 items per asset, with key and value", async ({ page }) => {
+    test(`at a glance prices should be displayed when switching asset type;
+            there should be 5 items per asset, with key and value`, async ({ page }) => {
         await pageSetup({ page });
 
         const cryptoButton = page.locator("#crypto-asset-button");
