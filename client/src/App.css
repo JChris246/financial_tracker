@@ -32,6 +32,22 @@
     @apply text-orange-400
 }
 
+.green-bg-accent {
+    @apply bg-green-400/15
+}
+
+.red-bg-accent {
+    @apply bg-red-400/15
+}
+
+.blue-bg-accent {
+    @apply bg-sky-400/15
+}
+
+.orange-bg-accent {
+    @apply bg-orange-400/15
+}
+
 /* Modal */
 .modal {
     position: fixed;

@@ -35,7 +35,7 @@ The application stack consists of [React ⚛](https://reactjs.org/) (js) with [V
 ### 💻 Running in dev mode
 
 1. Make a .env file in the server folder, with your values for the variables in the [.env.sample](server/.env.sample). DB_TYPE variable should have 1 of the accepted types: 
-    - `mongo` - to connect to a mongo database (be sure provide the connection vars)
+    - `mongo` - to connect to a mongo database (be sure to provide the connection vars)
     - `json` - to use flat json files for storage
     - `sql` - to use sqlite as the database
 

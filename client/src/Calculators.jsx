@@ -34,8 +34,8 @@ ChartJS.register(
 );
 
 // this should probably be a util
-const getOptions = title => (
-    {
+const getOptions = (title, pie) => {
+    const options = {
         responsive: true,
         plugins: {
             legend: {
@@ -46,8 +46,22 @@ const getOptions = title => (
                 text: title,
             },
         },
+    };
+
+
+    if (pie) {
+        options.plugins.legend = {
+            position: "bottom",
+            labels: {
+                color: "#e2e8f0",
+                padding: 20,
+                usePointStyle: true
+            }
+        };
     }
-);
+
+    return options;
+};
 
 function Calculators() {
     const [interestCalculatorData, setInterestCalculatorData] = useState({
@@ -69,6 +83,8 @@ function Calculators() {
         datasets: [{
             data: [1, 0, 0],
             backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"],
+            borderWidth: 0,
+            cutout: "70%"
         }]
     });
     const [stockDividendPie, setStockDividendPie] = useState({
@@ -76,6 +92,8 @@ function Calculators() {
         datasets: [{
             data: [1, 0, 0],
             backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"],
+            borderWidth: 0,
+            cutout: "70%"
         }]
     });
     const [amortizationPie, setAmortizationPie] = useState({
@@ -83,6 +101,8 @@ function Calculators() {
         datasets: [{
             data: [1, 0, 0, 0],
             backgroundColor: ["#9ae600", "#1447e6", "#ffdf20"],
+            borderWidth: 0,
+            cutout: "70%"
         }]
     });
 
@@ -193,7 +213,9 @@ function Calculators() {
                     setCompoundInterestPie({
                         datasets: [{
                             data: [interestCalculatorData.initial, json.totalContrib, json.profit],
-                            backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"]
+                            backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"],
+                            borderWidth: 0,
+                            cutout: "70%"
                         }],
                         // These labels appear in the legend and in the tooltips when hovering different arcs
                         labels: ["Initial Deposit", "Total Contributions", "Interest"]
@@ -282,7 +304,9 @@ function Calculators() {
                     setStockDividendPie({
                         datasets: [{
                             data: [json.initial, json.totalContrib, json.profit],
-                            backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"]
+                            backgroundColor: ["#9ae600", "#ffdf20", "#1447e6"],
+                            borderWidth: 0,
+                            cutout: "70%"
                         }],
                         // These labels appear in the legend and in the tooltips when hovering different arcs
                         labels: ["Initial Deposit", "Total Contributions", "Interest"]
@@ -361,7 +385,9 @@ function Calculators() {
                     setAmortizationPie({
                         datasets: [{
                             data: [json.loanAmount, json.interestPaid, amortizationCalculatorData.deposit],
-                            backgroundColor: ["#9ae600", "#1447e6", "#ffdf20"]
+                            backgroundColor: ["#9ae600", "#1447e6", "#ffdf20"],
+                            borderWidth: 0,
+                            cutout: "70%"
                         }],
                         // These labels appear in the legend and in the tooltips when hovering different arcs
                         labels: ["Loan Amount", "Interest Paid", "Deposit"]
@@ -646,7 +672,7 @@ function Calculators() {
                         </div>
 
                         { interestCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
-                            <Doughnut options={getOptions("Savings breakdown")} data={compoundInterestPie}/>
+                            <Doughnut options={getOptions("Savings breakdown", true)} data={compoundInterestPie}/>
                         </div> }
                         { interestCalcActiveTab === "0" && <Line options={getOptions("Growth chart")} data={compoundInterestLine}/> }
                         { interestCalcActiveTab === "2" &&
@@ -800,7 +826,7 @@ function Calculators() {
                         </div>
 
                         { dividendCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
-                            <Doughnut options={getOptions("Savings breakdown")} data={stockDividendPie}/>
+                            <Doughnut options={getOptions("Savings breakdown", true)} data={stockDividendPie}/>
                         </div> }
                         { dividendCalcActiveTab === "0" && <Line options={getOptions("Growth chart")} data={stockDividendLine}/> }
                         { dividendCalcActiveTab === "2" && <HistoryTable historyData={stockCalculatorData.history} calculator="dividend"/> }
@@ -949,7 +975,7 @@ function Calculators() {
                         </div>
 
                         { amortizationCalcActiveTab === "1" && <div className="w-full lg:w-1/3 mx-auto p-2">
-                            <Doughnut options={getOptions("amortization breakdown")} data={amortizationPie}/>
+                            <Doughnut options={getOptions("Amortization breakdown", true)} data={amortizationPie}/>
                         </div> }
                         { amortizationCalcActiveTab === "0" && <Line options={getOptions("Payment chart")} data={amortizationLine}/> }
                         { amortizationCalcActiveTab === "2" &&

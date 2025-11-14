@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import Balance from "./component/Balance";
 import IncomeExpense from "./component/IncomeExpense";
+import AssetAllocation from "./component/AssetAllocation";
 import TransactionHistoryGlance from "./component/TransactionHistoryGlance";
 import Glance from "./component/Glance";
 import { NavBar } from "./component/NavBar";
@@ -45,15 +46,15 @@ function App() {
     }, [sync]);
 
     return (
-        <div className="place-items-center bg-gray-900 min-h-screen">
+        <div className="place-items-center bg-gray-900 min-h-screen px-4">
             <NavBar/>
 
             <Balance refresh={updateValues}/>
             <IncomeExpense/>
+            <AssetAllocation/>
             <div className="flex flex-col lg:flex-row w-full items-center lg:items-end lg:justify-center md:mt-16">
-                <Glance type="stock"/>
                 <TransactionHistoryGlance sync={sync}/>
-                <Glance type="crypto"/>
+                <Glance />
             </div>
             <SpendingGraph/>
         </div>

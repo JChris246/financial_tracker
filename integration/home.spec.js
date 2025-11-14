@@ -162,15 +162,42 @@ test.describe("transaction history glance", () => {
 });
 
 test.describe("at a glance prices", () => {
-    test("at a glance price should be displayed; there should be 10 items, with key and value", async ({ page }) => {
+    test("at a glance prices should be displayed; there should be 5 items, with key and value", async ({ page }) => {
         await pageSetup({ page });
 
         const items = page.locator("[glance-price]");
-        await expect(items).toHaveCount(10);
+        await expect(items).toHaveCount(5);
 
-        for (let i = 0; i < 10; i++) {
-            await expect(items.nth(i).locator("span").nth(0)).toHaveText(/[A-Z]+/);
-            await expect(items.nth(i).locator("span").nth(1)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
+        for (let i = 0; i < 5; i++) {
+            await expect(items.nth(i).locator("span").nth(1)).toHaveText(/[A-Z]+/);
+            await expect(items.nth(i).locator("span").nth(2)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
+        }
+    })
+
+    test("at a glance prices should be displayed when switching asset type; there should be 5 items per asset, with key and value", async ({ page }) => {
+        await pageSetup({ page });
+
+        const cryptoButton = page.locator("#crypto-asset-button");
+        const stockButton = page.locator("#stock-asset-button");
+
+        await cryptoButton.click();
+
+        const items = page.locator("[glance-price]");
+        await expect(items).toHaveCount(5);
+
+        for (let i = 0; i < 5; i++) {
+            await expect(items.nth(i).locator("span").nth(1)).toHaveText(/[A-Z]+/);
+            await expect(items.nth(i).locator("span").nth(2)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
+        }
+
+        await stockButton.click();
+
+        const newItems = page.locator("[glance-price]");
+        await expect(newItems).toHaveCount(5);
+
+        for (let i = 0; i < 5; i++) {
+            await expect(newItems.nth(i).locator("span").nth(1)).toHaveText(/[A-Z]+/);
+            await expect(newItems.nth(i).locator("span").nth(2)).toHaveText(/\$\s*[\d,]+\.\d{2}/)
         }
     })
 });

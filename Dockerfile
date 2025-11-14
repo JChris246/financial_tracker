@@ -1,5 +1,5 @@
 # build react client
-FROM node:24.4.0-alpine AS build-react-stage
+FROM node:24.9.0-alpine AS build-react-stage
 
 RUN mkdir -p /home/react
 WORKDIR /home/react
@@ -11,7 +11,7 @@ COPY client/ ./
 RUN npm run build
 
 # build express server
-FROM node:24.4.0-alpine
+FROM node:24.9.0-alpine
 
 WORKDIR /home/financial_tracker
 

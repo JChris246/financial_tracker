@@ -50,4 +50,20 @@ const formatMoney = (m) => {
     return m.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
-export { pad, formatDate, DATE_TYPE, formatMoney };
+const stringToColor = (str) => {
+    str += "please add some more entropy to avoid to similar colors";
+
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 7) - hash);
+    }
+
+    const r = (hash & 0xFF0000) >> 16;
+    const g = (hash & 0x00FF00) >> 8;
+    const b = hash & 0x0000FF;
+
+    // convert to hex and return
+    return `#${pad(r.toString(16))}${pad(g.toString(16))}${pad(b.toString(16))}`;
+};
+
+export { pad, formatDate, DATE_TYPE, formatMoney, stringToColor };

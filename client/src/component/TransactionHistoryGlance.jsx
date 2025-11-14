@@ -4,7 +4,7 @@ import TransactionHistoryTile from "./TransactionHistoryTile";
 import { NotificationType, useNotificationContext } from "./Notification";
 import { request } from "../utils/Fetch";
 
-const MAX_TRANSACTION_ITEMS = 5;
+export const MAX_TRANSACTION_ITEMS = 5;
 
 const TransactionHistoryGlance = ({ sync }) => {
     const [transactions, setTransactions] = useState([]);
@@ -30,7 +30,8 @@ const TransactionHistoryGlance = ({ sync }) => {
     }, [sync]);
 
     return (
-        <section id="history" className="flex flex-col p-4 mx-4 bg-gray-800 rounded-md w-full md:w-fit my-4 md:my-2 h-fit lg:h-1/3">
+        <section id="history" className="flex flex-col px-4 py-2 mx-4 bg-gray-800 rounded-xl w-full md:w-fit my-4 md:my-2 h-fit lg:h-1/3
+            border-1 border-gray-700">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end mb-4">
                 <div className="mt-2 mr-4 text-stone-200 text-2xl font-semibold capitalize mb-2 lg:mb-0">Transaction History</div>
                 <a href="/history" className="font-semibold text-sky-400 hover:text-sky-600">View all</a>
