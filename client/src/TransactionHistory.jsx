@@ -260,7 +260,7 @@ function TransactionHistory() {
                             .sort(sortTransactions)
                             .map((transaction, i) => (
                                 <tr key={i} className="hover:bg-slate-700">
-                                    <td className="pl-4 text-gray-600 font-thin">{i+1}</td>
+                                    <td className="pl-4 text-gray-400 font-thin">{i+1}</td>
                                     <td className="px-4 py-2">{transaction.name}</td>
                                     <td id={"transaction-history-amount-" + i}
                                         className={"px-2 py-2 text-right " + (transaction.amount < 0 ? "text-red-400": "text-green-400")}>

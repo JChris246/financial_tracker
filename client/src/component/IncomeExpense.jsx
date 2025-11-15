@@ -7,7 +7,7 @@ import { TrendingDownIcon, TrendingUpIcon } from "@heroicons/react/solid";
 // TODO: rename this?
 const IndexCard = ({ title, amount, accentColor, symbol, children: icon }) => {
     return (
-        <div id={title} className={"border-1 border-l-8 border-gray-700 bg-gray-800 rounded-xl pl-4 pr-6 py-2 h-fit " + accentColor + "-accent"}
+        <div id={title} className={"border-1 border-l-8 border-gray-700 bg-gray-800 rounded-xl pl-4 pr-6 py-4 h-fit " + accentColor + "-accent"}
             title={title + " value in usd"}>
             <div className="flex justify-between items-center">
                 <div className="flex flex-col">
@@ -29,7 +29,7 @@ const IncomeExpense = () => {
     const { totalIncome: income, totalSpend: expense, totalStock: stock, totalCrypto: crypto } = balance;
 
     return (
-        <div id="incomeexpense" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mx-auto mb-8 py-10 rounded-sm px-4 max-w-7xl">
+        <div id="incomeexpense" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mx-auto my-8 rounded-sm px-4 max-w-7xl">
             <IndexCard title="Income" amount={income} accentColor="green" symbol={symbol.CASH}>
                 <TrendingUpIcon className={"w-6 h-6 green-text-accent"}/>
             </IndexCard>

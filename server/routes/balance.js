@@ -18,6 +18,14 @@ router
         } else {
             res.status(code).send({ msg });
         }
+    })
+    .get("/performance/:from/:to?", async (req, res) => {
+        const { success, response, code, msg } = await service.getBalancePerformance(req.params.from, req.params.to);
+        if (success) {
+            res.status(200).send(response);
+        } else {
+            res.status(code).send({ msg });
+        }
     });
 
 module.exports = router;

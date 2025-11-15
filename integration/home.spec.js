@@ -41,7 +41,6 @@ test.describe("add transaction", () => {
     });
 });
 
-
 test.describe("balance section", () => {
     test("has balance as 0 if no transactions", async ({ page }) => {
         await pageSetup({ page });

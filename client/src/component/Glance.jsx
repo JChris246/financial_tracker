@@ -44,7 +44,7 @@ const Glance = () => {
     }, [type]);
 
     return (
-        <div className="w-full lg:w-1/4 border-1 border-gray-700 bg-gray-800 rounded-md p-4 h-fit m-2 space-y-2">
+        <div className="w-full lg:w-1/2 border-1 border-gray-700 bg-gray-800 rounded-md p-4 h-fit m-2 space-y-2">
             <div className="flex justify-between">
                 <h1 className="text-2xl text-gray-200 font-bold mb-8 rounded underline-decoration">{atAGlanceParams[type].title}</h1>
                 <div className="space-x-2">

@@ -165,3 +165,78 @@ module.exports.getBalanceProgress = async (from, to) => {
 
     return { success: true, response, code: 200 };
 };
+
+module.exports.getBalancePerformance = async (from, to) => {
+    const toDate = parseDate(to) || new Date(); // if "to date" not passed, use "up to now"
+    const fromDate = parseDate(from);
+
+    if (!fromDate) {
+        logger.warn("User passed an invalid start date: " + from);
+        return { success: false, msg: "Start date invalid", code: 400 };
+    }
+
+    const toTime = toDate.getTime();
+    const fromTime = fromDate.getTime();
+    if (toTime < fromTime) {
+        return { success: false, msg: "Start date cannot be after end date", code: 400 }
+    }
+
+    const db = await getDatabase();
+    const transactions = await db.getAllTransactions();
+
+    // TODO: starting with only cash balances ... update to calculator for stock and crypto
+
+    if (!transactions) {
+        logger.error("getBalancePerformance - An error occurred while getting balance progress: " + err);
+        return { success: false, msg: "An error occurred fetching transactions to summarize balance progress", code: 500 };
+    }
+
+    const response = {
+        dailyPerformance: [], monthlyPerformance: []
+    };
+
+    if (transactions.length < 1) {
+        return { success: true, response, code: 200 };
+    }
+
+    transactions.sort((a, b) => a.date - b.date);
+    let runningBalance = 0;
+
+    const days = {};
+    const months = {};
+    for (let i = 0; i < transactions.length; i++) {
+        if (transactions[i].assetType !== ASSET_TYPE.CASH) {
+            continue;
+        }
+
+        runningBalance += calculateCashAmount(transactions[i]);
+        if (transactions[i].date >= fromTime && transactions[i].date <= toTime) {
+            const date = new Date(transactions[i].date).toDateString();
+            const month = date.slice(4, 7);
+            const value = toPrecision(calculateCashAmount(transactions[i]), 4);
+
+            if (!days[date]) {
+                days[date] = runningBalance;
+            } else {
+                days[date] += value;
+            }
+            if (!months[month]) {
+                months[month] = runningBalance;
+            } else {
+                months[month] += value;
+            }
+        }
+    }
+
+    response.dailyPerformance = Object.keys(days).map(date => ({
+        date,
+        balance: toPrecision(days[date], 4)
+    }));
+
+    response.monthlyPerformance = Object.keys(months).map(month => ({
+        month,
+        balance: months[month]
+    }));
+
+    return { success: true, response, code: 200 };
+};

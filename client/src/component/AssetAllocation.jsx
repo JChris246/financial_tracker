@@ -134,7 +134,7 @@ const AssetAllocation = () => {
     }, [balance]);
 
     return (
-        <div className="mx-auto w-full lg:w-1/3 bg-gray-800 rounded-lg p-4 border-1 border-gray-700">
+        <div className="w-full lg:w-1/2 bg-gray-800 rounded-lg p-4 border-1 border-gray-700">
             <h3 className="text-xl font-semibold text-gray-200 mb-4">Asset Allocation</h3>
             <div className="flex flex-col lg:flex-row justify-center items-center lg:justify-between lg:mx-0 p-4 h-[300px]">
                 <Doughnut options={getOptions("Asset Allocation")} data={assetAllocationData}/>

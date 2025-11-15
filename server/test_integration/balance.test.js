@@ -131,7 +131,7 @@ describe("balance endpoints", () => {
             expect(response.body.msg).toBe("Start date invalid");
         });
 
-        test("should return correct balance when no transactions have occurred", async () => {
+        test("should return correct income/spend when no transactions have occurred", async () => {
             // Act
             const response = await superTestRequest.get("/api/balance/progress/2025-04-01/2025-06-30");
 
@@ -142,7 +142,7 @@ describe("balance endpoints", () => {
             });
         });
 
-        test("should return correct balance when no transactions have occurred", async () => {
+        test("should return correct income/spend", async () => {
             // Arrange
             await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2025-04-01" });
             await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: -10, date: "2025-04-02" });
@@ -157,6 +157,95 @@ describe("balance endpoints", () => {
             expect(response.status).toBe(200);
             expect(response.body).toEqual({
                 totalIncome: 90, totalSpend: -20, avgMonthlySpend: -6.6667, avgMonthlyIncome: 30
+            });
+        });
+    });
+
+    describe("Get Balance Performance", () => {
+        test("should return bad request if provided start time in the future of end date", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/balance/performance/2025-04-01/2024-09-01");
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toBe("Start date cannot be after end date");
+        });
+
+        test("should return bad request if provided start time is invalid", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/balance/performance/2025-04-01:10");
+
+            // Assert
+            expect(response.status).toBe(400);
+            expect(response.body.msg).toBe("Start date invalid");
+        });
+
+        test("should return correct balance when no transactions have occurred", async () => {
+            // Act
+            const response = await superTestRequest.get("/api/balance/performance/2025-04-01/2025-06-30");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({ dailyPerformance: [], monthlyPerformance: [] });
+        });
+
+        test("should return correct balance with in range data", async () => {
+            // Arrange
+            await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2025-04-01" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: -10, date: "2025-04-02" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 3", amount: -10, date: "2025-05-03" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 4", amount: 60, date: "2025-05-04" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 5", amount: 20, date: "2025-06-07" });
+
+            // Act
+            const response = await superTestRequest.get("/api/balance/performance/2025-04-01/2025-06-30");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                dailyPerformance: [
+                    { "balance": 10, "date": "Tue Apr 01 2025" },
+                    { "balance": 0, "date": "Wed Apr 02 2025" },
+                    { "balance": -10, "date": "Sat May 03 2025" },
+                    { "balance": 50, "date": "Sun May 04 2025" },
+                    { "balance": 70, "date": "Sat Jun 07 2025" }
+                ],
+                monthlyPerformance: [
+                    { "balance": 0, "month": "Apr" },
+                    { "balance": 50, "month": "May" },
+                    { "balance": 70, "month": "Jun" }
+                ]
+            });
+        });
+
+        test("should return correct balance with out of range data", async () => {
+            // Arrange
+            await addTransaction(superTestRequest, { name: "Test Transaction 1", amount: 10, date: "2025-03-01" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 2", amount: 10, date: "2025-04-01" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 3", amount: -10, date: "2025-04-02" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 4", amount: -10, date: "2025-05-03" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 5", amount: 60, date: "2025-05-04" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 6", amount: 20, date: "2025-06-07" });
+            await addTransaction(superTestRequest, { name: "Test Transaction 7", amount: 20, date: "2025-07-07" });
+
+            // Act
+            const response = await superTestRequest.get("/api/balance/performance/2025-04-01/2025-06-30");
+
+            // Assert
+            expect(response.status).toBe(200);
+            expect(response.body).toEqual({
+                dailyPerformance: [
+                    { "balance": 20, "date": "Tue Apr 01 2025" },
+                    { "balance": 10, "date": "Wed Apr 02 2025" },
+                    { "balance": 0, "date": "Sat May 03 2025" },
+                    { "balance": 60, "date": "Sun May 04 2025" },
+                    { "balance": 80, "date": "Sat Jun 07 2025" }
+                ],
+                monthlyPerformance: [
+                    { "balance": 10, "month": "Apr" },
+                    { "balance": 60, "month": "May" },
+                    { "balance": 80, "month": "Jun" }
+                ]
             });
         });
     });

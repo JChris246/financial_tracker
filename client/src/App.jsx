@@ -8,7 +8,7 @@ import AssetAllocation from "./component/AssetAllocation";
 import TransactionHistoryGlance from "./component/TransactionHistoryGlance";
 import Glance from "./component/Glance";
 import { NavBar } from "./component/NavBar";
-import SpendingGraph from "./component/SpendingGraph";
+import PerformanceGraph from "./component/PerformanceGraph";
 
 import { useAppContext } from "./AppContext";
 
@@ -46,17 +46,20 @@ function App() {
     }, [sync]);
 
     return (
-        <div className="place-items-center bg-gray-900 min-h-screen px-4">
+        <div className="place-items-center bg-gray-900 min-h-screen px-4 pb-4">
             <NavBar/>
 
             <Balance refresh={updateValues}/>
             <IncomeExpense/>
-            <AssetAllocation/>
-            <div className="flex flex-col lg:flex-row w-full items-center lg:items-end lg:justify-center md:mt-16">
+            <div className="flex flex-col lg:flex-row w-full items-center lg:items-end lg:justify-center lg:space-x-4
+                space-y-4 lg:space-y-0 max-w-7xl lg:mx-auto">
+                <AssetAllocation/>
+                <PerformanceGraph/>
+            </div>
+            <div className="flex flex-col lg:flex-row w-full items-center lg:items-end lg:justify-center lg:mt-6 max-w-7xl lg:mx-auto">
                 <TransactionHistoryGlance sync={sync}/>
                 <Glance />
             </div>
-            <SpendingGraph/>
         </div>
     );
 }

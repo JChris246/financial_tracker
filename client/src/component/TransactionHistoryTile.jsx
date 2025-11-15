@@ -7,7 +7,7 @@ import { MAX_TRANSACTION_ITEMS } from "./TransactionHistoryGlance";
 const TransactionHistoryTile = ({ item, index }) => {
     const border = "border-b-1 border-gray-700";
     return (
-        <div className={"flex items-center px-2 py-5 my-1 max:w-96 md:w-96 " + (index !== MAX_TRANSACTION_ITEMS - 1 ? border : "")}>
+        <div className={"flex items-center px-2 py-5 my-1 w-full " + (index !== MAX_TRANSACTION_ITEMS - 1 ? border : "")}>
             {item.amount > 0 ?
                 <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-green-600/20 rounded">
                     <ArrowUpIcon className="w-5 h-5 text-green-400 fill-current" />
