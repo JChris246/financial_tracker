@@ -34,16 +34,18 @@ export const NavBar = () => {
                             className="pb-4 mt-4 lg:mt-0 lg:py-8 text-3xl text-gray-200 underline-decoration">Finance Tracker</h1>
                     </header>
                 </span>
-                <ul className="items-center hidden space-x-8 lg:flex">{
-                    navlinks.map(({ name, route, id }) => (
-                        <li key={id}>
-                            <a href={route} aria-label={name} title={name}
-                                className="font-medium tracking-wide text-gray-200 transition-colors duration-200 hover:text-deep-purple-accent-400">
-                                {name}
-                            </a>
-                        </li>
-                    ))
-                }</ul>
+                <nav>
+                    <ul className="items-center hidden space-x-8 lg:flex">{
+                        navlinks.map(({ name, route, id }) => (
+                            <li key={id}>
+                                <a href={route} aria-label={name} title={name}
+                                    className="font-medium tracking-wide text-gray-200 transition-colors duration-200 hover:text-deep-purple-accent-400">
+                                    {name}
+                                </a>
+                            </li>
+                        ))
+                    }</ul>
+                </nav>
                 {/*<ul className="flex items-center hidden space-x-8 lg:flex">
                 <li>
                 <a

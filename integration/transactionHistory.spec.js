@@ -1,5 +1,6 @@
 // @ts-check
 import { test, expect } from "@playwright/test";
+import AxeBuilder from '@axe-core/playwright';
 
 import { pageSetup } from "./setup";
 import { addTransaction } from "./helpers";
@@ -202,5 +203,12 @@ test.describe("transaction history", () => {
 
             await expect(trs).toHaveCount(4); // 2 transactions + 2 header rows
         })
+    });
+
+    test("accessibility test", async ({ page }) => {
+        await pageSetup({ page, pathname: "/history" });
+
+        const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+        expect(accessibilityScanResults.violations).toEqual([]);
     });
 });

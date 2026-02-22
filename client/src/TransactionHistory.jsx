@@ -309,12 +309,12 @@ function TransactionHistory() {
             </div>
             {/* TODO: paginate? */}
             {/* TODO: make this table mobile friendly? */}
-            {
+            <main>{
                 transactions.length > 0 ? transactionHistoryTemplate() :
                     <div className="w-full h-full flex flex-col items-center">
                         <span id="no-transactions-found" className="text-2xl font-bold text-gray-200">No transactions found.</span>
                     </div>
-            }
+            }</main>
 
             {isExportModalOpen && <Modal close={() => setIsExportModalOpen(false)}>
                 { exportModalTemplate() }
