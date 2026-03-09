@@ -99,6 +99,13 @@ cd integration
 npm run test:e2e
 ```
 
+### 👀 Visual Diff tests
+
+```bash
+cd integration
+npm run test:vd
+```
+
 ## 📓 Future Plans
 
 - [ ] ~~import transactions from csv~~ use AI to determine how to parse csv and md columns (when not mapped 1 to 1)?

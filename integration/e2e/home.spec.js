@@ -1,8 +1,10 @@
 // @ts-check
 import { test, expect } from "@playwright/test";
 
-import { pageSetup } from "./setup";
-import { addTransaction } from "./helpers";
+import { pageSetup } from "../setup";
+import { addTransaction } from "../helpers";
+
+const dirname = import.meta.dirname;
 
 test.afterEach(async () => {
     // TODO: if this were running as an "integration" test, we'd need to not run this (or mock it)
@@ -214,7 +216,7 @@ test.describe("import transactions", () => {
         }
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./transactions.csv");
+        await fileInput.setInputFiles(dirname + "/transactions.csv");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -230,7 +232,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./transactionsWithBlankRecords.csv");
+        await fileInput.setInputFiles(dirname + "/transactionsWithBlankRecords.csv");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -246,7 +248,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./bad_transactions.csv");
+        await fileInput.setInputFiles(dirname + "/bad_transactions.csv");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -260,7 +262,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./bad_transactions.csv");
+        await fileInput.setInputFiles(dirname + "/bad_transactions.csv");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -285,7 +287,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./transactions.md");
+        await fileInput.setInputFiles(dirname + "/transactions.md");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -301,7 +303,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./transactionsWithBlankRecords.md");
+        await fileInput.setInputFiles(dirname + "/transactionsWithBlankRecords.md");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -317,7 +319,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./bad_transactions.md");
+        await fileInput.setInputFiles(dirname + "/bad_transactions.md");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();
@@ -331,7 +333,7 @@ test.describe("import transactions", () => {
         await pageSetup({ page });
 
         const fileInput = page.locator("#transactions-file-input");
-        await fileInput.setInputFiles("./bad_transactions.md");
+        await fileInput.setInputFiles(dirname + "/bad_transactions.md");
 
         // basic verification, that the file was processed and loaded in the modal
         await expect(page.locator("#review-transactions-modal")).toBeVisible();

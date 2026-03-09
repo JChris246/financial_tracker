@@ -1,8 +1,8 @@
 // @ts-check
 import { test, expect } from "@playwright/test";
 
-import { pageSetup } from "./setup";
-import { addTransaction, formatInputDate } from "./helpers";
+import { pageSetup } from "../setup";
+import { addTransaction, formatInputDate } from "../helpers";
 
 test.afterEach(async () => {
     // TODO: if this were running as an "integration" test, we'd need to not run this (or mock it)

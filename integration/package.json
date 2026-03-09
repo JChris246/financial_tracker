@@ -6,12 +6,16 @@
   "type": "module",
   "scripts": {
     "test:integration": "npx playwright test --config=playwright.config.js",
-    "test:e2e": "npx playwright test --config=playwright-e2e.config.js"
+    "test:e2e": "npx playwright test --config=playwright-e2e.config.js",
+    "test:vd": "./visual-diff/visual_diff.bash",
+    "test:screenshots": "npx playwright test --config=playwright-visual.config.js",
+    "test:compare": "node ./visual-diff/compare.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0"
   },
   "dependencies": {
-    "@axe-core/playwright": "^4.11.1"
+    "@axe-core/playwright": "^4.11.1",
+    "jimp": "^1.6.0"
   }
 }

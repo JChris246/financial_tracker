@@ -7,7 +7,7 @@ import { baseUrl } from "./setup";
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-    testDir: "e2e/",
+    testDir: "visual-diff/",
     testMatch: '*.spec.js',
     fullyParallel: true,
     forbidOnly: !!process.env.CI, // TODO: set this var when setting up CI tests
@@ -29,36 +29,35 @@ export default defineConfig({
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
         },
-
         {
             name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
+            use: {
+                ...{
+                    ...devices['Desktop Firefox'],
+                    viewport: {
+                        width: 2560,
+                        height: 1440
+                    }
+                }
+            },
         },
-
-        // {
-        //     name: 'webkit',
-        //     use: { ...devices['Desktop Safari'] },
-        // },
-
-        /* Test against mobile viewports. */
-        // {
-        //   name: 'Mobile Chrome',
-        //   use: { ...devices['Pixel 5'] },
-        // },
-        // {
-        //   name: 'Mobile Safari',
-        //   use: { ...devices['iPhone 12'] },
-        // },
-
-        /* Test against branded browsers. */
-        // {
-        //   name: 'Microsoft Edge',
-        //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-        // },
-        // {
-        //   name: 'Google Chrome',
-        //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-        // },
+        // using specific device type may not age well...
+        {
+            name: 'phone',
+            use: {
+                ...{
+                    ...devices['Galaxy S24'],
+                    viewport: {
+                        width: 412,
+                        height: 915
+                    }
+                }
+            },
+        },
+        {
+            name: 'tablet',
+            use: { ...devices['iPad Pro 11'] },
+        }
     ],
 
     // TODO: should e2e tests be run like this, or with the "final product" of the server hosting the client?

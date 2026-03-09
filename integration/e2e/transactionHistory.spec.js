@@ -2,14 +2,16 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from '@axe-core/playwright';
 
-import { pageSetup } from "./setup";
-import { addTransaction } from "./helpers";
+import { pageSetup } from "../setup";
+import { addTransaction } from "../helpers";
 import * as fs from "fs";
 
 test.afterEach(async () => {
     // TODO: if this were running as an "integration" test, we'd need to not run this (or mock it)
     await fetch("http://localhost:5000/api/admin/wipeDb"); // TODO: extract url
 });
+
+test.afterAll(() => fs.rmdirSync("./downloaded"));
 
 test("has title", async ({ page }) => {
     await pageSetup({ page, pathname: "/history" });
